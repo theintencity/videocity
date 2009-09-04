@@ -178,6 +178,7 @@ def access(query):
         url, path = _makePath(url=room, filename='visitingCard.png')
         if _debug: print 'changing', room, 'to', type, 'file', path
         try:
+            if not os.path.exists(os.path.dirname(path)): os.makedirs(os.path.dirname(path), 0755)
             if type == 'public': file = open(path, "w"); file.write(visitingcard.data); file.close();
             else: os.remove(path)
         except: 
