@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head profile="http://gmpg.org/xfn/11">
+<meta http-equiv="Content-Type" content="html/plain" />
+<title>Internet Video City</title>
+<meta name="keywords" content="Video Frame, Video Telephony" />
+<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+<script src="AC_OETags.js" language="javascript"></script>
+</head>
+
+<body>
+<div id="container">
+	<div id="header">
+		<h1>Internet Video City</h1>
+		<div class="description">Web video telephony and conference</div>
+		<div id="nav">
+		<ul id="navbar">
+		<li ><a href="/">Home</a></li>
+		<li class="page_item"><a href="/www/about.html">About</a></li>
+		</ul></div>
+
+	</div>
+<div id="wrapper">
+	<div id="content">
+
+<h2>About Internet Video City</h2>
+
+<p>
+The Internet Video City project aims at providing open source and free software to support enterprise
+and consumer video conferencing using ubiquitous web based Flash Player platform. The motive of this
+project is to provide tools and technologies to other developers and system engineers so that they can
+easily incorporate the video communication feature in their service, software or enterprise infrastructure.
+Hence, we use open and customizable architecture, open standards, and promote third party contributions.
+This page describes the software and how it works.
+</p>
+
+<h4>Features</h4>
+
+<p>Following are the high level features of the software:
+<div style="margin-left: 30px;">
+<ol>
+<li>Multi-party multimedia conferencing with audio, video, text and sharing.</li>
+<li>Recording, playback and editing of conferences and video messages.</li>
+<li>Sharing of videos, photos and files from local PC as well as Internet.</li>
+<li>Shared browsing and media viewing experience.</li>
+<li>Customizable video rooms and video home pages.</li>
+<li>Secure and authenticated access control.</li>
+<li>Self organizing scalable and robust client-server architecture.</li>
+<li>Web-based client using Flash Player plugin as well as Firefox extension.</li>
+<li>Open source and embedable client side software.</li>
+<li>Portable software written in Python and ActionScript.</li>
+</ol>
+</div>
+</p><br/>
+
+<h4>Architecture</h4>
+
+<p>
+The software consists of client and server. The server is written in the Python 2.5 programming language. 
+The client is written in ActionScript 3.0 and runs in either Flash Player browser plugin of standalone 
+Adobe Integrated Runtime (AIR) platform. Similar to Python's motto, this software comes with batteries
+included, and doesn't require external dependencies. In particular, it has built-in web and
+media servers. 
+</p>
+
+<p>
+The client viewer application controls the main display, shows local and remote videos, and provides
+user friendly menu options. The client also captures and plays audio and video using the underlying
+Flash Player plugin. The backend server controls the authentication, conference state and sharing of
+media. In this client server architecture, multiple clients connect to the server hosting a conference.
+The conference state may get distributed among multiple servers depending on the current load and
+geography of the network.
+</p>
+
+<h4>Getting Started</h4>
+
+<p>
+If you are a developer and wants to get started with this software, I recommend that you checkout the 
+sources from SVN, run the server and point your browser to http://localhost:5080
+</p>
+
+<p>
+You may download the binary package, uncompress it, run the server and point your browser to the URL. 
+The binary downloads tend to get outdated hence I would recommend using SVN even if you don't plan to
+contribute to the project because in future you can use SVN to fetch the latest changes.
+</p>
+ 
+<font color="#ff0000">TBD (Rest of the documentation to be completed)</font>
+
+<!--
+<h4>Misc</h4>
+
+<p>
+You can start the viewer in a kiosk mode so that it occupies the full screen giving a better view 
+as a video software as follows. In most Windows XP installation, this can be done as follows.
+<pre>"C:\Program Files\Internet Explorer\iexplore.exe" -k http://localhost:5080/embed/index.swf</pre>
+</p>
+-->
+
+
+	</div>
+</div>
+
+<div id="navigation">
+
+<h2>On this page</h2>
+	<ul>
+	<a href="#features">Features</a>, 
+	<a href="#architecture">Architecture</a>,
+	<a href="#gettingstarted">Getting Started</a>,
+	<a href="#ui">User Interface</a>,
+	<a href="#card">Visiting Card</a>,
+
+	<a href="#conclusion">Conclusion</a>
+	</ul>
+
+<h2>Further Reading</h2>
+	<ul>
+	<li><strong><a href="">Flash-based video</a></strong></li>
+	</ul>		
+</div>
+
+	
+	<div id="footer">
+		<p>
+		&copy; 2009, <i>Kundan Singh</i>, All rights reserved.
+		</p>
+	</div>
+</div> 
+</body>
+</html>

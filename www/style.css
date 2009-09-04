@@ -1,0 +1,491 @@
+/*  
+Theme Name: LivingOS EPSILON
+Theme URI: http://www.livingos.com/
+Description: A photo inspired church theme. Supports (optional), Widgets, RS Event, Jeromes Keywords, FAlbum and PloggerPress. 
+Version: 1.4
+Author: Tim Hyde
+Author URI:  http://www.livingos.com/
+*/
+
+/*  basics */
+* {margin:0;padding:0}
+
+/* structure */
+body{
+	text-align:center;
+	background: url(images/bg1.jpg) repeat-y center;}
+
+div#header{
+	height: 110px;
+	position:relative;
+	background: url(images/continerbgtop.jpg) no-repeat top;}
+
+div#header h1{
+	position:absolute;
+	top:10px;
+	left:85px;
+	height:80px;
+	line-height:80px;
+	margin:0;
+	color: #79B30B;
+	}
+	
+.description{
+	position:absolute;
+	top: 65px;
+	left: 100px;
+}
+div#container{
+	
+	text-align:left;
+}
+
+
+div#container{
+	width:772px;
+	margin: 20px auto 0em auto;
+	background: #ffffff url(images/continerbg.jpg) repeat-y center;}
+div#wrapper{clear:both;
+	width:485px;
+	float:left;
+}
+	
+div#content{
+	margin-left: 10px;
+	margin-right: 10px;}
+	
+div#navigation{
+	float:left;
+	width:280px;
+	margin-bottom: 1em;
+}
+
+div#extra{
+	height:285px;
+	background: url(images/headerpicture.jpg) no-repeat left;
+	margin-left: 7px;
+	clear:both;
+
+	margin-right: 7px;}
+div#extra-sidebar{
+	height:285px;
+	width:285px;
+	float:right;
+	text-align:left;
+background: url(images/extrabar.jpg) repeat-x;
+}
+div#footer{
+	clear:both;
+	width:100%;
+	height:50px;
+	background: url(images/footer.jpg) no-repeat bottom;
+	text-align: right;
+	padding-bottom: 15px;}
+
+/*navbar*/
+
+#nav{
+	position:absolute;
+	margin: 0;
+	padding: 0;
+	right:0;
+	top: 20px;
+	margin-right: 7px;
+	width:600px;
+}
+#navbar{
+	float: right;}
+
+ul#navbar{
+	margin:0;
+	padding:0;}
+#navbar li{
+	display: inline;
+}
+
+#navbar li a{
+	float: left;
+	color: #ffffff;
+	
+	text-decoration: none;
+	background: url(images/menuoff.jpg) repeat-x;
+	height:80px;
+	text-transform: uppercase;
+	margin-left: 1px;
+	text-align: left;
+	font-size: 0.8em;
+	display: block;
+	line-height: 120px;
+	padding-left: 5px;
+	padding-right: 5px;}
+
+#navbar li.current_page_item a{
+
+background: url(images/menuon.jpg) repeat-x;
+color: #666;}
+
+#navbar li a:hover{
+background-image: url(images/menuon.jpg) ; /*background image swap on hover*/
+}
+/*links */
+
+a{
+	
+	color: #326ea1;
+	text-decoration: none;
+
+	}
+a:hover {
+	
+	color: #383d44;
+
+	}
+a img {border:0;}	
+/*images*/
+img {
+	border: 0;
+}
+/*typography*/
+	
+body {
+	font: 11px/1.5em "Lucida Grande", Verdana, Arial, Helvetica, serif;
+	color: #555;
+}
+
+h1, h2, h3, h4, h5, h6 {
+font-family: "Trebuchet MS", Trebuchet, Verdana, Arial, Helvetica, sans-serif;
+font-size: 1.6em;
+	font-weight: normal;
+	padding: 0em 0em 0em 0px;	
+	margin-top: 0.8em;
+	margin-bottom: 0.5em;
+	color: #d44944;
+text-transform: uppercase;
+}
+
+
+/* H1
+---------------------------------------------*/
+h1 {
+	font-size: 2.6em;
+	line-height: 1.3em;
+	color: #666;
+font-family: Georgia, serif, Times, "Times New Roman";
+text-transform: capitalize;
+letter-spacing: -1px;}
+h1 a{
+	color: #666;
+	border-bottom: 0em none;
+display: block;}
+h2 {
+	font-size: 164%;
+	line-height: 1.3em;
+	
+}
+h2 a, h3 a, h4 a{color: #d44944;
+	}
+h3 {
+	font-size: 145%;
+	line-height: 1.3em;
+	padding: 0.5em 0em 0em 0px;
+}
+h4 {
+	font-size: 118%;
+	line-height: 1.3em;
+}
+
+p {
+	padding: 0em 5px 10px 0px;
+}
+
+small {
+	font-size: 0.9em;
+	line-height: 1.5em;
+	}
+
+code {
+	font: 1.1em 'Courier New', Courier, Fixed;
+	}
+
+div#footer p{margin-left: 5px;
+font-size: 0.8em;
+margin-right: 5px;
+}
+
+.post{
+padding-left: 5px;
+padding-right: 5px;}
+
+.dte{
+color: #a3a3a3;
+margin-top: -1em;
+margin-bottom: 1em;}
+.postmetadata{
+	clear:both;
+	
+	font-size: 0.8em;
+	color: #a3a3a3;
+
+	background: url(images/documents.gif) no-repeat center left;
+	padding-left: 14px;
+border-top: 1px #e3f5ff solid;
+padding-top: 2px;}
+
+.entry img{
+	border: 1px #dbf1fc solid;
+	padding: 5px;
+	margin: 5px;}
+.entry a:hover img{border: 1px #fdde6a solid;
+}
+.post ul, .post ol{
+	margin-left: 50px;
+	margin-right: 50px;
+	margin-top: 0.5em;
+	margin-bottom: 1em;}
+
+.post ul li{
+	list-style-type: square;}
+
+.post blockquote{
+	padding: 5px;
+	font-weight: normal;
+	text-align: left;
+	margin: 5px;
+	font-size: 1em;
+border-left: 4px #dbf1fc solid;
+font-style: italic;
+margin-left: 30px;
+margin-right: 20px;}
+.post blockquote em{
+	
+	float: right;
+font-weight: normal;
+font-size: 1em;
+font-style: normal;}
+
+
+/*special*/
+span.amp {
+	font-family: "Goudy Old Style", "Palatino",
+	"Book Antiqua", serif;
+	font-style: italic;
+	font-size: 110%; }
+
+
+/*LISTS*/
+#navigation ul, #navigation li{
+	list-style-type: none;
+	margin: 0;
+	padding:0;
+text-indent: 0px;
+}
+
+
+
+/*events */
+#extra-sidebar ul, #extra-sidebar li{
+	margin:0;
+	padding:0;
+	list-style-type: none;}
+#extra-sidebar ul{
+padding-left: 20px;
+padding-right: 20px;}
+#extra-sidebar li{
+	display:block;
+	border-bottom: 1px #c8eb94 solid;
+text-transform: uppercase;
+color: #666;
+font-weight: bold;}
+#extra-sidebar li a{
+text-transform: capitalize;
+font-weight: bold;
+color: #ffffff;}
+#extra-sidebar li a:hover{
+color: #e5ca63;}
+#extra-sidebar h2{margin:0;
+padding-left: 5px;
+padding-top: 5px;
+margin-bottom: 5px;
+color: #dbf1fc;}
+
+/*comments*/	
+#comments{
+	margin-top: 10px;
+	margin-left: 25px;
+margin-right: 10px;}
+
+.commentlist{
+	margin-left: 5px;}
+.commentlist li{
+	
+	background-color: #ffffff;
+	padding: 2px;
+
+list-style-type: none;}
+.commentlist cite, .commentlist cite a {
+	font-style: normal;
+	font-size: 1em;
+	font-weight: bold;}
+.commentlist p{
+	margin-top: 1em;}
+.commentlist .alt{border-top: 1px #c2bfb2 solid;
+border-bottom: 1px #c2bfb2 solid;
+background-color: #fffdf8;}
+
+.nocomments a{
+background-image: url(images/figure.gif);
+padding-left: 12px;
+background-repeat: no-repeat;}
+
+#respond{
+	margin-top: 1em;}
+/*forms*/	
+
+input, textarea, select {	font: 1em Verdana, sans-serif; 
+	background: #f8f8f8;
+	border:1px solid #999;
+	border-color:#999 #eef #eef #999;
+	padding:1px;
+	color: #444;}	
+
+input#author, input#email{
+	background-color: #fdffdd;}
+
+input:focus, textarea:focus {background: #ffffff;}
+
+input:hover, textarea:hover {
+	background:#ffffff;
+	cursor:text;}
+	
+input#submit {border: 1px #0f0000 outset;
+	background-color: #e9e9e9;}
+
+input#submit:hover {cursor: pointer;
+	background-color: #fafafa;}
+#comment{width:420px;
+	font: 1em Verdana, sans-serif;
+margin-bottom: 1em;}
+#commentform{
+margin-top: 1em;
+}
+#searchform{
+margin-top: 5px;
+margin-left: 5px;}
+input#searchsubmit{
+display: none;}
+input#s {
+	width: 180px;
+	font-size: 1.2em;
+border: 1px #aeab9f solid;}
+
+.navigation{
+	font: 1em/1.2em "Trebuchet MS",verdana, arial, helvetica, sans-serif;
+	margin-left: 5px;
+	margin-top: 5px;
+	height:1.2em;
+	border-top: 1px #dbf1fc solid;
+	border-bottom: 1px #dbf1fc solid;
+}
+.navigation a{
+	color: #333;
+	font-style: normal;}
+.navigation a:hover{
+	color: #c2bfb2;}
+
+.alignleft{
+	float:left;
+	}
+.alignright{
+	float:right;
+	}
+	
+.related{
+	margin-bottom: 1em;
+	margin-top: 1em;}
+.related ul{
+	list-style-type: none;
+	margin: 0;
+	
+	}
+.related ul li{
+	list-style-type: none;
+	text-indent: 0;
+	}
+/*---archives---*/
+.archivemonth{
+	float:left;
+	width:45%;}
+
+.archivesubject{
+	float:right;
+	width:45%;}
+.achiverecent{
+	clear:both;}
+
+.archive ul, .archive ol{
+	list-style-type: none;
+	line-height:1.2em;
+	margin: 0;
+	padding: 0;
+	font-size: 1em;}
+.clear{clear:both;}
+.archive ul li {
+	margin:0;
+
+	list-style-type: none;}
+					
+.archive li a {
+
+	padding: 0px;
+	color: #83b449;
+
+	text-decoration: none;
+}
+
+.children li{
+
+	margin:0;
+	padding:0;
+	border: none;
+	padding-left: 1em;}
+.children li a {
+	padding-left:0px;
+	}					
+.archive li a:hover {
+
+	color: #333;
+}
+
+#pagenav{
+margin-bottom: 1em;
+height:25px;}
+
+ul#pagenav{float:left;
+	margin:0;
+	padding:0;
+	list-style-type:none;
+	float:left;}
+	
+#pagenav li{
+	float:left;
+	list-style-type:none;
+}
+
+#pagenav ul a{
+	display:block;
+	padding: 5px;
+	float:left;
+	line-height:25px;
+	color: #fff;
+	background: url(images/menuoff.jpg) repeat-x bottom;
+	margin-left: 1px;
+	text-transform: uppercase;}
+
+#pagenav li.current_page_item a{
+
+background: url(images/menuon.jpg) repeat-x bottom;
+color: #666;}
+
+#pagenav li a:hover{
+background-image: url(images/menuon.jpg) ; /*background image swap on hover*/
+}
