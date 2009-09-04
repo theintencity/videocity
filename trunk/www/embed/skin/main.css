@@ -1,0 +1,375 @@
+/* CSS file */
+
+
+LinkButton {
+	color: #ffffff;
+	corner-radius: 0;
+	font-weight: normal;
+}
+
+TextInput.grey {
+	color: #000000;
+	background-color: #808080;
+	border-style: none;
+}
+
+
+Photo {
+	background-color: #606060;
+}
+
+Accordion {
+	header-style-name: blackButtonStyle;
+	background-alpha: 0;
+	border-thickness: 0;
+	border-style: solid;
+	color: #efefef;
+	text-roll-over-color: #ffffff;
+	text-selected-color: #ffffff;
+}
+
+.smallComboBox {
+	font-weight: normal;
+	corner-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* All boxes */
+.slidingWindowStyle {
+ 	horizontal-gap: 0;
+ 	vertical-gap: 0;
+ }
+
+.centerBox {
+	vertical-gap: 0;
+	horizontal-align: center;
+}
+
+/* 0 - intro page */
+
+.introBox, .createBox {
+	padding-left: 10;
+	padding-right: 10;
+	padding-top: 10;
+	padding-bottom: 20;
+}
+
+introBox.roundedBox {
+	background-color: #303030;
+	background-alpha: 0.5;
+	corner-radius: 20;
+	border-style: solid;
+	border-thickness: 0;
+	padding-left: 40;
+	padding-right: 20;
+	padding-top: 10;
+	padding-bottom: 10;
+	vertical-gap: 0;
+}
+
+.large {
+	color: #ffffff;
+	font-weight: normal;
+	font-size: 14;
+}
+
+.regular {
+	color: #ffffff;
+	font-weight: normal;
+	font-size: 12;
+}
+
+.small {
+	color: #808080;
+	font-weight: normal;
+	font-size: 9;
+}
+
+TextArea.multiline {
+	border-style: solid;
+	border-thickness: 0;
+	background-alpha: 0;
+	color: #515151;
+	font-size: 9;
+}
+
+Button.signup {
+	color: #ffffff;
+}
+
+/* 2 - target page */
+.targetBox {
+}
+
+targetBox.VBox {
+	horizontal-align: center;
+	vertical-gap: 0;
+}
+
+/* All buttons and custom skins */
+
+/* Drag button to resize at bottom-right corner */
+.dragButtonStyle {
+	skin: ClassReference("skin.DragButtonSkin");
+}
+
+/* Default shiny background */
+.shinyButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #cacaca, #b8b8b8;
+	fill-down-colors: #cacaca, #b8b8b8;
+	background-alpha: 0.6;
+	skin: ClassReference("skin.ShinyButtonSkin");
+	over-skin: ClassReference("skin.ShinyButtonSkin");
+}
+
+/* Play and Pause button */
+.playButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.PlayButtonSkin");
+	over-skin: ClassReference("skin.PlayButtonSkin");
+}
+
+/* Record button */
+.recordButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.RecordButtonSkin");
+	overSkin: ClassReference("skin.RecordButtonSkin");
+}
+
+/* Camera button */
+.camButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.CamButtonSkin");
+	overSkin: ClassReference("skin.CamButtonSkin");
+}
+
+/* Mic mute and unmute button */
+.micButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.MicButtonSkin");
+	overSkin: ClassReference("skin.MicButtonSkin");
+}
+
+/* Speaker mute and unmute button */
+.speakerButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.SpeakerButtonSkin");
+	overSkin: ClassReference("skin.SpeakerButtonSkin");
+}
+
+/* Volume slider for control */
+.volumeSliderStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #cacaca, #b8b8b8;
+	fill-down-colors: #cacaca, #b8b8b8;
+	disabled-color: #a0a0a0;
+	show-track-highlight: true;
+	skin: ClassReference("skin.ShinyButtonSkin");
+	track-skin: ClassReference("skin.VolumeTrackSkin");
+	track-highlight-skin: ClassReference("skin.VolumeHighlightSkin");
+	thumb-skin: ClassReference("skin.VolumeThumbSkin");
+}
+
+/* Volume level for indication */
+.volumeLevelStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #cacaca, #b8b8b8;
+	fill-down-colors: #cacaca, #b8b8b8;
+	skin: ClassReference("skin.ShinyButtonSkin");
+}
+
+/* Full Screen button  */
+.fullScreenButtonStyle {
+	borderThickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #cacaca, #b8b8b8;
+	fill-down-colors: #cacaca, #b8b8b8;
+	skin: ClassReference("skin.FullScreenButtonSkin");
+	overSkin: ClassReference("skin.FullScreenButtonSkin");
+}
+
+/* Text button */
+.phoneButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.PhoneButtonSkin");
+	overSkin: ClassReference("skin.PhoneButtonSkin");
+}
+
+/* Text button */
+.textButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.TextButtonSkin");
+	overSkin: ClassReference("skin.TextButtonSkin");
+}
+
+/* upload control button */
+.uploadButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.UploadButtonSkin");
+	overSkin: ClassReference("skin.UploadButtonSkin");
+}
+
+/* download control button */
+.downloadButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.DownloadButtonSkin");
+	overSkin: ClassReference("skin.DownloadButtonSkin");
+}
+
+/* left arrow button */
+.leftButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.LeftButtonSkin");
+	overSkin: ClassReference("skin.LeftButtonSkin");
+}
+
+/* upload control button */
+.homeButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.HomeButtonSkin");
+	overSkin: ClassReference("skin.HomeButtonSkin");
+}
+
+/* color control button */
+.colorButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.ColorButtonSkin");
+	overSkin: ClassReference("skin.ColorButtonSkin");
+}
+
+/* Layout control button */
+.layoutButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("skin.LayoutButtonSkin");
+	overSkin: ClassReference("skin.LayoutButtonSkin");
+}
+
+/* Black shiny background */
+.blackButtonStyle {
+	border-thickness: 0;
+	fill-colors: #181818, #000000;
+	fill-over-colors: #181818, #121212;
+	fill-down-colors: #000000, #000000;
+	color: #808080;
+	text-roll-over-color: #ffffff;
+	text-selected-color: #ffffff;
+	font-weight: normal;
+	skin: ClassReference("skin.ShinyButtonSkin");
+	over-skin: ClassReference("skin.ShinyButtonSkin");
+}
+
+/* play/pause in video box */
+.playVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.PlayButtonSkin");
+	over-skin: ClassReference("skin.PlayButtonSkin");
+}
+
+/* previous/rewind in video box */
+.prevVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.PrevButtonSkin");
+	over-skin: ClassReference("skin.PrevButtonSkin");
+}
+
+/* next/forward in video box */
+.nextVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.NextButtonSkin");
+	over-skin: ClassReference("skin.NextButtonSkin");
+}
+
+/* upload in video box */
+.uploadVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.UploadButtonSkin");
+	overSkin: ClassReference("skin.UploadButtonSkin");
+}
+
+/* download in video box */
+.downloadVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.DownloadButtonSkin");
+	over-skin: ClassReference("skin.DownloadButtonSkin");
+}
+
+/* Layout control button in video box */
+.layoutVideoButtonStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #c8c8c8;
+	skin: ClassReference("skin.LayoutButtonSkin");
+	overSkin: ClassReference("skin.LayoutButtonSkin");
+}
+
+/* No access button */
+.noAccessStyle {
+	border-thickness: 0;
+	fill-colors: #404040, #404040;
+	fill-over-colors: #686868, #686868;
+	color: #ff0000;
+	alpha: 0.5;
+	skin: ClassReference("skin.NoAccessSkin");
+	over-skin: ClassReference("skin.NoAccessSkin");
+}
+
+/* Photo background */
+.photoStyle {
+	skin: ClassReference("skin.PhotoSkin");
+	over-skin: ClassReference("skin.PhotoSkin");
+	fill-colors: #303030, #303030;
+	color: #202020;
+	background-color: #303030;
+	border-style: none;
+	border-thickness: 0;
+}
+
