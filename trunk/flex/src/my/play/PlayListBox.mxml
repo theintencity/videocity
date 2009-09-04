@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component implements the view and controller for a play list. A play list is a collection of media
+resources that can be played in a single view. The resource can be either a file to be downloaded, a photo
+to be viewed, a video to be played or a slide show to be shown. This component uses several other components
+such as PlayListItem, PlayListItems, PlayListEdit to show the individual views. The data model is implemented
+using the PlayList class.
+-->
+
+<containers:BaseBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:controls="my.controls.*" xmlns:play="my.play.*"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	rollOver="hover=true" rollOut="hover=false" add="addHandler(event)" remove="removeHandler(event)"
+	dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched by TrashButton on this object after TrashButton.addTrashable(this) is invoked. 
+		 */
+		[Event(name="trash", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.DynamicEvent;
+			import mx.events.CollectionEvent;
+			import mx.managers.DragManager;
+			import mx.events.DragEvent;
+			import mx.events.ListEvent;
+			import mx.events.ResizeEvent;
+			import mx.collections.ArrayCollection;
+			import mx.containers.Tile;
+			import mx.core.Container;
+			import mx.core.UIComponent;
+			import mx.controls.Button;
+			import mx.controls.Image;
+			import mx.controls.List;
+			import mx.controls.VideoDisplay;
+			import mx.controls.Alert;
+
+			import my.core.User;
+			import my.core.Room;
+			import my.core.Constant;
+			import my.controls.Prompt;
+			import my.controls.TrashButton;
+			import my.play.PlayItem;
+			import my.play.PlayList;
+			import my.settings.SaveMediaPrompt;
+
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			private static const SELECTED:String = "selected";
+			private static const LIST:String = "list";
+			private static const EDIT:String = "edit";
+			
+			private static const SELECTED_INDEX:uint = 0;
+			private static const LIST_INDEX:uint = 1;
+			private static const EDIT_INDX:uint = 2;
+			private static const VIEW_COUNT:uint = 3; // must be total number of views.
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			/*
+			 * The playList data model associated with this view.
+			 */
+			private var _playList:PlayList;
+			
+			[Bindable]
+			/*
+			 * Whether the user has mouse overed this view?
+			 */
+			private var hover:Boolean;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+
+			[Bindable]
+			/**
+			 * The data model associated with this view.
+			 */
+			public function get playList():PlayList
+			{
+				return _playList;
+			}
+			public function set playList(value:PlayList):void
+			{
+				var oldValue:PlayList;
+				_playList = value;
+				if (value != oldValue) {
+					if (oldValue != null)
+						oldValue.removeEventListener(TrashButton.TRASH, trashHandler1);
+					if (value != null)
+						value.addEventListener(TrashButton.TRASH, trashHandler1, false, 0, true);
+				}
+				
+			}
+			
+			[Bindable]
+			/**
+			 * Implement the playing property as required by the BaseBox, and update the actual played
+			 * item's playing state.
+			 */
+			override public function get playing():Boolean
+			{
+				return super.playing;
+			}
+			override public function set playing(value:Boolean):void
+			{
+				super.playing = value;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function addHandler(event:Event):void
+			{
+				TrashButton.addTrashable(this);
+				this.addEventListener(TrashButton.TRASH, trashHandler, false, 0, true);
+			}
+			private function removeHandler(event:Event):void
+			{
+				this.removeEventListener(TrashButton.TRASH, trashHandler);
+				TrashButton.removeTrashable(this);
+				_playList.close();
+				//_playList = null;
+			}
+			
+			private function trashHandler(event:Event):void
+			{
+				if (playList != null && playList.user != null) {
+					var user:User = playList.user;
+					var e:DynamicEvent = new DynamicEvent(Constant.PLAY_LIST);
+					e.command = TrashButton.TRASH;
+					e.room = user.selected;
+					e.playList = playList;
+					playList.user.dispatchEvent(e);
+				}
+			}
+			
+			private function trashHandler1(event:Event):void
+			{
+				trashHandler(event);
+				dispatchEvent(new Event(BaseBox.DELETE));
+			}
+			
+			private function playHandler(event:Event):void
+			{
+				if (viewStack.selectedIndex != SELECTED_INDEX)
+					viewStack.selectedIndex = SELECTED_INDEX;
+					
+				if (!_playList.playing)
+					_playList.playing = true;
+			}
+			
+			private function layoutButtonHandler():void
+			{
+//				if (viewStack.selectedIndex == SELECTED_INDEX) {
+//					if (_playList.playing)
+//						_playList.playing = false;
+//				}
+				
+				viewStack.selectedIndex = (viewStack.selectedIndex + 1) % VIEW_COUNT;
+			}
+			
+			
+			private function downloadHandler():void
+			{
+				SaveMediaPrompt.show(_playList);
+			}
+			
+			private function dragEnterHandler(event:DragEvent):void
+			{
+				if (event.dragSource.dataForFormat("command") == "move" && event.dragSource.hasFormat("playList")) {
+					if (event.dragSource.dataForFormat("playList") != _playList)
+						DragManager.acceptDragDrop(event.currentTarget as UIComponent);
+				}
+			}
+			
+			private function dragDropHandler(event:DragEvent):void
+			{
+				if (event.dragSource.dataForFormat("command") == "move" && event.dragSource.hasFormat("playList")) {
+					var playList:PlayList = event.dragSource.dataForFormat("playList") as PlayList;
+					if (playList != null && playList != _playList) {
+						this._playList.add(playList);
+						playList.dispatchEvent(new Event(TrashButton.TRASH));
+					}
+				}
+			}
+			
+			private function dataRemoveHandler(event:Event):void
+			{
+				if (this.parent != null) {
+					this.parent.removeChild(this);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The view has two parts: the main canvas and the bottom control buttons. The main canvas can be in three
+	view states: display, list or script edit. The default display state shows the photo or video, the list
+	state shows a list of all the items in this play list and allows moving, re-ordering, etc., and the
+	script edit state allows editing the underlying play list XML script using a simple text editor.
+	-->
+	
+	<mx:ViewStack id="viewStack" width="100%" height="100%">
+		<play:ListItem  playList="{playList}" playing="{this.playing &amp;&amp; playList.playing}"/>
+		<play:ListItems playList="{playList}" play="playHandler(event)" height="{viewStack.height-controlBox.height}"/>
+		<play:ListEdit  playList="{playList}" height="{viewStack.height-controlBox.height}"/>
+	</mx:ViewStack>
+
+	<play:ListControl id="controlBox" width="{this.width-2}" bottom="0"
+		playList="{playList}" visible="{hover || viewStack.selectedIndex != SELECTED_INDEX}" 
+		download="downloadHandler()" layout="layoutButtonHandler()"/>
+	
+</containers:BaseBox>

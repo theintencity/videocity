@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The ListEdit component displays the editor for the play list. It just uses a TextArea that allows editing the
+XML description of the PlayList, and a save button that gets displayed when user starts editing the 
+text. Note that the editor does not allow saving a modified "id" property of the play list since that will 
+cause confusion with the play list operations of upload, share, send, etc.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import my.controls.Prompt;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the associated play list.
+			private var _playList:PlayList;
+			
+			// the id property of the play list
+			private var _id:String;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model for this editor is the play list object.
+			 */
+			public function get playList():PlayList
+			{
+				return _playList;
+			}
+			public function set playList(value:PlayList):void
+			{
+				_playList = value;
+				_id = (value != null && value.data != null && value.data.@id != null ? String(value.data.@id) : null);
+			}
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			public function save():void
+			{
+				try {
+					var xml:XML = new XML(text.text);
+					if (_id != null && xml.localName() == 'show' && xml.@id != _id) {
+						xml.@id = _id;
+						text.text = xml.toXMLString();
+					}
+					playList.data = xml;
+				} catch (e:Error) {
+					Prompt.show("XML parse error: " + e.toString(), "Error saving document");
+					saveButton.visible = true;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="text" width="100%" height="100%" y="12"
+		backgroundColor="#000000" color="#c8c8c8" borderThickness="0" themeColor="#000000"
+		horizontalScrollPolicy="auto" verticalScrollPolicy="auto" wordWrap="false"
+		text="{playList == null || playList.data == null ? '' : playList.data.toXMLString()}"
+		mouseDown="event.stopPropagation()" doubleClick="event.stopPropagation()"
+		change="saveButton.visible=true"/>
+
+	<mx:Button id="saveButton" bottom="20" left="2" label="{_('save')}" styleName="shinyButtonStyle" 
+		visible="false" click="save(); saveButton.visible = false"/>
+		
+</mx:Canvas>

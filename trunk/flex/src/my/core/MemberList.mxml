@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The MemberList component displays the members in a room. Each member is represented using a RoomMember
+object. Depending on the number of members and available size, it may display a custom scroll components
+on top and bottom. The member list is displayed vertically, and is placed on the left side of a RoomPage.
+It is displayed only when the user mouse overs near the left edge of the view.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:core="my.core.*"
+	height="100%" width="{WIDTH}" horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" verticalGap="0"
+	moveEffect="{moveEffect}" resize="resizeHandler(event)" rollOut="hide()" creationComplete="hide()">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CollectionEventKind;
+			import mx.events.CollectionEvent;
+			import mx.controls.Alert;
+			import mx.events.ResizeEvent;
+			import mx.collections.ArrayCollection;
+		
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			// size of each member item
+			
+			private static const WIDTH:uint = 50;
+			private static const HEIGHT:uint = 50;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			[Bindable]
+			/*
+			 * Number of members that are displayed.
+			 */
+			private var visibleCount:Number = 4;
+			
+			// associated list of Member object, with each containing: name, data, etc.
+			private var _dataProvider:ArrayCollection;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The item renderer for this view.
+			 */
+			public var itemRenderer:IFactory;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is an array collection of all the members.
+			 */
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				var oldValue:ArrayCollection = _dataProvider;
+				_dataProvider = value;
+				if (oldValue != value) {
+					list.removeAllChildren();
+					
+					if (oldValue != null)
+						oldValue.removeEventListener(CollectionEvent.COLLECTION_CHANGE, dataChangeHandler);
+					if (value != null) {
+						value.addEventListener(CollectionEvent.COLLECTION_CHANGE, dataChangeHandler, false, 0, true);
+						
+						for each (var item:Object in value) {
+							var member:RoomMember = new RoomMember();
+							member.data = item;
+							list.addChild(member);
+						}
+					}
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function dataChangeHandler(event:CollectionEvent):void
+			{
+				var member:RoomMember, item:Object;
+				
+				switch (event.kind) {
+					case CollectionEventKind.ADD:
+						for each (item in event.items) {
+							member = new RoomMember();
+							member.data = item;
+							list.addChild(member);
+						}
+						break;
+					case CollectionEventKind.REMOVE:
+						for each (item in event.items) {
+							for (var i:int=0; i<list.numBoxes; ++i) {
+								member = list.getWindowAt(i) as RoomMember;
+								if (member != null && member.data == item) {
+									list.removeChildAt(i);
+									break;
+								}
+							}
+						}
+						break;
+				}
+			}
+			
+			public function show():void
+			{
+				this.x = 0;
+			}
+			
+			public function hide():void
+			{
+				this.x = -WIDTH;
+			}
+			
+			private function resizeHandler(event:ResizeEvent):void
+			{
+				var height:int = this.height - 65;
+				visibleCount = Math.floor(height / HEIGHT);
+				list.selectedIndex = 0;
+			}
+			
+			private function prev():void
+			{
+				list.selectedIndex = Math.max(list.selectedIndex - visibleCount, 0)
+			}
+			
+			private function next():void
+			{
+				list.selectedIndex = Math.min(list.selectedIndex + visibleCount, dataProvider.length - visibleCount)				
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Spacer height="16"/>
+	
+	<mx:Button styleName="upButtonStyle" width="100%" height="16"
+		visible="{dataProvider.length &gt; visibleCount}" click="prev()"/>
+	
+	<containers:SlidingWindow id="list" width="{WIDTH}" height="{visibleCount*HEIGHT}" direction="vertical" verticalGap="0" 
+		numColumns="1" visibleCount="{visibleCount}" allowDrag="false" creationComplete="list.selectedIndex=0"/>
+	
+	<mx:Button styleName="downButtonStyle" width="100%" height="16" 
+		visible="{dataProvider.length &gt; visibleCount}" click="next()"/>
+	
+	<mx:Spacer height="17"/>
+	
+	<mx:Move id="moveEffect" duration="200"/>
+</mx:VBox>

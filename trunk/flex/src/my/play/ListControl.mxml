@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The ListControl component displays the bottom button bar in a PlayListBox. It uses the data model of the
+PlayList object. It updates the selectedIndex property of play list when the user clicks on the previous
+or next button. It also updates the description as needed when the user edits the description of a 
+play item. When the user clicks on the layout or download button, it dispatches an event so that the
+application can take care of launching appropriate action.
+-->
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" 
+	width="100%" height="20" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	horizontalGap="1" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	rollOut="rollOutHandler(event)" mouseMove="mouseMoveHandler(event)" doubleClick="event.stopPropagation()">
+
+	<mx:Metadata>
+		/**
+		 * Dispatched when the download button is clicked on the control bar.
+		 */
+		[Event(name="download", type="flash.events.Event")]
+		
+		/**
+		 * Dispatched when the layout button is clicked on the control bar.
+		 */
+		[Event(name="layout", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.DragManager;
+			import mx.core.DragSource;
+			import mx.controls.Button;
+			
+			import my.core.Constant;
+		
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the underlying play list
+			private var _playList:PlayList;
+			
+			[Bindable]
+			/*
+			 * The description that is shown in the help part of the bottom button bar.
+			 */ 
+			private var description:String = "Play List";
+			
+			// currently editing play item if any.
+			private var _playItemEditing:PlayItem = null;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is the PlayList object. This item listens for change in the selectedItem
+			 * property of the play list, and updates its view based on the description of that item.
+			 */
+			public function get playList():PlayList
+			{
+				return _playList;
+			}
+			public function set playList(value:PlayList):void
+			{
+				var oldValue:PlayList = _playList;
+				_playList = value as PlayList;
+				
+				if (oldValue != value) {
+					if (oldValue != null)
+						oldValue.removeEventListener(PlayList.SELECTED_CHANGE, selectedChangeHandler);
+					if (value != null) {
+						value.addEventListener(PlayList.SELECTED_CHANGE, selectedChangeHandler, false, 0, true);
+						setDescription();
+					}
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function setDescription():void
+			{
+				var desc:String = null;
+				if (_playList.selectedItem != null) {
+					var item:PlayItem = _playList.selectedItem;
+					desc = (_playList.length > 1 ? ('(' + (_playList.selectedIndex + 1) + '/' + _playList.length + ') ') : '') + (item.name != null ? item.name : '') + ": " + (item.description != null ? item.description : '');
+				}
+				this.description = desc;
+			}
+	
+			private function selectedChangeHandler(event:Event):void
+			{
+				setDescription();
+			}
+			
+			private function rollOutHandler(event:Event):void
+			{
+				setDescription();
+			}
+			
+			private function mouseMoveHandler(event:MouseEvent):void
+			{
+				try {
+					for each (var child:DisplayObject in this.getChildren()) {
+						if ((child is Button) && child.hitTestPoint(stage.mouseX, stage.mouseY) && Button(child).includeInLayout) {
+							if (Button(child).includeInLayout) {
+								description = (child.name != null && child.name.indexOf("Button") != 0) ? child.name : null;
+								var item:PlayItem = (child.name == _("Previous") ? _playList.getItemAt(_playList.selectedIndex-1) : (child.name == _("Next") ? _playList.getItemAt(_playList.selectedIndex+1): null)) as PlayItem;
+								if (item.description != null) 
+									description += ": " + item.description;
+							}
+							else {
+								description = null;
+							}
+						}
+					}
+				} catch (e:Error) { trace(e); }
+			}
+			
+			private function dragStartHandler(event:MouseEvent):void
+			{
+				var dragInitiator:Button = event.currentTarget as Button;
+				var dragSource:DragSource = new DragSource();
+				dragSource.addData("move", "command");
+				dragSource.addData(playList, "playList");
+				var dragProxy:BButton = new BButton();
+				dragProxy.styleName = "downloadVideoButtonStyle";
+				dragProxy.setStyle("color", 0xffffff);
+				DragManager.doDrag(dragInitiator, dragSource, event, dragProxy);
+			}
+			
+			
+			private function descClickHandler(event:Event):void
+			{
+				if (_playList.selectedItem != null) {
+					_playItemEditing = _playList.selectedItem;
+					descInput.text = _playItemEditing.description;
+					descInput.visible = true;
+				}
+			}
+			
+			private function descEnterHandler(event:Event):void
+			{
+				if (_playItemEditing != null) {
+					descInput.visible = false;
+					_playItemEditing.xml.@description = descInput.text;
+					_playItemEditing.description = descInput.text;
+					setDescription();
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The buttons are on the left, and a text description of the current play item or the help text for the
+	user action are on the right.
+	-->
+	
+	<controls:BButton id="playButton" name="{_('Play/pause show')}" styleName="playVideoButtonStyle" color="#ffffff"
+		toggle="true" selected="{playList.playing}" click="playList.playing = playButton.selected"/>
+	<controls:BButton name="{_('Change layout')}" styleName="layoutVideoButtonStyle" color="#ffffff"
+		click="dispatchEvent(new Event(Constant.LAYOUT))"/>
+	<controls:BButton name="{_('Save content or drag to another playlist')}" styleName="downloadVideoButtonStyle" color="#ffffff"
+		click="dispatchEvent(new Event(Constant.DOWNLOAD))"
+		mouseMove="event.stopPropagation(); dragStartHandler(event)" mouseDown="event.stopPropagation()"/>
+	<!--
+	<controls:BButton name="{_('Upload to your home')}" styleName="uploadVideoButtonStyle" color="#ffffff"
+		click="uploadHandler()"/>
+	-->
+	<controls:BButton id="prevButton" name="{_('Previous')}" styleName="prevVideoButtonStyle" color="#ffffff"
+		buttonMode="{prevButton.enabled}" includeInLayout="{playList.selectedIndex &gt; 0}"
+		click="if (playList.selectedIndex &gt; 0) playList.selectedIndex = playList.selectedIndex - 1;"/>
+	<controls:BButton id="nextButton" name="{_('Next')}" styleName="nextVideoButtonStyle" color="#ffffff"
+		buttonMode="{nextButton.enabled}" includeInLayout="{playList.selectedIndex &lt; (playList.length - 1)}"
+		click="if (playList.selectedIndex &lt; (_playList.length - 1)) playList.selectedIndex = playList.selectedIndex + 1;"/>
+	
+	<mx:Canvas id="descBox" width="100%" height="20" backgroundColor="0x404040"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+		click="descClickHandler(event)" mouseDown="event.stopPropagation()">
+		<mx:Label width="{descBox.width}" height="20"
+			text="{description}" color="0xffffff" fontWeight="normal" textAlign="left"/>
+		<mx:TextInput id="descInput" visible="false" height="20" width="100%" toolTip="{_('Edit description and press enter')}" 
+			enter="descEnterHandler(event)"/>
+	</mx:Canvas>
+</mx:HBox>

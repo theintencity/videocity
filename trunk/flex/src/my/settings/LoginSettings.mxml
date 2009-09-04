@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The LoginSettings dialog box is displayed when the user is already logged in and clicks on the signup or 
+accounts menu option. The dialog box allows the user to save his login card to the shared object so that
+next time his browser will automatically login when visiting this site.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
+	width="100%" height="100%" cornerRadius="8" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	creationComplete="loadSettings()">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import my.controls.Prompt;
+			import my.core.User;
+			import my.card.VisitingCard;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Associated user object.
+			 */
+			private var user:User;
+			
+			//--------------------------------------
+			// STATIC VARIABLES
+			//--------------------------------------
+			
+			// when first time getCard() is called.
+			private static var firstTime:Boolean = true;
+			
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * Public method to fetch the login card if available, else null.
+			 */
+			public static function getCard():VisitingCard
+			{
+				if (firstTime) {
+		            registerClassAlias("flash.utils.ByteArray", ByteArray);
+		            firstTime = false;
+		  		}
+		  
+				var so:SharedObject = SharedObject.getLocal("login");
+				so.objectEncoding = ObjectEncoding.AMF3;
+				if (so.data.email != undefined && so.data.card != undefined) {
+					var bytes:ByteArray = so.data.card;
+					if (bytes != null) {
+						bytes.position = 0;
+						var card:ByteArray = new ByteArray();
+						bytes.readBytes(card, 0, bytes.length);
+						card.position = 0;
+						return VisitingCard.load(card);
+					}
+				}
+				return null;
+			}
+			
+			/**
+			 * Public method to fetch the password if available, else null.
+			 */
+			public static function getPassword():String
+			{
+				var so:SharedObject = SharedObject.getLocal("login");
+				so.objectEncoding = ObjectEncoding.AMF3;
+				if (so.data.email != undefined && so.data.password != undefined) {
+					return so.data.password;
+				}
+				return null;
+			}
+			
+			/**
+			 * Public method to show the dialog box.
+			 */
+			public static function show(user:User):void
+			{
+				var child:LoginSettings = new LoginSettings();
+				child.user = user;
+				
+				var loginHandler:Function = function(id:uint):void {
+					child.saveSettings();
+				};
+				var m:Prompt = Prompt.show("", "Save your login information", Alert.OK, null, loginHandler);
+				m.innerCanvas.addChild(child);
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			// save or unsave the settings
+			private function saveSettings():void 
+			{
+				if (firstTime) {
+		            registerClassAlias("flash.utils.ByteArray", ByteArray);
+		            firstTime = false;
+		  		}
+		  
+            	var so:SharedObject = SharedObject.getLocal("login");
+				so.objectEncoding = ObjectEncoding.AMF3;
+				if (saveCardBox.selected) {
+					so.data.email = user.email;
+					so.data.fullname = user.name;
+					so.data.card = user.card.rawData;
+					if (savePasswordBox.selected && passwordText.text != '') 
+						so.data.password = passwordText.text;
+					else if (so.data.password != undefined)
+						delete so.data.password;
+				}
+				else {
+					delete so.data.email;
+					delete so.data.fullname;
+					delete so.data.card;
+					delete so.data.password;
+				}
+				so.flush();
+			}
+			
+			// on load if settings are saved then load them
+			private function loadSettings():void
+			{
+				var so:SharedObject = SharedObject.getLocal("login");
+				so.objectEncoding = ObjectEncoding.AMF3;
+				
+				if (so.data.email == undefined)
+					return;
+					
+				if (so.data.email != undefined && so.data.email == user.email) {
+					saveCardBox.selected = (so.data.card != undefined);
+					if (so.data.password != undefined) {
+						savePasswordBox.selected = true;
+						passwordText.text = so.data.password;
+					}
+				}
+				else {
+					saveCardBox.selected = false;
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label styleName="small" x="5" y="5"
+		text="{user.email}"/>
+		
+	<mx:CheckBox id="saveCardBox" x="5" y="20"
+		change="if (!saveCardBox.selected) {
+			savePasswordBox.selected = false;
+			passwordText.text='';
+		}"/>
+	
+	<mx:TextArea styleName="multiline" y="20" left="20" right="5"
+		text="Remember my login card to auto-login because this is my personal computer"
+		selectable="false" editable="false"
+		/>
+
+	<mx:CheckBox id="savePasswordBox" x="5" y="60"
+		enabled="{saveCardBox.selected}"
+		change="if (!savePasswordBox.selected) passwordText.text = '';"
+		/>
+	
+	<mx:TextArea styleName="multiline" y="60" left="20" right="5"
+		text="Remember my password to decrypt the login card"
+		visible="{!savePasswordBox.selected}" selectable="false" editable="false"
+		enabled="{saveCardBox.selected}"
+		/>
+		
+	<controls:TextLabel id="passwordText" y="60" left="30" right="5"
+		label="Your Password?"
+		visible="{savePasswordBox.selected}"
+		enabled="{saveCardBox.selected}"
+		/>
+	
+</mx:Canvas>

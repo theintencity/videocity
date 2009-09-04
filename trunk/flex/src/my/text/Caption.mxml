@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The Caption component implement closed captioning for recorded videos. The source property controls the URL of
+the sub-titles file to play, and the video property points to a VideoDisplay object which controls the timing of
+the playback. In particular the caption timing information is in the sub-titles file, whereas the video's current
+position determines when a particular caption is played.
+
+The component is usually rendered on top of a VideoDisplay in a parent Canvas. The component expands by default to
+the size of the parent Canvas.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:net="flash.net.*" styleName="captionBox" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.events.VideoEvent;
+			import mx.controls.Text;
+			import mx.controls.Alert;
+			import mx.controls.VideoDisplay;
+			
+			import my.controls.Prompt;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _source:String;
+			private var _video:VideoDisplay;
+			private var captions:Array = [];
+			private var lastPos:int = -1; 
+			private var timer:Timer;
+			private var downloaded:Boolean = false; // source is downloaded on first access.
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			/**
+			 * Number of rows of closed captioning to do.
+			 */
+			public var rows:Number = 3;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The source property stores the URL of the sub-titles file.
+			 */
+			public function get source():String
+			{
+				return _source; 
+			}
+			public function set source(value:String):void
+			{
+				_source = value;
+			}
+			
+			[Bindable]
+			/**
+			 * The associated video display object which supplies the current timing information.
+			 */
+			public function get video():VideoDisplay
+			{
+				return _video; 
+			}
+			public function set video(value:VideoDisplay):void
+			{
+				var oldValue:VideoDisplay = _video;
+				_video = value;
+				if (oldValue != value && value != null) {
+					value.addEventListener(VideoEvent.STATE_CHANGE, stateChangeHandler, false, 0, true);
+					if (value.playing)
+						start();
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function completeHandler(event:Event):void
+			{
+				var text:String = String(loader.data);
+				for each (var t:String in text.split("\n")) {
+					captions.push(t);
+					//trace('caption line: ' + t);
+				}
+				
+				if (video != null && video.playing)
+					start();
+			}
+			
+			private function stateChangeHandler(event:VideoEvent):void
+			{
+				// the source URL is downloaded for first time it is needed. This is for efficiency.
+				if (!downloaded && source != null && source != "") {
+					downloaded = true;
+					try {
+						loader.load(new URLRequest(source));
+					}
+					catch (error:Error) {
+						trace("Cannot download the subtitles file " + source);
+					}
+					return; // will continue when download completes.
+				}
+				
+				switch (event.state) {
+				case VideoEvent.PLAYING:
+					start();
+					break;
+				case VideoEvent.CONNECTION_ERROR:
+				case VideoEvent.PAUSED:
+				case VideoEvent.STOPPED:
+				case VideoEvent.DISCONNECTED:
+					reset();
+					break;
+				}
+			}
+			
+			private function start():void
+			{
+				if (video != null) {
+					if (timer == null) {
+						timer = new Timer(1000, 0);
+						timer.addEventListener(TimerEvent.TIMER, timerHandler, false, 0, true);
+						timer.start();
+						lastPos = -1;
+						timerHandler(null);
+					}
+				}
+			}
+			
+			private function reset():void
+			{
+				lastPos = -1;
+				
+				if (timer != null) {
+					timer.stop();
+					timer = null;
+				}
+				
+				for (var i:int=this.numChildren-1; i>=0; --i) { // remove all UI elements.
+					var child:DisplayObject = this.getChildAt(i);
+					if (child is Text)
+						this.removeChildAt(i);
+				} 
+			}
+			
+			private function timerHandler(event:TimerEvent):void
+			{
+				var pos:int = (lastPos == -1 ? video.playheadTime : lastPos + 1);
+				//trace("position=" + pos);
+				if (pos >= 0 && pos < captions.length)
+					addCaptionLine(pos);
+			}
+			
+			private function addCaptionLine(pos:int):void
+			{
+				if (pos == lastPos) 
+					return;
+				if (pos < 0 || pos >= captions.length)
+					return;
+				lastPos = pos;
+				var line:String = captions[pos];
+				if (line == null || line == '') 
+					return;
+				
+				// first remove the oldest line, and move others up
+				if (this.numChildren >= (rows + 1)) {
+					for (var i:int=0; i<this.numChildren; ++i) {
+						var child:Text = this.getChildAt(i) as Text;
+						if (child != null) {
+							this.removeChildAt(i);
+							break;
+						}
+					}
+				}
+				
+				child = new Text();
+				child.height = 20;
+				child.percentWidth = 100;
+				child.text = line;
+				child.styleName = "captionText";
+				this.addChild(child);
+			}
+		]]>
+	</mx:Script>
+	
+	<net:URLLoader id="loader"
+		ioError="trace('IO error in downloading subtitles')" securityError="trace('security error in downloading subtitled')"
+		complete="completeHandler(event)"
+		/>
+</mx:VBox>

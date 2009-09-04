@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The AddMediaPrompt dialog box is displayed when the user clicks on the add photo or video button.
+The dialog box displays three options: create a new play list, upload files from local computer
+and download files from a web URL. Depending on the user's choice, either an event is dispatched
+on the user object or the web URL is loaded. The event is dispatched with type 'control' and data
+as either 'create' or 'upload' to indicate 'create a new play list' or 'upload files...'. The
+Controller handles these events on the user object as if they are coming from the control bar.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" styleName="settingsStyle"
+	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			
+			import my.controls.Prompt;
+			import my.core.Constant;
+			import my.core.User;
+			import my.core.Room;
+			import my.play.PlayItem;
+			
+			[Bindable]
+			/**
+			 * The user object associated with this component.
+			 */
+			public var user:User;
+
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * The main method to launch this dialog box.
+			 */
+			public static function show(user:User):void
+			{
+				var child:AddMediaPrompt = new AddMediaPrompt();
+				child.user = user;
+				
+				var m:Prompt = Prompt.show(null, "Add photo or video to the room", Alert.CANCEL);
+				
+				m.innerCanvas.addChild(child);
+				m.innerCanvas.verticalScrollPolicy = m.innerCanvas.horizontalScrollPolicy = "off";
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function buttonHandler(type:String):void
+			{
+				if (type == 'create') {
+					PopUpManager.removePopUp(this.parent.parent as Prompt);
+					user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE));
+				}
+				else if (type == 'upload') {
+					PopUpManager.removePopUp(this.parent.parent as Prompt);
+					user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD));
+				}
+				else if (url.text != '') {
+					PopUpManager.removePopUp(this.parent.parent as Prompt);
+					if (user.selected != null) {
+						user.selected.load(PlayItem.describeURL(url.text));
+					}
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler('create')">
+		<mx:Label text="{'1. ' + _('create a new empty playlist')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="createButtonStyle" toolTip="{_('create')}"/>
+	</mx:HBox>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler('upload')">
+		<mx:Label text="{'2. ' + _('upload files from your computer')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="uploadButtonStyle" toolTip="{_('upload')}"/>
+	</mx:HBox>
+	
+	<mx:Label text="{'3. ' + _('download file from the web')}"/>
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<controls:TextLabel id="url" width="100%"  label="{'http://... ' + _('paste URL here')}" 
+			toolTip="{_('paste a web, youtube video, slideshare or photo URL here')}"
+			enter="buttonHandler('download')"/>
+		<controls:BButton styleName="downloadButtonStyle" toolTip="{_('download')}"
+			click="buttonHandler('download')"/>
+	</mx:HBox>
+	
+</mx:VBox>

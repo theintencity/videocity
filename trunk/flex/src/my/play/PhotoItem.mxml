@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+Just a image box used in PlayListItem.
+The caller uses the play, pause and close methods on this.
+-->
+
+<mx:Image xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" height="100%" maintainAspectRatio="true" horizontalAlign="center" verticalAlign="middle">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when playing was true, and the slide show timer expired.
+		 */
+		[Event(name="playComplete", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import my.core.Constant;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			// how long is a photo shown in the slideshow mode?
+			private static const DEFAULT_SHOW_DURATION:uint = 5000;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// For a photo view, timer to change the view in slide show mode.
+			private var _playTimer:Timer;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			override public function set source(value:Object):void
+			{
+				if (value is String)
+					super.source = value;
+				else if (value is ByteArray)
+					super.load(value);
+			}
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			public function play():void
+			{
+				startPlayTimer();
+			}
+			
+			public function pause():void
+			{
+				stopPlayTimer();
+			}
+			
+			public function close():void
+			{
+				stopPlayTimer();
+			}
+
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function startPlayTimer():void
+			{
+				if (_playTimer == null) {
+					_playTimer = new Timer(DEFAULT_SHOW_DURATION, 1);
+					_playTimer.addEventListener(TimerEvent.TIMER, playTimerHandler, false, 0, true);
+					_playTimer.start();
+				}
+			}
+			
+			private function stopPlayTimer():void 
+			{
+				if (_playTimer != null) {
+					_playTimer.stop();
+					_playTimer = null;
+				}
+			}
+			
+			private function playTimerHandler(event:TimerEvent):void
+			{
+				_playTimer = null;
+				dispatchEvent(new Event(Constant.PLAY_COMPLETE));
+			}
+
+		]]>
+	</mx:Script>
+</mx:Image>

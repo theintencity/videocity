@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This view component extends the TextInput component with a "status" property. When the status property is set,
+it displays the status in red color for 2 seconds, then reverts back to the original TextInput display.
+This is usually used for displaying any text input validation errors, such as prompting the user to only
+enter numbers in a phone number input control.
+
+TODO: define the statusColor as a style instead of hard-coding here.
+-->
+
+<mx:TextInput xmlns:mx="http://www.adobe.com/2006/mxml">
+
+	<mx:Script>
+		<![CDATA[
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			private var timer:Timer = null;
+			private var oldText:String = null;
+			private var oldColor:int = -1;
+			private var statusColor:uint = 0xff0000;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			/**
+			 * When the status property is updated by the application, the status string is displayed for
+			 * 2 seconds in the view.
+			 */
+			public function set status(value:String):void
+			{
+				if (oldText == null) {
+					oldText = this.text;
+					this.text = value;
+				}
+				if (oldColor == -1) {
+					oldColor = this.getStyle("color");
+					this.setStyle("color", statusColor);
+				}
+				if (timer == null) {
+					timer = new Timer(2000, 1);
+					timer.addEventListener(TimerEvent.TIMER_COMPLETE, timerHandler, false, 0, true);
+					timer.start();
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function timerHandler(event:TimerEvent):void
+			{
+				if (timer != null) {
+					timer.stop();
+					timer = null;
+				}
+				if (oldText != null) {
+					this.text = oldText;
+					oldText = null;
+				}
+				if (oldColor != -1) {
+					this.setStyle("color", oldColor);
+					oldColor = -1;
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:TextInput>

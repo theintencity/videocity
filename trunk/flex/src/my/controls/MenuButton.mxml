@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This is a menu button control. This is a self contained component, which also launches the actual menu view
+as a child of the supplied "canvas" display container. It also handles the menu item click event and re-dispatches
+using a data event. The application must supply a data model in the form of an Array of Object items to the data
+property of this component.  
+-->
+
+<controls:BButton xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
+	width="40" label="{_('menu')}" fontSize="9" paddingLeft="2" paddingRight="2" 
+	preinitialize="preinitializeHandler(event)" click="showHandler(event)">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the user clicks on a menu item. The data property of the event contains the
+		 * data property pointing to the particular item in the Array data supplied to this component.
+		 * @eventType my.controls.MenuButton.ITEM_CLICK
+		 */
+		[Event(name="itemClick", type="flash.events.DataEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.Canvas;
+			import mx.controls.Label;
+			import mx.controls.HRule;
+			import mx.core.UIComponent;
+			import mx.containers.VBox;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			public static const ITEM_CLICK:String = "itemClick";
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			private var _menu:VBox;
+			private var _data:Array;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			/**
+			 * Show the actual menu as a child of this Canvas display container, when this MenuButton is 
+			 * clicked.
+			 */
+			public var canvas:DisplayObjectContainer;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The application can set the data to be an Array of Object items.
+			 * Each item must have an event and a label properties, both String, such that when the
+			 * user clicks on a menu item, the DataEvent dispatched has the data property set from the 
+			 * 'event' property, and the displayed menu item has text from the 'label' property.
+			 * For example, menu.data = [{event: 'first', label: 'First option'}, {event: 'second', label: 'Second option'}]
+			 * then when user clicks on the second menu item, the dispatched DataEvent's data property is 'second'. 
+			 */
+			override public function get data():Object 
+			{
+				return _data;
+			}
+			override public function set data(value:Object):void
+			{
+				if (value != null && !(value is Array)) 
+					throw new Error("data property must be an Array of Object containing label and event properties");
+					
+				_data = value as Array;
+				
+				rebuildMenu();
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function preinitializeHandler(event:Event):void
+			{
+				_menu = new VBox();
+				_menu.width  = 120;
+				_menu.verticalScrollPolicy = _menu.horizontalScrollPolicy = "off";
+				_menu.styleName = "menuBox";
+				_menu.setStyle("bottom", 20);
+				_menu.setStyle("right", 1);
+				_menu.addEventListener(MouseEvent.CLICK, hideHandler, false, 0, true);
+			}
+			
+			private function showHandler(event:Event):void
+			{
+				if (canvas != null && canvas is UIComponent) {
+					if (!canvas.contains(_menu))
+						canvas.addChild(_menu);
+					else
+						canvas.removeChild(_menu);
+				}
+			}
+			
+			private function hideHandler(event:Event):void
+			{
+				if (canvas != null && canvas.contains(_menu))
+					canvas.removeChild(_menu);
+			}
+
+			private function rebuildMenu():void
+			{
+				var height:int = 20;
+				_menu.removeAllChildren(); // first remove all children. then add one at a time.
+				
+				if (_data != null) {
+					for each (var obj:Object in _data) {
+						trace(obj);
+						if (obj == null) {
+							var sep:HRule = new HRule();
+							sep.percentWidth = 100;
+							sep.setStyle("strokeWidth", 1);
+							sep.setStyle("strokeColor", _menu.getStyle("borderColor"));
+							_menu.addChild(sep);
+							height += 6;
+						}
+						else {
+							var label:Label = new Label();
+							label.text = (obj.label != undefined ? obj.label : "undefined");
+							label.mouseChildren = false;
+							label.data = obj.event != undefined ? obj.event : "undefined";
+							label.addEventListener(MouseEvent.CLICK, itemClickHandler, false, 0, true);
+							_menu.addChild(label);
+							height += 18;
+						}
+					}
+				}
+				
+				var close:Label = new Label();
+				close.text = _("Close Menu");
+				close.mouseChildren = false;
+				close.addEventListener(MouseEvent.CLICK, hideHandler, false, 0, true);
+				_menu.addChild(close);
+				
+				_menu.height = height; 
+			}
+			
+			private function itemClickHandler(event:Event):void
+			{
+				var label:Label = event.currentTarget as Label;
+				if (label != null && label.data != null) {
+					dispatchEvent(new DataEvent(ITEM_CLICK, true, true, label.data as String));
+				}
+			}
+		]]>
+	</mx:Script>
+
+</controls:BButton>
+

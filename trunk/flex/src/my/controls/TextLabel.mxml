@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component view is similar to Textinput except that a "label" property is defined. When the application
+sets the label property, this component displays that label text if there is no actual "text" in the input.
+This is usually used for TextInput components that need to display a help text. For example, a phone number
+TextLabel may set the label property as "Enter your phone number". The "label" property is used as help text
+here and the "text" property is the actual input text, i.e., phone number, entered by the user or set by the 
+application. Note that if the "text" property is not empty, then the label is not displayed. Also note that the
+label help is displayed only when the mouse is not over this view. When the user moves the mouse over this
+view and the "text" is empty, then the display is also empty. This gives the right impression to the user
+that he can not enter the text.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	rollOver="rollOverHandler(event)" rollOut="rollOutHandler(event)">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the text changes on user input. This is similar to the change event dispatched by
+		 * TextInput component.
+		 */
+		[Event(name="change", type="flash.events.Event")]
+
+		/**
+		 * Dispatched when the user presses the enter key. This is similar to the enter event dispatched by
+		 * TextInput component.
+		 */
+		[Event(name="enter", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+		
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			// the style name used for this component.
+			private var _styleName:Object;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The associated text entered by the user in this text input. Default is "" and not null.
+			 */
+			public var text:String = '';
+
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			/**
+			 * Override the styleName setter to store the value internally.
+			 */
+			override public function set styleName(value:Object):void
+			{
+				_styleName = value;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function rollOverHandler(event:Event):void
+			{
+				if (labelBox.text == this.label)
+					labelBox.text = ''
+			}
+			
+			private function rollOutHandler(event:Event):void
+			{
+				if (labelBox.text == '')
+					labelBox.text = this.label
+			}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The view contains two TextInput components one over other. The background component stores the actual "text"
+	property whereas the foreground component alters between "label" and "text" as well as accepts user input.
+	The background one is hidden, whereas the foreground one is actually displayed.
+	-->
+	
+	<mx:TextInput styleName="{_styleName}" width="100%" height="100%" 
+		visible="false" text="{this.text}"/>
+		
+	<mx:TextInput id="labelBox"  styleName="{_styleName}" width="100%" height="100%"
+		text="{this.text == null || this.text == '' ? this.label : this.text}"
+		change="this.text = (labelBox.text != this.label ? labelBox.text : ''); dispatchEvent(event.clone())"
+		enter="labelBox.setSelection(0,0); dispatchEvent(event.clone())"/>
+		
+</mx:Canvas>

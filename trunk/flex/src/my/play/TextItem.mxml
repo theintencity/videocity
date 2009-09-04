@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+Just a TextArea used in PlayListItem. 
+The caller uses the play, pause and close methods on this component.
+-->
+
+<mx:TextArea xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" height="100%" editable="false" 
+	borderThickness="0" backgroundAlpha="1" backgroundColor="#000000" color="#ffffff">
+	
+	<mx:Script>
+		<![CDATA[
+			import my.core.Constant;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// For a photo view, timer to change the view in slide show mode.
+			private var _playTimer:Timer;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _source:XML;
+			
+			private var interval:int = 2000;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			public function get source():XML
+			{
+				return _source;
+			}
+			public function set source(value:XML):void
+			{
+				_source = value; 
+				
+				if (_source != null) {
+					var str:String = _source.children().toXMLString();
+					if (str.charAt(0) == '<')
+						this.htmlText = str;
+					else
+						this.text = str;
+					var interval:String = String(_source.@interval);
+					if (interval != "")
+						this.interval = parseInt(interval);
+				}
+				else {
+					this.htmlText = "";
+					this.text = "";
+				}
+			}
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			public function play():void
+			{
+				startPlayTimer();
+			}
+			
+			public function pause():void
+			{
+				stopPlayTimer();
+			}
+			
+			public function close():void
+			{
+				stopPlayTimer();
+			}
+
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function startPlayTimer():void
+			{
+				if (_playTimer == null) {
+					_playTimer = new Timer(interval, 1);
+					_playTimer.addEventListener(TimerEvent.TIMER, playTimerHandler, false, 0, true);
+					_playTimer.start();
+				}
+			}
+			
+			private function stopPlayTimer():void 
+			{
+				if (_playTimer != null) {
+					_playTimer.stop();
+					_playTimer = null;
+				}
+			}
+			
+			private function playTimerHandler(event:TimerEvent):void
+			{
+				_playTimer = null;
+				dispatchEvent(new Event(Constant.PLAY_COMPLETE));
+			}
+		]]>
+	</mx:Script>
+</mx:TextArea>

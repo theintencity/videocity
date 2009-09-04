@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component is the canvas for displaying a card. It defines the width and height, as well as disables the
+scrolling.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="200" height="120" horizontalScrollPolicy="off" verticalScrollPolicy="off"/>
+	

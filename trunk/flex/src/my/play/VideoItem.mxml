@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+Just a VideoDisplay used in PlayListItem. 
+The caller uses the play, pause and close methods on this component.
+-->
+
+<mx:VideoDisplay xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" height="100%" borderThickness="0" 
+	complete="dispatchEvent(new Event(Constant.PLAY_COMPLETE))">
+	
+	<mx:Script>
+		<![CDATA[
+			import my.core.Constant;
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			override public function play():void
+			{
+				if (this.source == null) {
+					this.autoPlay = true;
+					super.load();
+				}
+				else {
+					super.play();
+				}
+			}
+			
+			override public function pause():void
+			{
+				if (this.source == null)
+					this.autoPlay = false;
+				if (this.playing)
+					super.pause();
+			}
+		]]>
+	</mx:Script>
+</mx:VideoDisplay>

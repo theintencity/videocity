@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This is a full-screen button control, that also handles the full screen state change on the stage object.
+There are static properties to indicate the current full-screen state, as well as to class methods to change
+to full screen mode optionally with hardware stretching.
+-->
+
+<controls:BButton xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" 
+	toggle="true" click="fullScreenButtonHandler(event)" addedToStage="addHandler(event)" removedFromStage="removeHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			
+			//--------------------------------------
+			// CLASS VARIABLES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The global property indicates whether we are currently in full-screen mode or not?
+			 */
+			public static var fullScreen:Boolean = false;
+			
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * The method allows toggling the full-screen state of the application. The optional parameter
+			 * controls whether hardware scaling is desired or not? If true, the whole application is stretched,
+			 * otherwise just the width/height of the application is set to full screen.
+			 * 
+			 * @param stretch Whether to use hardware scaling to stretch or not? Default is false.
+			 */
+			public static function toggleFullScreen(stretch:Boolean = false):void
+			{
+				var stage:Stage = Application.application.stage;
+				if (stage != null) {
+					if (stretch && stage.hasOwnProperty('fullScreenSourceRect')) 
+						stage.fullScreenSourceRect = new Rectangle(0, 0, Application.application.width, Application.application.height);
+					stage.displayState = stage.displayState == StageDisplayState.FULL_SCREEN ? StageDisplayState.NORMAL : StageDisplayState.FULL_SCREEN;
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function addHandler(event:Event):void
+			{
+				if (stage != null) 
+					stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler, false, 0, true);
+			}
+			
+			private function removeHandler(event:Event):void
+			{
+				if (stage != null)
+					stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
+			}
+			
+			private function fullScreenHandler(event:FullScreenEvent):void
+			{
+				if (FullScreen.fullScreen != event.fullScreen) 
+					FullScreen.fullScreen = event.fullScreen;
+				this.selected = event.fullScreen;
+				if (!event.fullScreen && stage != null && stage.hasOwnProperty("fullScreenSourceRect"))
+					stage.fullScreenSourceRect = null;
+			}
+			
+			private function fullScreenButtonHandler(event:Event):void
+			{
+				if (stage != null) {
+					stage.displayState = stage.displayState == StageDisplayState.FULL_SCREEN ? StageDisplayState.NORMAL : StageDisplayState.FULL_SCREEN;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+</controls:BButton>

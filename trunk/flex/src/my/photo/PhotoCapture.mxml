@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The PhotoCapture component allows the user to take a snapshot using his camera. This component should be
+launched in modal popup mode. The view displays the captured video, a rectangle box, and two buttons. The
+captured video is horizontally flipped so that user sees himself as if in a mirror. The rectangle box
+allows the user to drag and change the size of the captured area for the snapshot. The capture button
+take an instantaneous snapshot and the done button exits the popup. When done, the last captured snapshot
+is saved in selectedPhoto property, or if none explicitly captured, then one is captured implicitly. This
+is to take care of those who click on Done without clicking on Capture. Also note that the actual 
+captured snapshot is not flipped horizontally. The component also allows the user to upload a photo from
+local computer using the file property, and use that in the view. The user can still crop the photo
+and extract only what is needed.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="{WIDTH}" height="{HEIGHT+32}"
+	addedToStage="addHandler(event)" removedFromStage="removeHandler(event)"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="0x000000">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.net.FileReference;
+			
+			import mx.core.UIComponent;
+			import mx.controls.Image;
+			import mx.managers.PopUpManager;
+			import mx.effects.AnimateProperty;
+			import mx.effects.Move;
+			import mx.effects.Parallel;
+			import mx.graphics.codec.JPEGEncoder;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the dimension of the camera for capture
+			private static const WIDTH:uint = 320;
+			private static const HEIGHT:uint = 240;
+			
+			// the dimension of the captured thumb views
+			private static const THUMB_WIDTH:uint = 60;
+			private static const THUMB_HEIGHT:uint = 60;
+			
+			private var sprite:Sprite;
+			private var video:Video;
+			private var cam:Camera;
+			private var jpeg:ByteArray;
+			private var images:Array = [];
+			private var _selected:UIComponent;
+			private var _file:FileReference;
+			private var img:Image;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			/**
+			 * Whether to maintain the aspect ratio as 1:1 or not? If true, the rectangle box maintains the
+			 * aspect ratio so that the snap is always captured in NxN pixels. If false, the user may
+			 * drag the rectangle box and change the aspect ratio. The aspect ratio needs to be fixed when
+			 * capturing snapshot for a card, and can change when capturing snapshot for a play list.
+			 */
+			public var maintainAspectRatio:Boolean = true;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			/**
+			 * Set the file reference for the image file to display instead of captured video.
+			 * This must be set before this component is added as popup or child of another container.
+			 */ 
+			public function set file(value:FileReference):void
+			{
+				_file = value;
+			}
+			
+			/**
+			 * When done, this property gives the selected photo that was captured.
+			 */
+			public function get selectedPhoto():UIComponent
+			{
+				return _selected;
+			}
+			
+			/**
+			 * Set the selected component. This is updated when the user selects a photo. This allows the
+			 * application to bind another view with the selected photo, e.g., when capturing snapshot for
+			 * creating a card.
+			 */
+			private function set selected(value:UIComponent):void
+			{
+				var old:UIComponent = _selected;
+				_selected = value;
+				if (old != value) {
+					if (old != null)
+						old.setStyle("borderColor", 0x000000);
+					if (value != null)
+						value.setStyle("borderColor", 0x00ff00);
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function addHandler(event:Event):void
+			{
+				if (_file == null) {
+					// live capture
+					cam = Camera.getCamera();
+					if (cam == null) {
+						Security.showSettings(SecurityPanel.CAMERA);
+					}
+					else {
+						cam.setMode(WIDTH, HEIGHT, 30);
+						var ui:UIComponent = new UIComponent();
+						ui.x = WIDTH; 
+						ui.scaleX = -1;
+						this.addChild(ui);
+						
+						video = new Video(WIDTH, HEIGHT);
+						video.width = WIDTH; 
+						video.height = HEIGHT;
+						video.attachCamera(cam);
+						ui.addChild(video);
+					}
+				}
+				else {
+					// capture from file
+					img = new Image();
+					img.maintainAspectRatio = true;
+					img.percentWidth = img.percentHeight = 100;
+					img.setStyle("verticalAlign", "middle");
+					img.setStyle("horizontalAlign", "center");
+					img.load(_file.data);
+					this.addChild(img);
+				}
+			}
+			
+			private function removeHandler(event:Event):void
+			{
+				cam = null;
+				if (video != null) {
+					video.attachCamera(null);
+					video = null;
+				}
+				if (img != null) {
+					this.removeChild(img);
+					img.unloadAndStop();
+					img = null;
+				}
+			}
+			
+			private function getPhoto():UIComponent
+			{
+				if (video != null || img != null) {
+					var snap:BitmapData = new BitmapData(win.width, win.height, true);
+					// for some reason it doesn't work for video.
+					//var rect:Rectangle = new Rectangle(win.x, win.y, win.width, win.height);
+					var matrix:Matrix, x0:Number, y0:Number, scaleX:Number;
+					if (video != null) {
+						matrix = new Matrix(1, 0, 0, 1, -(this.width-win.width-win.x), -win.y);
+						snap.draw(video.parent, matrix);
+						x0 = win.x + win.width;
+						y0 = win.y;
+						scaleX = -1;
+					}
+					else {
+						matrix = new Matrix(1, 0, 0, 1, -win.x, -win.y);
+						snap.draw(img, matrix);
+						x0 = win.x;
+						y0 = win.y;
+						scaleX = 1;
+					}  
+					
+					var bm:Bitmap = new Bitmap(snap);
+	                var encoder:JPEGEncoder = new JPEGEncoder(100);
+    	            this.jpeg = encoder.encode(snap);
+					var ui:UIComponent = new UIComponent();
+					ui.setStyle("borderThickness", 1);
+					ui.setStyle("borderStyle", "solid");
+					ui.setStyle("borderColor", 0x000000);
+					ui.width = win.width;
+					ui.height = win.height;
+					ui.x = x0;
+					ui.y = y0;
+					ui.scaleX = scaleX;
+					ui.addChild(bm);
+					return ui;
+				}
+				return null;
+			}
+			
+			private function doMoveEffect(ui:UIComponent):void
+			{
+				var yTo:int = 0;
+				yTo = (images.length % Math.floor((this.height-30)/THUMB_WIDTH)) * THUMB_HEIGHT;
+				images.push(ui);
+				
+				var effect:Parallel = new Parallel(ui);
+				effect.duration = 1000;
+				var move:Move = new Move();
+				move.xTo = this.width - THUMB_WIDTH;
+				move.yTo = yTo;
+				var prop1:AnimateProperty = new AnimateProperty();
+				prop1.property = "scaleX";
+				prop1.toValue = THUMB_WIDTH/ui.width;
+				var prop2:AnimateProperty = new AnimateProperty();
+				prop2.property = "scaleY";
+				prop2.toValue = THUMB_HEIGHT/ui.height;
+				effect.addChild(move);
+				effect.addChild(prop1);
+				effect.addChild(prop2);
+				effect.play();
+			}
+			
+			private function photoClickHandler(event:Event):void
+			{
+				var photo:UIComponent = event.currentTarget as UIComponent;
+				selected = photo;
+			}
+			
+			private function snapButtonHandler(event:Event):void
+			{
+				var photo:UIComponent = getPhoto();
+				if (photo != null) {
+					this.addChild(photo);
+					doMoveEffect(photo);
+					selected = photo;
+					photo.addEventListener(MouseEvent.CLICK, photoClickHandler, false, 0, true);
+				}
+			}
+			
+			private function doneButtonHandler(event:Event):void
+			{
+				if (_selected == null) { // select the default
+					var photo:UIComponent = getPhoto();
+					if (photo != null) {
+						selected = photo;
+					}
+				}
+				
+				if (this.isPopUp)
+					PopUpManager.removePopUp(this);
+				_file = null; // clear the reference first.
+				dispatchEvent(new Event(Event.COMPLETE));
+			}
+			
+			private function dragButtonDownHandler(event:MouseEvent):void
+			{
+				event.stopPropagation();
+				if (stage != null) {
+					stage.addEventListener(MouseEvent.MOUSE_MOVE, dragMouseMoveHandler, false, 0, true);
+					stage.addEventListener(MouseEvent.MOUSE_UP, dragMouseUpHandler, false, 0, true);
+				}
+			}
+			
+			private function dragMouseUpHandler(event:MouseEvent):void
+			{
+				if (stage != null) {
+					stage.removeEventListener(MouseEvent.MOUSE_MOVE, dragMouseMoveHandler);
+					stage.removeEventListener(MouseEvent.MOUSE_UP, dragMouseUpHandler);
+				}
+			}
+
+			private function dragMouseMoveHandler(event:MouseEvent):void
+			{
+				if (stage != null) {
+					if (maintainAspectRatio) {
+						var diff:int = Math.round(Math.max(this.mouseX-win.x-win.width, this.mouseY-win.y-win.height));
+						if (win.width + 2*diff > THUMB_WIDTH && win.height + 2*diff > THUMB_HEIGHT) {
+							win.width += 2*diff;
+							win.height += 2*diff;
+							win.x -= diff;
+							win.y -= diff;
+							win.validateNow();
+						}
+					}
+					else {
+						var xd:int = this.mouseX - win.x - win.width;
+						var yd:int = this.mouseY - win.y - win.height;
+						if (win.width + 2*xd > THUMB_WIDTH) { 
+							win.width += 2*xd;
+							win.x -= xd;
+						}
+						if (win.height + 2*yd > THUMB_HEIGHT) {
+							win.height += 2*yd;
+							win.y -= yd;
+						}
+						win.validateNow();
+					}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas id="win"
+		width="120" height="120" borderColor="0x606060" borderStyle="solid" borderThickness="2"
+		creationComplete="win.x=this.width/2-win.width/2; win.y=this.height/2-win.height/2"
+		mouseDown="win.startDrag()" mouseUp="win.stopDrag()" rollOut="win.stopDrag()"
+		>
+		<mx:Button
+			styleName="dragButtonStyle"
+			width="12" height="12" bottom="0" right="0"
+			buttonMode="true"
+			mouseDown="dragButtonDownHandler(event)"
+			/>
+	</mx:Canvas>
+		
+		
+	<mx:HBox width="100%" height="30"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" horizontalGap="2"
+		bottom="2"
+		>
+		<mx:Button id="snapButton"
+			label="Capture" width="50%" height="30" styleName="blackButtonStyle"
+			click="snapButtonHandler(event)"/>
+		<mx:Button id="doneButton"
+			label="Done" width="50%" height="30" styleName="blackButtonStyle"
+			click="doneButtonHandler(event)"/>
+	</mx:HBox>
+</mx:Canvas>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The Photo component is used to display the photo on the CreatePage. It has two buttons: one to upload a
+photo from local computer and other to live capture a snapshot. Both these button launch the PhotoCapture
+component to allow the user to select the photo.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+
+	<mx:Metadata>
+		/** 
+		 * Dispatched when photo is successfully uploaded or captured. 
+		 */
+		[Event(name="complete", type="flash.events.Event")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+			import my.controls.Prompt;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			// file filters that are treated as photo to upload
+			private static var imageTypes:FileFilter = new FileFilter("Images (*.jpg, *.jpeg, *.gif, *.png)", "*.jpg; *.jpeg; *.gif; *.png");
+
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the file reference to upload
+			private var file:FileReference;
+			
+			// the associated PhotoCapture object
+			private var capture:PhotoCapture;
+			
+			// whether the photo is valid or not?
+			private var _valid:Boolean = false;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Whether a photo was successfully loaded or captured in this control?
+			 */
+			public function get valid():Boolean
+			{
+				return _valid;
+			}
+			public function set valid(value:Boolean):void
+			{
+				_valid = value;
+			}
+			
+			/**
+			 * The image object for this photo view.
+			 */
+			public function get image():Image
+			{
+				return _img;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function captureHandler(event:Event):void
+			{
+				capture = PopUpManager.createPopUp(parentApplication as DisplayObject, PhotoCapture, true) as PhotoCapture;
+				
+				capture.addEventListener(Event.COMPLETE, captureCompleteHandler, false, 0, true);
+				PopUpManager.centerPopUp(capture);
+			}
+			
+			private function captureCompleteHandler(event:Event):void
+			{
+				if (capture.selectedPhoto != null) {
+					_img.load(capture.selectedPhoto.getChildAt(0));
+					valid = true;
+					dispatchEvent(new Event(Event.COMPLETE));
+				}
+			}
+			
+			private function uploadHandler(event:Event):void
+			{
+				try {
+					file = new FileReference();
+					file.addEventListener(Event.SELECT, uploadSelectHandler, false, 0, true);
+					file.addEventListener(Event.COMPLETE, uploadCompleteHandler, false, 0, true);
+					file.addEventListener(IOErrorEvent.IO_ERROR, uploadErrorHandler, false, 0, true);
+					file.addEventListener(SecurityErrorEvent.SECURITY_ERROR, uploadErrorHandler, false, 0, true);
+					file.addEventListener(HTTPStatusEvent.HTTP_STATUS, uploadErrorHandler, false, 0, true);
+					file.addEventListener(Event.CANCEL, uploadCancelHandler, false, 0, true);
+					file.browse([imageTypes]);
+				}
+				catch (e:Error) {
+					trace("unable to browse for files."); 
+					Prompt.show("<b></b>An exception was encountered in selecting the file:<br/>"
+						+ e.toString(), "Error uploading the file");
+					file = null;
+				}
+			}
+			
+			private function uploadSelectHandler(event:Event):void
+			{
+				try {
+					file.load();
+				}
+				catch (e:Error) {
+					trace("unable to upload files.");
+					Prompt.show("<b></b>An exception was encountered in uploading the file:<br/>"
+						+ e.toString(), "Error uploading the file");
+					file = null;
+				}
+			}
+			
+			private function uploadCompleteHandler(event:Event):void
+			{
+				trace("upload complete");
+				capture = new PhotoCapture();
+				capture.file = file;
+				capture.addEventListener(Event.COMPLETE, captureCompleteHandler, false, 0, true);
+				PopUpManager.addPopUp(capture, parentApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(capture);
+			}
+			
+			private function uploadErrorHandler(event:Event):void
+			{
+				Prompt.show("<b></b>An error was encountered in uploading the file:<br/>" + 
+					(event is ErrorEvent ? ErrorEvent(event).text : event.toString()), "Error uploading file");
+				file = null;
+			}
+			
+			private function uploadCancelHandler(event:Event):void
+			{
+				file = null;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Button styleName="photoStyle" width="{this.width}" height="{this.height}"/>
+	
+	<mx:Image id="_img" width="{this.width}" height="{this.height}" maintainAspectRatio="true"/>
+	
+	<mx:Label text="Photo" width="100%" color="0xffffff" fontSize="9" fontWeight="normal"/>
+	
+	<mx:VBox id="control" x="{this.width/2-control.width/2}" y="{this.height-control.height-2}"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" horizontalAlign="center" verticalGap="2">
+		
+		<mx:Button id="captureButton" label="live capture" width="100" height="14" 
+			styleName="blackButtonStyle" alpha="0.5" fontSize="9" fontWeight="normal"
+			click="captureHandler(event)"/>
+		<mx:Button id="uploadButton" label="upload file" width="100" height="14" 
+			styleName="blackButtonStyle" alpha="0.5" fontSize="9" fontWeight="normal"
+			click="uploadHandler(event)"/>
+	</mx:VBox>
+</mx:Canvas>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This is the main Flash application file for the Internet Video City sample front end. 
+This just creates the various MVC (model-view-controller) components of the project, and let those components
+implement the various functions. It also installs the context menu, receives the various flashVars from the 
+HTML page, installs various javascript API calls, and includes the CSS style file.
+
+An AIR-based application will have a different main file similar to this.
+-->
+
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:core="my.core.*" layout="absolute"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" creationComplete="creationCompleteHandler(event)">
+	
+	<mx:Style source="style/main.css" />
+	
+  	<mx:Script>
+		<![CDATA[
+			import my.settings.LoginSettings;
+			import my.controls.FullScreen;
+			import my.core.Constant;
+			import my.core.User;
+			import my.card.VisitingCard;
+		
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The local user object that represents the current state. This is the main data model for this
+			 * application. Most of the view depends on the state of user, and the controllers update the state.
+			 * This is passes to other components as reference.
+			 */
+			private var user:User = new User();
+			
+			// last status message to display in the view.
+			private var _lastStatus:String;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			/**
+			 * The last status property of the application.
+			 */
+			public function get lastStatus():String
+			{
+				return _lastStatus;
+			}
+			
+			public function set lastStatus(value:String):void
+			{
+				_lastStatus = value;
+				trace("lastStatus=" + value);
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			/*
+			 * When the application is created, it checks if a login card is saved in shared object,
+			 * then load it. Then it calls other methods to apply the supplied flashVars parameters,
+			 * install javascript API, install context menu and select camera and microphone devices.
+			 */
+			private function creationCompleteHandler(event:Event):void 
+			{
+				var card:VisitingCard = LoginSettings.getCard();
+				if (card != null)
+					user.login(card);
+					
+				applyParameters();
+				installJavaScriptAPI();
+				installContextMenu();
+				activateDevice();
+			}
+			
+			/*
+			 * All the parameters supplied in flashVars are applied to the User object. Any exception is
+			 * ignored.
+			 */
+			private function applyParameters():void
+			{
+				for (var s:String in this.parameters) {
+					if (User.allowedParameters.indexOf(s) >= 0) {
+						try {
+							user[s] = this.parameters[s];
+						}
+						catch (e:Error) {
+							trace("ignoring error in setting parameter: " + e);
+						}
+					}
+				}
+			}
+			
+			/*
+			 * If user has not allowed device access, then a prompt is presented to the user to allow and
+			 * remember the device access preference.
+			 */
+			private function activateDevice():void
+			{
+				var cam:Camera = Camera.getCamera();
+				if (cam != null && cam.muted) {
+					Security.showSettings(SecurityPanel.PRIVACY);
+				}
+			}
+			
+			/*
+			 * The javascript code can invoke certain methods such as setTarget on this flash application.
+			 */
+			private function installJavaScriptAPI():void
+			{
+                try {
+					ExternalInterface.addCallback("setTarget", setTarget);
+                }
+                catch (e:Error) {
+                    trace('error ' + e.message);
+                }
+   			}
+   			
+   			/*
+   			 * This method can be invoked by the external javascript code to set the target of this
+   			 * application. The function sets the target property of the user object.
+   			 */
+   			private function setTarget(value:String):void
+   			{
+   				if (user != null)
+   					user.target = value;
+   			}
+   			
+   			/*
+   			 * The context menu has a full-screen option. 
+   			 * TODO: somehow this does not work.
+   			 */
+   			private function installContextMenu():void
+   			{
+				var menu:ContextMenu = this.contextMenu;
+				menu.hideBuiltInItems();
+				
+				var fullscreen:ContextMenuItem = new ContextMenuItem(_("Full screen"));
+				menu.customItems.push(fullscreen);
+				fullscreen.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, fullScreenHandler);
+				trace("installed context menu");
+			}
+
+			/*
+			 * The method causes the application to toggle the full screen mode. 
+			 */
+			private function fullScreenHandler(event:Event):void 
+			{
+				FullScreen.toggleFullScreen();
+			}
+		]]>
+	</mx:Script>
+	
+    <core:View id="main" user="{user}"/>
+    
+</mx:Application>
