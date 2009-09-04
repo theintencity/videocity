@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The DeviceSettings dialog box is launched when the user clicks on the device settings menu option.
+This dialog box allows configuring your camera and microphone beyond what the Flash Security settings
+allows you to do. In particular, it allows to you change the frames-per-second, quality, bandwidth, 
+resolution of your camera capture, and the codec, sampling rate, quality, etc., of your microphone.
+It calls the ActionScript API on Camera and Microphone objects to perform these updates.
+-->
+
+<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml" styleName="settingsStyle"
+	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the user clicks on the 'select mic' link. The application launches the standard
+		 * Flash Player security settings on this event.
+		 */
+		[Event(name="selectMic", type="flash.events.Event")]
+		
+		/**
+		 * Dispatched when the user clicks on the 'select camera' link. The application launches the standard
+		 * Flash Player security settings on this event.
+		 */ 
+		[Event(name="selectCam", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.controls.Alert;
+
+			import my.core.User;
+			import my.controls.Prompt;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The user object associated with this component.
+			 */
+			public var user:User;
+
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * The main method that launches the dialog box and acts on it.
+			 */
+			public static function show(user:User):void
+			{
+				var child:DeviceSettings = new DeviceSettings();
+				child.user = user;
+				
+				var deviceHandler:Function = function(id:uint):void {
+					if (id == Alert.YES || id == Alert.NO) {
+						child.selectedIndex = (id == Alert.YES ? 0 : 1)
+						throw new Error("Don't close dialog");
+					}
+				};
+				Alert.yesLabel = 'Camera';
+				Alert.noLabel  = 'Microphone';
+				Alert.cancelLabel = 'Close';
+				var m:Prompt = Prompt.show(null, "Device Settings", Alert.YES | Alert.NO | Alert.CANCEL, null, deviceHandler);
+				Alert.yesLabel = 'Yes';
+				Alert.noLabel  = 'No';
+				Alert.cancelLabel = 'Cancel';
+				
+				m.innerCanvas.addChild(child);
+				m.innerCanvas.verticalScrollPolicy = m.innerCanvas.horizontalScrollPolicy = "off";
+				
+				var selectHandler:Function = function(event:Event):void {
+					if (m != null && m.isPopUp)
+						PopUpManager.removePopUp(m);
+					Security.showSettings(event.type == 'selectMic' ? SecurityPanel.MICROPHONE : SecurityPanel.CAMERA);
+				};
+				
+				child.addEventListener("selectMic", selectHandler, false, 0, true);
+				child.addEventListener("selectCam", selectHandler, false, 0, true);
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:Form label="Camera"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+		verticalGap="0" horizontalGap="0" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0" fontSize="8"
+		>
+		<mx:FormItem label="Camera:">
+			<mx:Label id="camName" styleName="smallComboBox" height="14" color="#0000ff"
+				creationComplete="camName.text=(user.camera != null ? user.camera.name : 'select a camera')"
+				click="dispatchEvent(new Event('selectCam', true, true))"/>
+		</mx:FormItem>
+		<mx:FormItem label="Mode:">
+			<mx:HBox horizontalGap="1">
+				<mx:ComboBox id="sizeBox" styleName="smallComboBox" width="65" height="14"
+					dataProvider="{['200x150', '240x180', '320x240', '400x300', '640x480']}"
+					creationComplete="sizeBox.selectedItem=user.camWidth+'x'+user.camHeight"
+					change="user.camWidth=String(sizeBox.selectedItem).split('x')[0]"/>
+				<mx:ComboBox id="fpsBox" styleName="smallComboBox" width="40" height="14"
+					dataProvider="{[12, 6, 15, 30]}"
+					creationComplete="fpsBox.selectedItem=(user.camera != null ? user.camera.currentFPS : user.camFPS)"
+					change="user.camFPS=fpsBox.selectedItem as Number"/>
+				<mx:Label text="fps"/>
+			</mx:HBox>
+		</mx:FormItem>
+		<mx:FormItem label="Quality:">
+			<mx:HBox>
+				<mx:CheckBox id="qualityCheck"
+					creationComplete="qualityCheck.selected=(user.camQuality!=0)"
+					change="user.camQuality=qualityCheck.selected ? qualitySlider.value as Number : 0"/>
+				<mx:HSlider id="qualitySlider" styleName="smallComboBox" width="100" height="14"
+					minimum="0" maximum="100" liveDragging="false"
+					creationComplete="qualitySlider.value=user.camQuality"
+					change="user.camQuality=qualityCheck.selected ? qualitySlider.value as Number : 0"/>
+			</mx:HBox>
+		</mx:FormItem>
+		<mx:FormItem label="Bandwidth:">
+			<mx:HBox>
+				<mx:CheckBox id="bandwidthCheck"
+					creationComplete="bandwidthCheck.selected=(user.camBandwidth!=0)"
+					change="user.camBandwidth=bandwidthCheck.selected ? bandwidthSlider.value as Number : 0"/>
+				<mx:HSlider id="bandwidthSlider" styleName="smallComboBox" width="100" height="14"
+					minimum="0" maximum="700" liveDragging="false"
+					creationComplete="bandwidthSlider.value=user.camBandwidth"
+					change="user.camBandwidth=bandwidthCheck.selected ? bandwidthSlider.value as Number : 0"/>
+			</mx:HBox>
+		</mx:FormItem>
+		<mx:FormItem label="Loopback:">
+			<mx:CheckBox id="loopbackCheck" styleName="smallComboBox"
+				label="compress/decompress"
+				creationComplete="loopbackCheck.selected=user.camLoopback"
+				change="user.camLoopback=loopbackCheck.selected"/>
+		</mx:FormItem>		
+		<!--
+		<mx:FormItem label="Loopback:">
+			<mx:CheckBox id="loopbackBox" styleName="smallComboBox" width="10" height="10"
+				creationComplete="loopbackBox.selected=user.camLoopback"
+				change="user.camLoopback=loopbackBox.selected"/>
+		</mx:FormItem>
+		-->
+	</mx:Form>
+		
+	<mx:Form label="Microphone" 
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+		verticalGap="0" horizontalGap="0" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0" fontSize="8"
+		>
+		<mx:FormItem label="Microphone:">
+			<mx:Label id="micName" styleName="smallComboBox" height="14" color="#0000ff"
+				creationComplete="micName.text=(user.mic != null ? user.mic.name : 'select a microphone')"
+				click="dispatchEvent(new Event('selectMic', true, true))"/>
+		</mx:FormItem>
+		<mx:FormItem label="Codec:">
+			<mx:ComboBox id="codecBox" styleName="smallComboBox" height="14"
+				dataProvider="{['nellymoser', 'speex']}"
+				creationComplete="codecBox.selectedItem=user.micCodec.toLowerCase()"
+				change="user.micCodec=codecBox.selectedItem as String"/>
+		</mx:FormItem>
+		<mx:FormItem label="Rate kHz:">
+			<mx:ComboBox id="rateBox" styleName="smallComboBox" width="50" height="14"
+				dataProvider="{[8, 5, 11, 22, 44]}" 
+				text="{codecBox.selectedItem=='speex' ? 8 : rateBox.selectedItem}"
+				enabled="{codecBox.selectedItem=='nellymoser'}"
+				creationComplete="rateBox.selectedItem=user.micRate"
+				change="user.micRate=rateBox.selectedItem as Number"/>
+		</mx:FormItem>
+		<mx:FormItem label="Encode quality:">
+			<mx:ComboBox id="qualityBox" styleName="smallComboBox" width="50" height="14"
+				dataProvider="{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}"
+				enabled="{codecBox.selectedItem=='speex'}"
+				creationComplete="qualityBox.selectedItem=user.micEncodeQuality"
+				change="user.micEncodeQuality=qualityBox.selectedItem as Number"/>
+		</mx:FormItem>
+		<mx:FormItem label="Frames/packet:">
+			<mx:ComboBox id="framesBox" styleName="smallComboBox" width="50" height="14"
+				dataProvider="{[1, 2]}"
+				enabled="{codecBox.selectedItem=='speex'}"
+				creationComplete="framesBox.selectedItem=user.micFramesPerPacket"
+				change="user.micFramesPerPacket=framesBox.selectedItem as Number"/>
+		</mx:FormItem>
+	</mx:Form>
+		
+</mx:ViewStack>

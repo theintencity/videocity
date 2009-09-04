@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The PlayVideo component wraps a VideoDisplay component to playback a video file. A play/pause button is super-
+imposed on the video. The button displays a play icon and is placed at the center when the video is not playing,
+and displays a pause icon and is placed at the bottom-left when the video is playing.
+
+There are two important properties: source and parentExpand. The source property controls the URL of the video
+FLV file similar to the VideoDisplay's source property. The parentExpand (UIComponent) property, if set, causes
+the video to expand to the given UIComponent when playing. Typically, the caller uses top-level Application
+to expand the played video to full view. Additionally, the application can set the label property to indicate
+the name of this video, so that it appears in any tooltip. To play sub-titles in the video, please supply the
+URL of the sub-titles file using the textsource property.
+
+Note that there can be only one active (currently playing) PlayVideo component in the application. If another
+component is played, the previous one is automatically paused.
+
+The main use of this component is to playback help videos or recorded messages in a modal mode. It can also be
+used to playback videos in thumbsnail view.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:text="my.text.*" styleName="videoBox"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" initialize="initializeHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.events.VideoEvent;
+			import mx.events.StateChangeEvent;
+			import mx.events.EffectEvent;
+			import mx.core.Application;
+			import mx.core.UIComponent;
+			import mx.controls.VideoDisplay;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _source:String;
+			private var _parentExpand:UIComponent;
+			private var _textsource:String;
+
+			//--------------------------------------
+			// CLASS VARIABLES
+			//--------------------------------------
+			
+			// only one PlayVideo can be playing at any instant.
+			private static var _videos:Dictionary = new Dictionary(true);
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Connect the source property to underlying VideoDisplay.
+			 */
+			public function get source():String
+			{
+				return _source; 
+			}
+			public function set source(value:String):void
+			{
+				_source = value;
+			}
+			
+			[Bindable]
+			/**
+			 * Use this URL, if supplied, for sub-titles.
+			 */
+			public function get textsource():String
+			{
+				return _textsource; 
+			}
+			public function set textsource(value:String):void
+			{
+				_textsource = value;
+			}
+			
+			[Bindable]
+			/**
+			 * The parentExpand property determines where to move the videoBox on play.
+			 */
+			public function get parentExpand():UIComponent
+			{
+				return _parentExpand;
+			}
+			public function set parentExpand(value:UIComponent):void
+			{
+				var old:UIComponent = _parentExpand;
+				_parentExpand = value;
+				if (value != old) {
+					if (old != null)
+						old.removeEventListener(Event.RESIZE, resizeHandler);
+					if (value != null)
+						value.addEventListener(Event.RESIZE, resizeHandler, false, 0, true);
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function initializeHandler(event:Event):void
+			{
+				_videos[this] = true;
+			}
+			
+			private function getXY():Point
+			{
+				var result:Point = new Point(0, 0);
+				for (var p:UIComponent = this; p != null && p != parentExpand && p != Application.application; p = p.parent as UIComponent) {
+					result.x += p.x;
+					result.y += p.y;
+				}
+				return result;
+			}
+			
+			private function play():void
+			{
+				for (var v:Object in _videos) {
+					if (v != this)
+						v.pause();
+				}
+				
+				if (!video.playing) {
+					if (video.source != this.source)
+						video.source = this.source;
+					video.play();
+				}
+			}
+			
+			private function pause():void
+			{
+				if (video.playing)
+					video.pause();
+				else
+					playButton.selected = false;
+			}
+			
+			private function minimizeEndHandler(event:Event):void
+			{
+				if (videoBox.parent == parentExpand) 
+					parentExpand.removeChild(videoBox);
+				if (videoBox.parent != this) {
+					this.addChildAt(videoBox, 0);
+					videoBox.x = videoBox.y = 0;
+					videoBox.width = this.width;
+					videoBox.height = this.height;
+				}
+			}
+			
+			private function playButtonHandler(event:MouseEvent):void
+			{
+				if (playButton.selected)
+					play();
+				else
+					pause();
+			}
+			
+			private function statePlaying():void
+			{
+				if (parentExpand != null) {
+					if (videoBox.parent == this) {
+						removeChild(videoBox);
+					}
+					if (videoBox.parent != parentExpand) {
+						parentExpand.addChild(videoBox);
+						var xy:Point = getXY();
+						videoBox.x = xy.x;
+						videoBox.y = xy.y;
+						if (minimize.isPlaying)
+							minimize.stop();
+						maximize.play([videoBox]);
+					}
+				}
+			}
+			private function statePaused():void
+			{
+				if (parentExpand != null) {
+					if (videoBox.parent != this) {
+						if (maximize.isPlaying)
+							maximize.stop();
+						var xy:Point = getXY();
+						minimize.children[1].xTo = xy.x;
+						minimize.children[1].yTo = xy.y;
+						minimize.play([videoBox]);
+					}
+				}
+			}
+			
+			private function stateChangeHandler(event:VideoEvent):void
+			{
+				trace(event.state);
+				switch (event.state) {
+				case VideoEvent.PLAYING:
+					errorText.visible = false;
+					statePlaying();
+					break;
+				case VideoEvent.CONNECTION_ERROR:
+					errorText.text = _("Connection Error");
+					errorText.visible = true;
+					statePaused();
+					break;
+				case VideoEvent.PAUSED:
+				case VideoEvent.STOPPED:
+				case VideoEvent.DISCONNECTED:
+					statePaused();
+					break;
+				}
+			}
+			
+			private function resizeHandler(event:Event):void
+			{
+				if (video.playing) {
+					if (maximize.isPlaying)
+						maximize.stop();
+					if (minimize.isPlaying)
+						minimize.stop();
+					videoBox.x = videoBox.y = 0;
+					videoBox.width = (parentExpand != null ? parentExpand.width : this.width);
+					videoBox.height = (parentExpand != null ? parentExpand.height : this.height);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The view contains a VideoDisplay in the background. The foreground contains several elements such as
+	a Play/Pause button, an error text and any sub-titles. There are couple of effects defined to maximize
+	or minimize the view on play or pause, respectively.
+	-->
+	
+	<mx:Parallel id="maximize" duration="500">
+		<mx:Resize widthTo="{parentExpand != null ? parentExpand.width : this.width}" 
+			heightTo="{parentExpand != null ? parentExpand.height : this.height}"/>
+		<mx:Move xTo="0" yTo="0"/>
+	</mx:Parallel>
+	
+	<mx:Parallel id="minimize" duration="500" effectEnd="minimizeEndHandler(event)">
+		<mx:Resize widthTo="{this.width}" heightTo="{this.height}"/>
+		<mx:Move xTo="0" yTo="0"/>
+	</mx:Parallel>
+	
+	
+	<mx:Canvas id="videoBox" verticalScrollPolicy="off" horizontalScrollPolicy="off"
+		creationComplete="videoBox.width = this.width; videoBox.height = this.height">
+		<mx:VideoDisplay id="video" 
+			width="{videoBox.width}" height="{videoBox.height}" autoPlay="false"
+			complete="pause(); playButton.selected=false;" stateChange="stateChangeHandler(event)"/>
+		<text:Caption source="{textsource}" video="{video}" rows="2"/>
+		<mx:Button id="playButton" styleName="playVideoButtonStyle" color="0xffffff"
+			toggle="true" selected="false" buttonMode="true" alpha="0.5" 
+			toolTip="{video.playing ? _('Pause this video') : (this.label == '' ? _('Play this video') : _('Play video') + ' \'' + this.label + '\'')}"
+			width="{video.playing ? 20 : 40}" height="{video.playing ? 20 : 40}" 
+			x="{video.playing ? 0 : videoBox.width/2-playButton.width/2}"
+			y="{video.playing ? videoBox.height-playButton.height : videoBox.height/2-playButton.height/2}"
+			click="playButtonHandler(event)"/>
+		<mx:Text id="errorText" styleName="errorText" visible="false" 
+			width="{videoBox.width}" height="{videoBox.height}"/>
+	</mx:Canvas>
+</mx:Canvas>

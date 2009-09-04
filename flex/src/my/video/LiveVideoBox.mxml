@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The LiveVideoBox component is used to display the local video captured from the camera. There can be only
+only LiveVideoBox component instance in an application. The Controller has the reference to the singleton
+video object.
+
+The local video is displayed with horizontal flip so that it appears as a mirror to the user. The component
+attaches and detaches its camera based on the camera property of the user object.
+
+The component also periodically displays the current FPS (frames-per-second) of the camera video.
+-->
+
+<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+	label="You" name="local"
+	add="addHandler(event)" remove="removeHandler(event)"
+	rollOver="hover=true" rollOut="hover=false" xmlns:controls="my.controls.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ResizeEvent;
+			
+			import my.core.User;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _user:User = null;
+			private var ratio:Number = 4/3;
+			
+			[Bindable]
+			/*
+			 * whether user has mouse over this.
+			 */
+			private var hover:Boolean = false;
+			
+			// the timer that is used to periodically display the video properties.
+			private var timer:Timer;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The user property controls the camera attached to this component as well as the smoothing
+			 * property of the video.
+			 */
+			public function get user():User
+			{
+				return _user;
+			}
+			public function set user(value:User):void
+			{
+				_user = value;
+				if (value != null && video != null) {
+					video.smoothing = user.smoothing;
+					video.attachCamera(user.camera);
+				}
+			}
+			
+			/**
+			 * When the component is paused, it detaches the camera.
+			 */
+			override public function get playing():Boolean
+			{
+				return super.playing;
+			}
+			override public function set playing(value:Boolean):void
+			{
+				super.playing = value;
+				if (video != null) {
+					if (value) {
+						video.attachCamera(user.camera);
+						startTimer();
+					}
+					else {
+						stopTimer();
+						video.attachCamera(null);
+					}
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function addHandler(event:Event):void
+			{
+				if (!moving) {
+					video = new Video();
+					if (user) {
+						video.smoothing = user.smoothing;
+						video.attachCamera(user.camera);
+					}
+					startTimer();
+				}
+			}
+			
+			private function removeHandler(event:Event):void
+			{
+				if (!moving) {
+					stopTimer();
+				
+					if (user) {
+						callLater(closeDevice, [user]);
+						user = null;
+					}
+				}
+			}
+			
+			private function closeDevice(user:User):void 
+			{
+				user.camActive = false;
+				user.micActive = false;
+			}
+			
+			private function startTimer():void
+			{
+				if (timer == null) {
+					timer = new Timer(1000, 0);
+					timer.addEventListener(TimerEvent.TIMER, timerHandler, false, 0, true);
+					timer.start();
+				}
+			}
+			
+			private function stopTimer():void
+			{
+				if (timer != null) {
+					timer.stop();
+					timer = null;
+				}
+			}
+			
+			private function timerHandler(event:TimerEvent):void
+			{
+				var text:String = '';
+				if (user != null && user.camera != null) {
+					var cam:Camera = user.camera;
+					text += cam.currentFPS + ' fps';
+//					text += 'size=' + cam.width + 'x' + cam.height 
+//						+ ' quality=' + (cam.quality == 0 ? 'auto' : cam.quality) 
+//						+ ' bandwidth=' + (cam.bandwidth == 0 ? 'auto' : cam.bandwidth) 
+//						+ ' fps=' + cam.currentFPS;
+				}
+				status.text = text;
+			}
+			
+			//--------------------------------------
+			// PROTECTED METHODS
+			//--------------------------------------
+			
+			/**
+			 * The video is transformed so that it is flipped horizontally.
+			 */
+			override protected function resizeVideoHandler(event:ResizeEvent):void
+			{
+				if (video != null) {
+					var m:Matrix = new Matrix();
+					var parent:DisplayObject = video.parent;
+					m.scale(-Math.max(parent.width, ratio*parent.height)/320, Math.max(parent.height, (1/ratio)*parent.width)*(3/4)/240);
+					m.translate(Math.max(parent.width, ratio*parent.height)-(Math.max(parent.width, ratio*parent.height)-parent.width)/2, -(Math.max(parent.height, (1/ratio)*parent.width)*(3/4)-parent.height)/2);
+					trace("video transform " + m.a + "," + m.b + "," + m.c + "," + m.d + "," + m.tx + "," + m.ty);
+					video.transform.matrix = m; 
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="status" visible="{hover}" 
+		top="15" left="10" right="10" height="30"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		borderThickness="0" borderStyle="solid" backgroundAlpha="0" color="0xffffff" fontSize="9"
+		selectable="false" editable="false"
+		/>
+</video:VideoBox>

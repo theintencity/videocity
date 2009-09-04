@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This view defines the user interface for the control bar and menu at the bottom of the main View.
+This is tied to the application, as such, it uses the User object as the underlying data model for this view.
+The application must supply the "user" property to this view.
+
+Most of the user click events such as menu click or button click is dispatched on behalf of the User object.
+This allows external Controller object act on those user events.
+For certain user interactions which involve toggling or changing a User state, this view also acts as controller
+and updates those state properties in the User object. For example, micVolume or camActive properties.
+
+There are two view states in this component. Under default state it shows minimum number of buttons, whereas
+when the User object has a valid "selected" room, it goes into a "inside" or "outside" state with
+additional buttons that are specific to a room view. The "inside" state has more buttons such as those 
+needed from inside a room, whereas "outside" state has buttons that are needed from outside.
+-->
+
+<containers:HorizontalBar xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" 
+	xmlns:controls="my.controls.*" xmlns:skin="my.skins.*" styleName="controlBar">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.PropertyChangeEvent;
+			
+			import my.core.Constant;
+			
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			private static const menuData:Array = [
+				{event: Constant.SMOOTH,      label: _('Smooth Video')},
+				{event: Constant.FULL_SCREEN, label: _('Fullscreen')},
+				{event: Constant.STRETCH,     label: _('Stretch Full')},
+				null,
+				{event: Constant.SETTINGS,    label: _('Device Selection')},
+				{event: Constant.DEVICE,      label: _('Device Settings')},
+				{event: Constant.PHONE,       label: _('VoIP Settings')},
+				null,
+				{event: Constant.EMBED,       label: '</> ' + _('URL') + ' & ' + _('Embed')},
+				{event: Constant.SEARCH,      label: '>> ' + _('search')},
+				null,
+				{event: Constant.SIGNUP,      label: _('Signup / Account')},
+				{event: Constant.LOGIN,       label: _('Login / Logout')}
+			];
+			
+			private static const INSIDE:String = "inside";
+			private static const OUTSIDE:String = "outside";
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			private var _user:User; // associated user object
+			private var _room:Room; // current room if any based on user.selected property
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is represented as the User property. This component just dispatches appropriate
+			 * event on this user object when the user clicks on any menu item or button in this component.
+			 * The separate controller is responsible for handling the user event.
+			 */
+			public function get user():User
+			{
+				return _user;
+			}
+			public function set user(value:User):void
+			{
+				var old:User = _user;
+				_user = value;
+				if (old != value) {
+					if (old != null) 
+						old.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler);
+					if (value != null)
+						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler, false, 0, true);
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function userChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (event.property == "selected") {
+					if (_room != null)
+						_room.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
+					_room = user.selected;
+					if (_room != null)
+						_room.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
+					updateState();
+				}
+			}
+			
+			private function roomChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (event.property == "connected") {
+					updateState();
+				}
+			}
+			
+			private function updateState():void
+			{
+				setCurrentState(_room == null ? null : (_room.connected ? INSIDE : OUTSIDE));
+			}
+		]]>
+	</mx:Script>
+	
+	<controls:BButton styleName="uploadButtonStyle" name="{_('Upload login/visiting card')}"
+		click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD))"/>
+		
+	<mx:Spacer width="1"/>
+	
+	<controls:BButton id="playPauseButton" styleName="playButtonStyle" name="{_('Pause everything')}"
+		toggle="true" selected="{user.playing}" change="user.playing = playPauseButton.selected"/>
+		
+	<mx:Spacer width="1"/>
+	
+	<controls:BButton id="camButton" styleName="camButtonStyle" name="{_('On/off camera')}"
+		toggle="true" selected="{user.camActive}" change="user.camActive = camButton.selected"/>
+		
+	<mx:Spacer width="1"/>
+	
+	<controls:BButton id="micButton" styleName="micButtonStyle" name="{_('On/off microphone')}"
+		toggle="true" selected="{user.micActive}" change="user.micActive = micButton.selected"/>
+	
+	<mx:Canvas width="40" height="20"
+		rollOver="Canvas(event.currentTarget).getChildAt(0).visible = true; Canvas(event.currentTarget).getChildAt(1).visible = false;" 
+		rollOut="Canvas(event.currentTarget).getChildAt(0).visible = false; Canvas(event.currentTarget).getChildAt(1).visible = true;" 
+		>
+		<skin:VolumeSlider width="40" height="20" styleName="volumeSliderStyle"
+			level="{user.micVolume}" enabled="{user.micActive}"
+			change="user.micVolume = VolumeSlider(event.currentTarget).level"/>
+		<skin:VolumeLevel width="40" height="20" styleName="volumeLevelStyle"
+			enabled="{user.micActive}" level="{user.micLevel}"/>
+	</mx:Canvas>
+		
+	<mx:Button width="5" height="20" name="" styleName="shinyButtonStyle"/>
+
+	<mx:Spacer width="1"/>
+	
+	<mx:Button width="100%" height="20" name="" styleName="shinyButtonStyle"/>
+
+		
+<!-- no skinning for now	
+	<mx:Spacer width="1"/>
+	
+	<controls:BButton styleName="colorButtonStyle" name="{_('Change skin')}"
+		click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.SKIN))"/>
+-->
+
+	<mx:Spacer id="seperator" width="1"/>
+	
+	<controls:BButton styleName="layoutButtonStyle" name="{_('Change to different room')}"
+		click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LAYOUT))"/>
+		
+	<mx:Spacer width="1"/>
+	
+	<controls:BButton styleName="homeButtonStyle" name="{_('Go to front page')}"
+		click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.HOME))"/>
+		
+	<mx:Spacer width="1"/>
+	
+	<controls:FullScreen styleName="fullScreenButtonStyle" name="{_('Toggle fullscreen')}"/>
+
+	<mx:Spacer width="1"/>
+	
+	<controls:MenuButton styleName="shinyButtonStyle" name="{_('Launch the main menu')}" 
+		data="{menuData}" canvas="{this.parent}" 
+		itemClick="user.dispatchEvent(new DataEvent(Constant.MENU, false, false, event.data))"/>
+		
+	<containers:states>
+		<mx:State name="outside">
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="leftButtonStyle" name="{_('Unload this room')}"
+					click="user.removeRoom(user.selected)"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="recordButtonStyle" name="{_('Record a video message')}"
+					toggle="true" selected="{user.recording}" change="user.recording = BButton(event.currentTarget).selected"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="rightButtonStyle" name="{_('Enter this room')}"
+					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.ENTER_ROOM))"/>
+			</mx:AddChild>
+		</mx:State>
+			
+		<mx:State name="inside">
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="speakerButtonStyle" name="{_('On/off speaker')}"
+					toggle="true" selected="{user.speakerActive}" change="user.speakerActive = BButton(event.currentTarget).selected"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<skin:VolumeSlider width="40" height="20" styleName="volumeSliderStyle" name="{_('Adjust speaker volume')}"
+					level="{user.speakerVolume}" enabled="{user.speakerActive}" change="user.speakerVolume = VolumeSlider(event.currentTarget).level"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Button width="5" height="20" styleName="shinyButtonStyle"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:TrashButton name="{_('Drag this to a video box to delete')}"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="snapButtonStyle" name="{_('Take camera snapshot')}"
+					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CAPTURE))"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="phoneButtonStyle" name="{_('Add VoIP or phone dialing')}"
+					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PHONE))"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="textButtonStyle" name="{_('Add text chat')}"
+					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.MESSAGE))"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="leftButtonStyle" name="{_('Exit from this room')}"
+					click="user.dispatchEvent(new DataEvent(Constant.EXIT_ROOM, false, false, user.selected.url))"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="recordButtonStyle" name="{_('Record a video')}"
+					toggle="true" selected="{user.recording}" change="user.recording = BButton(event.currentTarget).selected"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="uploadButtonStyle" name="{_('Add photos or videos to this room')}"
+					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LOAD))"/>
+			</mx:AddChild>
+			
+		</mx:State>
+		
+	</containers:states>
+</containers:HorizontalBar>

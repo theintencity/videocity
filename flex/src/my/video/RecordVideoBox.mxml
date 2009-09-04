@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The RecordVideoBox represents a video recorder box. It uses the underlying data model of Record object
+to store the recording state.
+-->
+
+<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+	label="Recording" name="record"
+	add="addHandler(event)" remove="removeHandler(event)"
+	>
+	
+	<mx:Script>
+		<![CDATA[
+			import my.core.User;
+
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _user:User = null;
+			
+			[Bindable] 
+			/*
+			 * Recording duration is displayed using this variable's binding.
+			 */
+			private var durationAsString:String = "";
+			
+			[Bindable]
+			/*
+			 * The actual recording duration in seconds.
+			 */
+			private var duration:Number = 0;
+			
+			/*
+			 * The timer that is used to update the recording duration.
+			 */
+			private var durationTimer:Timer = null;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The user property represents the global configuration that supplies the "smoothing" attribute
+			 * to be applied to this video object, and the camera object for display and recording.
+			 */
+			public function get user():User
+			{
+				return _user;
+			}
+			public function set user(value:User):void
+			{
+				_user = value;
+				if (value != null && video != null) {
+					video.smoothing = user.smoothing;
+					video.attachCamera(user.camera);
+				}
+			}
+			
+			/**
+			 * When the video recording is paused, it detaches the camera object from the video and resets
+			 * the recording flag on the associated user object.
+			 */
+			override public function get playing():Boolean
+			{
+				return super.playing;
+			}
+			override public function set playing(value:Boolean):void
+			{
+				super.playing = value;
+				if (video != null && user != null) {
+					if (value)
+						video.attachCamera(user.camera);
+					else
+						video.attachCamera(null);
+				}
+				if (user != null && user.record != null) {
+					user.record.recording = value;
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function addHandler(event:Event):void
+			{
+				video = new Video();
+				if (user) {
+					video.smoothing = user.smoothing;
+					video.attachCamera(user.camera);
+				}
+				if (durationTimer == null) {
+					durationTimer = new Timer(1000, 0);
+					durationTimer.addEventListener(TimerEvent.TIMER, durationHandler, false, 0, true);
+					durationTimer.start();
+				}
+			}
+			
+			private function resetRecording(user:User):void
+			{
+				user.recording = false;
+			}
+			
+			private function removeHandler(event:Event):void
+			{
+				if (user) {
+					if (user.recording)
+						callLater(resetRecording, [user]);
+					user = null;
+				}
+				
+				if (durationTimer != null) {
+					durationTimer.stop();
+					durationTimer = null;
+				}
+			}
+			
+			private function durationHandler(event:TimerEvent):void
+			{
+				duration += 1;
+				
+				if (playing) {
+					var ss:int = duration % 60;
+					var mm:int = Math.floor((duration % 3600) / 60);
+					var hh:int = Math.floor(duration / 3600);
+					var value:String = (mm < 10 ? '0' + mm.toString() : mm.toString()) + ":" + (ss < 10 ? '0' + ss.toString() : ss.toString());;
+					if (hh > 0)
+						value = hh.toString() + ":" + durationAsString;
+					durationAsString = value;
+					durationLabel.visible = Timer(event.target).currentCount % 2 == 1;
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label id="durationLabel"
+		text="{'REC' + durationAsString}"
+		visible="true"
+		right="2"
+		bottom="2"
+		color="0xff0000"
+		fontSize="9"
+		/>
+</video:VideoBox>

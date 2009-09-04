@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This Prompt view is similar to the Flex Alert component, and is used to display alert or prompt messages and
+take short user input. The class method "show" is used to display a prompt message. 
+The look-and-feel of this view is made similar to the built-in Flash security dialog box for consistency.
+This also guarantees the fixed size of this view to be 215x138 pixels. If the actual content of the prompt
+box is bigger, it will get clipped.
+-->
+
+<mx:Canvas xmlns="view.*" xmlns:mx="http://www.adobe.com/2006/mxml" styleName="alertBox" filters="{[filter]}"
+	width="{WIDTH}" height="{HEIGHT}" minWidth="{WIDTH}" minHeight="{HEIGHT}" maxWidth="{WIDTH}" maxHeight="{HEIGHT}"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" defaultButton="{defButton}">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the user clicks on any URL (link) in the title or text of the prompt. For this
+		 * to work, the application must supply the title or text property as HTML by setting the first 
+		 * character of these argument in show method as '&lt;'. For example, if the text supplied is 
+		 * '&lt;b/&gt;Example &lt;a href="event:something"&gt;URL&lt;/a&gt;' then the "URL" will be displayed 
+		 * as a link. If the user clicks on this link, the "link" event is dispatched and the "text" property 
+		 * of the event is "something".
+		 */
+		[Event(name="link",type="flash.events.TextEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.FocusManager;
+			import mx.managers.PopUpManager;
+			import mx.controls.Button;
+			import mx.controls.Alert;
+			import mx.core.Application;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			// the fixed dimension of this component is 215x138.
+			private static const WIDTH:uint = 215;
+			private static const HEIGHT:uint = 138;
+			
+			// the filter used for this view.
+			private static const filter:DropShadowFilter = new DropShadowFilter(4, 45, 0x001122, 0.56, 0, 0, 1, 2);
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			// the function callback which will get invoked when user clicks on a button.
+			private var closeHandler:Function;
+			
+			// the icon to be displayed.
+			private var iconClass:Class;
+			
+			[Bindable]
+			/* the default button which is triggered when user presses 'enter' key. */
+			private var defButton:Button;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The text message to be displayed in the prompt.  Either text or htmlText, but not both,
+			 * should be supplied.
+			 */
+			public var text:String;
+			
+			[Bindable]
+			/**
+			 * The htmlText message to be displayed in the prompt. Either text or htmlText, but not both,
+			 * should be supplied.
+			 */
+			public var htmlText:String;
+			
+			[Bindable]
+			/**
+			 * The title text to be displayed in the top-bar title of the prompt.
+			 * Either title or htmlTitle, but not both, should be supplied.
+			 */
+			public var title:String;
+			
+			[Bindable]
+			/**
+			 * The htmlTitle text to be displayed in the top-bar title of the prompt.
+			 * Either title or htmlTitle, but not both, should be supplied.
+			 */
+			public var htmlTitle:String;
+			
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * The only publically visible method that should be used to launch a prompt box.
+			 * 
+			 * @param text the text message to be displayed. If the first character in the text is '<' then
+			 * it is assumed to be html text and assigned to the htmlText property, otherwise to the text
+			 * property.
+			 * 
+			 * @param title the title string for title bar. If the first character in the title is '<' then
+			 * it is assumed to be html text and assigned to the htmlTitle property, otherwise to the title
+			 * property.
+			 * 
+			 * @param flags this is same as the flags in Alert.show. In particular, this can be bitwise 'or'
+			 * of various flags such as Alert.OK, Alert.CANCEL, Alert.YES, Alert.NO. Default is Alert.OK (0x4).
+			 * 
+			 * @param parent the parent view in which this prompt box is launched as child. The prompt view is launched as
+			 * a popup.
+			 * 
+			 * @param closeHandler the function callback that gets invoked when the user clicks on a button in this prompt.
+			 * The button id is supplied as the only parameter to this callback function.
+			 * 
+			 * @param iconClass this is similar to Alert.show argument. This implementation ignores this argument.
+			 * 
+			 * @param defaultButtonFlag the id of the default button if any. Default is Alert.OK (0x4).
+			 * 
+			 * @return On success it returns the newly launched Prompt object.
+			 */
+			public static function show(text:String = "", title:String = "", flags:uint = 0x4, parent:Sprite = null, closeHandler:Function = null, iconClass:Class = null, defaultButtonFlag:uint = 0x4):Prompt
+			{
+				var m:Prompt = PopUpManager.createPopUp((parent == null ? Application.application : parent) as DisplayObject, 
+								Prompt,!(flags & Alert.NONMODAL)) as Prompt;
+				PopUpManager.centerPopUp(m);
+				
+				if (text == null || text.substr(0, 1) != '<')
+					m.text = text;
+				else
+					m.htmlText = text;
+				if (title == null || title.substr(0, 1) != '<')
+					m.title = title;
+				else
+					m.htmlTitle = title;
+					
+				m.closeHandler = closeHandler;
+				
+				if (flags & Alert.OK) 
+					m.addButton(Alert.OK, Alert.okLabel, defaultButtonFlag == Alert.OK);
+				if (flags & Alert.YES) 
+					m.addButton(Alert.YES, Alert.yesLabel, defaultButtonFlag == Alert.YES);
+				if (flags & Alert.NO) 
+					m.addButton(Alert.NO, Alert.noLabel, defaultButtonFlag == Alert.NO);
+				if (flags & Alert.CANCEL) 
+					m.addButton(Alert.CANCEL, Alert.cancelLabel, defaultButtonFlag == Alert.CANCEL);
+				
+				return m;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			/*
+			 * Add the buttons in this prompt view based on the supplied information.
+			 */
+			private function addButton(id:uint, label:String, def:Boolean):void
+			{
+				var b:Button = new Button();
+				b.data = id;
+				b.label = label;
+				b.width = 64;
+				b.height = 14;
+				b.styleName = "alertButton";
+				
+				b.addEventListener(MouseEvent.CLICK, buttonClickHandler, false, 0, true);
+				
+				if (def)
+					b.setFocus();
+					
+				buttons.addChild(b);
+			}
+			
+			/*
+			 * When the user clicks on a prompt button, the callback is invoked and the prompt popup is removed.
+			 * If the callback throws an exception, the exception is ignored, but the prompt popup is not removed.
+			 * This gives a control to the button handler implementation to keep the prompt when certain
+			 * buttons are pressed. By default, the prompt is closed when a button is pressed and the handler
+			 * is either missing or ran with exception.
+			 */
+			private function buttonClickHandler(event:MouseEvent):void
+			{
+				var b:Button = event.target as Button;
+				var close:Boolean = true;
+				if (b != null && closeHandler != null) {
+					try {
+						closeHandler(b.data);
+					}
+					catch (e:Error) { // this is a way for closeHandlers to prevent closing the dialog
+						close = false;
+					}
+				}
+				if (close && this.isPopUp)
+					PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The view contains three parts: title top bar, main inner canvas, and bottom buttons.
+	The title bar displays the title or htmlTitle. The innerCanvas by default displays the text or htmlText.
+	The application may set text to "" and explicitly supply the content for the innerCanvas.
+	The bottom button bar displays all the buttons.
+	-->
+	
+	<mx:Label id="titleLabel" styleName="alertTitle" x="0" y="-1" 
+		text="{this.title}" htmlText="{this.htmlTitle}" link="dispatchEvent(event.clone())"/>
+		
+	<mx:Canvas id="innerCanvas" styleName="alertCanvas" width="{this.width-10}" height="{this.height-44}" x="4" y="14">
+		<mx:TextArea id="innerText" styleName="multiline"
+			width="{this.width-18}" height="{this.height-52}" x="4" y="4"
+			borderStyle="none" backgroundAlpha="0.0" selectable="false" editable="false"
+			text="{this.text}" htmlText="{this.htmlText}" link="dispatchEvent(event.clone())"/>
+	</mx:Canvas>
+	
+	<mx:HBox id="buttons" styleName="alertButtonBar" width="{this.width}" height="30" x="0" y="{this.height-buttons.height}"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"/>
+</mx:Canvas>

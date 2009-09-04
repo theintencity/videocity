@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The ListItems component represents the play list in a list view. It allows drag and drop operations on the 
+play items.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+
+	<mx:Metadata>
+		/**
+		 * Dispatched when the user double-clicks on a play item, so that the higher layer can
+		 * start playing that item as needed.
+		 */
+		[Event(name="play", type="flash.events.Event")]
+	</mx:Metadata>	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+
+			import my.core.Constant;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the associated playList.
+			private var _playList:PlayList;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is the PlayList object.
+			 */
+			public function get playList():PlayList
+			{
+				return _playList;
+			}
+			public function set playList(value:PlayList):void
+			{
+				var oldValue:PlayList = _playList;
+				_playList = value;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function itemClickHandler(event:ListEvent):void
+			{
+				if (event.rowIndex >= 0 && event.rowIndex < _playList.length) {
+					_playList.selectedIndex = event.rowIndex;
+					dispatchEvent(new Event(Constant.PLAY));
+				}
+			}
+
+			private function labelFunction(data:Object):String
+			{
+				return (data != null && data is PlayItem ? (data.name + ": " + (data.description != null ? data.description : data.source) ) : null);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:List id="list" width="100%" height="100%" dataProvider="{playList}" labelFunction="{labelFunction}"
+		rowHeight="15" y="12"
+		backgroundColor="#000000" color="#c8c8c8" borderStyle="solid" borderThickness="0"
+		horizontalScrollPolicy="off" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true"
+		selectable="true" allowMultipleSelection="true" allowDragSelection="true"
+		mouseDown="event.stopPropagation()" doubleClick="event.stopPropagation()" 
+		itemDoubleClick="itemClickHandler(event)"/>
+		
+</mx:Canvas>

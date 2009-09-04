@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component extends HBox to provide a 20px high horizontal bar which can be populated by buttons etc.
+It also creates tool-tip text just above the bar, where the tool-tip text is derived from the name property of
+children, only Button and VolumeSlider, of this container. It assumes that this will be a child of a Canvas.
+It also assumes that this bar is attached to the bottom of the parent canvas hence the tool-tip is just above
+this bar. 
+-->
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="20"
+	rollOut="rollOutHandler(event)" mouseMove="mouseMoveHandler(event)" mouseDown="mouseDownHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Button;
+			import mx.controls.LinkButton;
+		
+			import my.skins.VolumeSlider;
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			private var _help:LinkButton;
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function rollOutHandler(event:Event):void
+			{
+				setToolTip(null);
+			}
+
+			private function mouseMoveHandler(event:MouseEvent):void
+			{
+				for each (var child:DisplayObject in this.getChildren()) {
+					if (((child is Button) || (child is VolumeSlider)) && child.hitTestPoint(stage.mouseX, stage.mouseY)) {
+						var tip:String = (child.name != null && child.name.indexOf("Button") != 0) ? child.name : null;
+						setToolTip(tip, child);
+					}
+				}
+			}
+			
+			private function mouseDownHandler(event:MouseEvent):void
+			{
+				setToolTip(null);
+			}
+			
+			private function setToolTip(str:String, child:DisplayObject=null):void
+			{
+				if (_help == null) {
+					_help = new LinkButton();
+					_help.styleName = "signup";
+					_help.setStyle("bottom", 20);
+					if (parent != null)
+						parent.addChild(_help);
+				}
+				if (str != null && str != '') {
+					_help.visible = true;
+					_help.label = str;
+					if (child != null) {
+						_help.x = child.x - _help.width/2;
+						if (_help.x < 0) _help.x = 0;
+						else if (_help.x + _help.width > this.width) _help.x = this.width - _help.width;
+					}
+				}
+				else {
+					_help.visible = false; // hide it
+				}
+			}
+			
+		]]>
+	</mx:Script>
+</mx:HBox>
+	

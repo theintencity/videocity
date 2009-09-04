@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+A trash button displays a small 20x20 button with an icon to discard. The button can be dragged to
+other components. If another component has invoked TrashButton.addTrashable(component) then that component
+becomes trashable, in which case the trash button can be dropped on that component. When the user drop
+the trash button to a trashable component, the "trash" event is dispatched on the component, so that
+the application can take appropriate action on it.
+
+Ideally there can be only one trash button in the application. The class variable "button" stores the instance
+of that trash button.
+-->
+
+<controls:BButton xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
+	styleName="trashButtonStyle" addedToStage="button=this" removedFromStage="button=null" mouseMove="moveHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.events.DragEvent;
+			import mx.core.UIComponent;
+			import mx.managers.DragManager;
+			import mx.core.DragSource;
+			
+			import my.skins.NoAccessSkin;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			/**
+			 * Event type used for dispatching the trash event on trashable component when trash button is
+			 * dropped on it.
+			 */
+			public static const TRASH:String = "trash";
+			
+			// singleton instance of the button
+			private static var button:TrashButton = null;
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function moveHandler(event:MouseEvent):void
+			{
+				var dragInitiator:TrashButton = event.currentTarget as TrashButton;
+				var dragSource:DragSource = new DragSource();
+				dragSource.addData(TRASH, "command");
+				var dragProxy:BButton = new BButton();
+//				dragProxy.width = dragProxy.height = 40;
+//				dragProxy.x = dragProxy.y = -12;
+				dragProxy.styleName = "trashButtonStyle";
+				dragProxy.setStyle("fillColors", [0x000000, 0x000000]);
+				dragProxy.setStyle("fillOverColors", [0x000000, 0x000000]);
+				dragProxy.setStyle("color", 0xff0000);
+				DragManager.doDrag(dragInitiator, dragSource, event, dragProxy);
+			}
+			
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * Usually an application calls TrashButton.addTrashable(component) to make the component
+			 * trashable.
+			 */
+			public static function addTrashable(obj:UIComponent):void
+			{
+				obj.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler, false, 0, true);
+				obj.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler, false, 0, true);
+				obj.addEventListener(DragEvent.DRAG_DROP, dragDropHandler, false, 0, true);
+			}
+			
+			/**
+			 * The application invokes this make to revert the trashable attribute of the component.
+			 */
+			public static function removeTrashable(obj:UIComponent):void
+			{
+				obj.removeEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
+				obj.removeEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
+				obj.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+			}
+			
+			/*
+			 * When trash button is dragged on to a trashable component, we invoke acceptDragDrop.
+			 */
+			private static function dragEnterHandler(event:DragEvent):void
+			{
+				if (event.dragSource.dataForFormat("command") == TRASH) {
+					var obj:UIComponent = event.currentTarget as UIComponent;
+					DragManager.acceptDragDrop(obj);
+				}
+			}
+			
+			// nothing
+			private static function dragExitHandler(event:DragEvent):void
+			{
+				
+			}
+			
+			/*
+			 * When the trash button is dragged on to a trashable component, we dispatch the trash
+			 * event on the component and then remove it from its parent.
+			 */
+			private static function dragDropHandler(event:DragEvent):void
+			{
+				if (event.dragSource.dataForFormat("command") == TRASH) {
+					var obj:UIComponent = event.currentTarget as UIComponent;
+					obj.dispatchEvent(new Event(TRASH));
+					if (obj.isPopUp)
+						PopUpManager.removePopUp(obj);
+					else if (obj.parent != null)
+						obj.parent.removeChild(obj);
+				}
+			}
+		]]>
+	</mx:Script>
+</controls:BButton>

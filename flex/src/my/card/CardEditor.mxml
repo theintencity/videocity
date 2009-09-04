@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component displays a card editor. The actual editing of text and photo is done outside this
+component. However, this allows the user to move the text and photos in the card as well as change the
+skin (color).
+
+This is used in the CreatePage view to signup a new account and/or create a new room. A visiting card is usually
+associated with a single room. A login card is usually associated with a single user. The caller is responsible
+for creating a VisitingCard object using the rawData property of the CardEditor object. The caller also sets
+the room property, so that the editor can capture updates to the Room's photo property and update its own
+photo element.
+-->
+
+<controls:CCard xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" xmlns:card="my.card.*" styleName="cardEditor" 
+	backgroundColor="{_skin.titleColor}" mouseDown="event.stopPropagation()" initialize="initializeHandler(event)" 
+	rollOver="if (editable) hover=true;" rollOut="if (editable) hover=false;">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Image;
+			import mx.events.PropertyChangeEvent;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.utils.ObjectProxy;
+			
+			import my.core.Util;
+			import my.core.Room;
+			import my.core.Constant;
+			import my.card.VisitingCard;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			/*
+			 * List of properties defined in the style for card editor. This is in singular form, whereas
+			 * .css contains the plural form.
+			 */
+			private static const SKIN_PROPERTIES:Array = ['backgroundColor', 'titleColor', 'titleTextColor', 'textColor', 'lineColor', 'nameColor', 'linkColor', 'disabledColor'];
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			/* 
+			 * The associated room object for this editor.
+			 */
+			private var _room:Room;
+			
+			/*
+			 * The raw data for the card that is sent to the server for verfication or signing.
+			 */
+			private var _rawData:ByteArray;
+			
+			[Bindable]
+			/*
+			 * Whether the user has mouse rolled over this component or not?
+			 */
+			private var hover:Boolean = false;
+			
+			[Bindable]
+			/*
+			 * Whether the user is currently downloading the card image or not?
+			 */ 
+			private var downloading:Boolean = false;
+			
+			/*
+			 * List of all the available skins for the card which the user can select.
+			 * This gets populated during initialization based on the styles.
+			 */
+			private var _skins:Array = [];
+
+			[Bindable]
+			/*
+			 * The currently selected skin, which defaults to the first one in the list.
+			 * This gets populated during initialization based on the styles.
+			 */
+			private var _skin:Object;
+			
+			/*
+			 * The title variable.
+			 */
+			private var _title:String = VisitingCard.INTERNET_VISITING_CARD;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Whether this editor allows editing of the children elements or not?
+			 * Default is false. If this is set to true, then the editor allows downloading the card, as well
+			 * as moving various children elements in the card view.
+			 */
+			public var editable:Boolean = false;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The title of the card, which defaults to "Internet Visiting Card". For login card the caller
+			 * should update the title property to "Private Login Card". When the title is updated to indicate
+			 * login card, the default skin is changed to the last value in the skins styles.
+			 */
+			public function get title():String
+			{
+				return _title;
+			}
+			public function set title(value:String):void
+			{
+				_title = value;
+				if (value != VisitingCard.INTERNET_VISITING_CARD)
+					if (_skins.length > 0)
+						_skin = _skins[_skins.length-1];
+			}
+			
+			[Bindable]
+			/**
+			 * The caller can set the room property of the editor. The editor listens for the change in the 
+			 * photo property of the room, and updates the editor's photo view when the room's photo property
+			 * changes. This allows the caller (CreatePage) to just edit the room object, without having to
+			 * explicitly change the image on the editor.
+			 */
+			public function get room():Room
+			{
+				return _room;
+			}
+			public function set room(value:Room):void
+			{
+				var old:Room = _room;
+				_room = value;
+				if (old != value) {
+					if (old != null) {
+						old.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler);
+						if (photoBox.numChildren >= 2)
+							photoBox.removeChildAt(1);
+					}
+					if (value != null) {
+						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler, false, 0, true);
+						if (value.photo != null) {
+							var img:Image = Util.copyImage(value.photo as Image);
+							img.percentWidth = img.percentHeight = 100;
+							photoBox.addChild(img);
+						}					
+					}
+				}
+			}
+			
+			/**
+			 * The read-only rawData property returns the bytes representing the raw binary data for this
+			 * card. In particular, the rawData is a PNG image data where some metadata information is stored
+			 * in the PNG image file itself. 
+			 * @see VisitingCard.createInfo
+			 */
+			public function get rawData():ByteArray
+			{
+				downloading = true;
+				var snap:BitmapData = new BitmapData(this.width, this.height, true, 0x00FFFFFF);
+				snap.draw(this, new Matrix());
+				hover = true;
+				var encoder:PNGEncoder = new PNGEncoder();
+				var bytes:ByteArray = encoder.encode(snap);
+				var info:ByteArray = VisitingCard.createInfo(title, room, photoBox.getRect(this));
+				this._rawData = VisitingCard.save(bytes, info);
+				downloading = false;
+				return this._rawData;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function initializeHandler(event:Event):void
+			{
+				var count:Number = getStyle("skinsCount") || 0;
+				if (count <= 0) 
+					return;
+				var values:Object = new Object();
+				for each (var p:String in SKIN_PROPERTIES)
+					values[p] = getStyle(p + "s") as Array;
+				for (var i:int=0; i<count; ++i) {
+					var obj:Object = new Object();
+					for each (var s:String in SKIN_PROPERTIES)
+						obj[s] = values[s][i];
+					_skins.push(new ObjectProxy(obj));
+				}
+				if (_skins.length > 0)
+					_skin = _skins[0];
+			}
+			
+			private function propertyChangeHandler(event:PropertyChangeEvent):void
+			{
+				trace("card editor property updated " + event.property);
+				if (event.property == "photo" && photoBox != null) {
+					if (event.oldValue != null && event.oldValue is DisplayObject 
+							&& photoBox.contains(event.oldValue as DisplayObject)) {
+						photoBox.removeChild(event.oldValue as DisplayObject);
+					}
+					if (event.newValue != null && event.newValue is DisplayObject
+							&& !photoBox.contains(event.newValue as DisplayObject)) {
+						var img:Image = Util.copyImage(event.newValue as Image);
+						img.percentWidth = img.percentHeight = 100;
+						photoBox.addChild(img);
+					}
+				}
+			}
+			
+			private function skinChangeHandler(event:Event):void
+			{
+				var old:int = _skins.indexOf(_skin);
+				if (old >= 0) {
+					var index:int = (old + 1) % _skins.length;
+					if (index != old) {
+						_skin = _skins[index];
+					}
+				}
+			}
+			
+			private function photoBoxCreationHandler(event:Event):void
+			{
+				if (room != null && room.photo != null) {
+					var img:Image = Util.copyImage(room.photo as Image);
+					img.percentWidth = img.percentHeight = 100;
+					photoBox.addChild(img);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas width="100%" height="14">
+		<mx:Label width="100%" styleName="cardTitle" text="{this.title}" color="{_skin.titleTextColor}"/>
+	</mx:Canvas>
+	<mx:HRule strokeColor="{_skin.lineColor}" strokeWidth="1" width="100%" y="15"/>
+	
+	<mx:Canvas width="100%" height="{this.height-32}" x="0" y="16"
+		backgroundColor="{_skin.backgroundColor}" backgroundAlpha="1.0"/>
+		
+	<controls:DraggableCanvas id="photoBox" width="50" height="50" x="6" y="24" draggable="{editable}"
+		creationComplete="photoBoxCreationHandler(event)">
+		<mx:Button styleName="photoStyle" width="{photoBox.width}" height="{photoBox.height}"/>
+	</controls:DraggableCanvas>
+
+	<controls:DraggableCanvas width="140" height="14" x="60" y="20" draggable="{editable}">
+		<mx:Text width="100%" styleName="cardName" color="{_skin.nameColor}"
+			text="{room != null ? (room.name != null &amp;&amp; room.name != '' ? room.name : room.owner) : ''}"/>
+	</controls:DraggableCanvas>
+		
+	<controls:DraggableCanvas width="100" height="60" x="60" y="37" draggable="{editable}">
+		<mx:TextArea width="100%" height="100%" styleName="cardText" color="{_skin.textColor}"
+			selectable="false" editable="false" mouseChildren="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+			text="{room != null ? room.keywords.join('; ') : ''}"/>
+	</controls:DraggableCanvas>
+	
+	<controls:DraggableCanvas width="180" height="40" x="8" y="75" draggable="{editable}">
+		<mx:TextArea width="100%" height="100%" styleName="cardText" color="{_skin.linkColor}"
+			selectable="false" editable="false" mouseChildren="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+			text="{room != null ? room.url : ''}"/>
+	</controls:DraggableCanvas>
+	
+	<mx:Canvas width="{this.width}" height="14" x="0" y="{this.height-16}">
+		<mx:HRule strokeColor="{_skin.lineColor}" strokeWidth="1" width="100%"/>
+		<mx:Text width="100%" y="2" styleName="cardCopyright" color="{_skin.disabledColor}"
+			text="Issued (c) {(new Date()).fullYear} by {Constant.COMPANY_NAME}"/>
+	</mx:Canvas>
+	
+	<card:InvalidCard visible="{(room == null || !room.valid) &amp;&amp; !downloading}"/>
+	
+	<mx:HBox width="22" height="22" x="10" bottom="2" styleName="cardButtonBar"
+		visible="{editable &amp;&amp; hover &amp;&amp; !downloading}">
+		<controls:BButton styleName="colorButtonStyle" color="#000000"
+			toggle="false" toolTip="{_('Change skin')}" click="skinChangeHandler(event)"/>
+	</mx:HBox>
+</controls:CCard>

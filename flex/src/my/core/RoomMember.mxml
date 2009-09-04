@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component is used as a list item renderer to display each member in a room as part of the 
+MemberList view. 
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="50" height="50"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" alpha="0.5" 
+	mouseChildren="false">
+	
+	<mx:Button styleName="photoStyle" width="{this.width}" height="{this.height}"/>
+	
+	<mx:Image id="_img" width="{this.width}" height="{this.height}" maintainAspectRatio="true"/>
+	
+	<mx:Text text="{data != null ? data.name : 'none'}" color="#ffffff" horizontalCenter="0" bottom="0"/>
+</mx:Canvas>

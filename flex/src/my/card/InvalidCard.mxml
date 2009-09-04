@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!-- 
+This component just displays a 'NOT VALID' text and usually is overlayed on top of a card.
+For example, CardEditor uses this component to display the text.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" styleName="cardInvalidBox" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" autoLayout="true">
+	<mx:HRule styleName="cardInvalidText" width="100%"/>
+	<mx:Label styleName="cardInvalidText" text="NOT VALID"/>
+	<mx:HRule styleName="cardInvalidText" width="100%"/>
+</mx:VBox>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component displays a card's image. It also displays a overlay button to allow downloading the card when
+the user mouse-overs. The data model for this view is a VisitingCard object.
+
+@see VisitingCard, CardEditor
+-->
+
+<controls:CCard xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" styleName="cardBox"
+	mouseDown="event.stopPropagation()" rollOver="hover = true" rollOut="hover = false">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the user clicks on the 'download' button.
+		 * @event-type my.card.CardBox.DOWNLAOD
+		 */
+		[Event(name="download", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import my.card.VisitingCard;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			public static const DOWNLOAD:String = "download";
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			/*
+			 * The data model for this view is a VisitingCard.
+			 */
+			private var _data:VisitingCard;
+			
+			[Bindable]
+			/*
+			 * Whether the user is current mouse-over this view, in which case the download button
+			 * may be displayed.
+			 */
+			private var hover:Boolean = false;
+			
+			[Bindable]
+			/*
+			 * Whether the user is already downloading the card, in which case the download button 
+			 * will be disabled.
+			 */
+			private var downloading:Boolean = false;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model for this view must be a valid VisitingCard object or null. The image is
+			 * loaded from this VisitingCard object, or unloaded if null.
+			 */
+			override public function get data():Object
+			{
+				return _data;
+			}
+			override public function set data(value:Object):void
+			{
+				var old:VisitingCard = _data;
+				_data = value as VisitingCard;
+				if (value != old) {
+					if (_data != null) 
+						image.load(_data.rawData);
+					else
+						image.unloadAndStop();
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Image id="image" width="{this.width}" height="{this.height}"/>
+	
+	<mx:HBox width="22" height="22" x="10" bottom="2" styleName="cardButtonBar"
+		visible="{hover &amp;&amp; !downloading}">
+		<controls:BButton styleName="downloadButtonStyle" color="#000000"
+			toggle="false" toolTip="{_('Download Card')}" click="dispatchEvent(new Event(DOWNLOAD))"/>
+	</mx:HBox>
+</controls:CCard>

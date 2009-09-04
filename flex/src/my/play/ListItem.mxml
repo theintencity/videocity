@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component is a wrapper around other items such as PlayVideoItem, PlayImageItem, etc.
+It listens for change in the selectedIndex property of the PlayList and creates new item as a 
+child depending on the current PlayItem.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	remove="removeHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CollectionEvent;
+
+			import my.core.Constant;
+			import my.video.Play;
+
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			// the underlying play list
+			private var _playList:PlayList;
+			
+			// playing or not?
+			private var _playing:Boolean = false;
+			
+			// current active child.
+			private var activeChild:DisplayObject;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is the PlayList object. This item listens for change in the selectedItem
+			 * property of the play list, and updates its view view based on the type of that item.
+			 */
+			public function get playList():PlayList
+			{
+				return _playList;
+			}
+			public function set playList(value:PlayList):void
+			{
+				var oldValue:PlayList = _playList;
+				_playList = value;
+				
+				if (oldValue != value) {
+					if (oldValue != null)
+						oldValue.removeEventListener(PlayList.SELECTED_CHANGE, selectedChangeHandler);
+					if (value != null)
+						value.addEventListener(PlayList.SELECTED_CHANGE, selectedChangeHandler, false, 0, true);
+					if (value != null) 
+						selectedChangeHandler(null);
+				}
+				
+			}
+			
+			[Bindable]
+			/**
+			 * The playing property controls the playback of video or timer for slide/photo show.
+			 */
+			public function get playing():Boolean
+			{
+				return _playing;
+			}
+			public function set playing(value:Boolean):void
+			{
+				_playing = value;
+				
+				if (activeChild != null) {
+					if (value)
+						Object(activeChild).play();
+					else
+						Object(activeChild).pause();
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function removeHandler(event:Event):void
+			{
+				if (activeChild != null) {
+					Object(activeChild).pause();
+				}
+			}
+			
+			private function selectedChangeHandler(event:Event):void
+			{
+				if (activeChild != null) {
+					Object(activeChild).close();
+					activeChild.removeEventListener(Constant.PLAY_COMPLETE, completeHandler);
+					this.removeChild(activeChild);
+					activeChild = null;
+				}
+				
+				if (_playList.selectedItem != null) {
+						
+					activeChild = createDisplay(_playList.selectedItem);
+					activeChild.addEventListener(Constant.PLAY_COMPLETE, completeHandler, false, 0, true);
+					
+					// for some weird reason, it doesn't work if addChildAt is called after play
+					// or before pause.
+					if (playing) {
+						this.addChildAt(activeChild, 0);
+						Object(activeChild).play();
+					}
+					else {
+						Object(activeChild).pause();
+						this.addChildAt(activeChild, 0);
+					}
+				}
+			}
+
+			private function createDisplay(item:PlayItem):DisplayObject
+			{
+				if (item.name == PlayItem.VIDEO) {
+					var box:VideoItem = new VideoItem();
+					box.autoPlay = false;
+					box.source = item.source;
+					return box;
+				}
+				else if (item.name == PlayItem.STREAM) {
+					var stream:StreamItem = new StreamItem();
+					stream.data = new Play(item.source, String(item.xml.@id), _playList.user);
+					return stream;
+				}
+				else if (item.name == PlayItem.IMAGE) {
+					var fg:PhotoItem = new PhotoItem();
+					fg.source = (item.content != null ? item.content : item.source);
+					return fg;
+				}
+				else if (item.name == PlayItem.TEXT) {
+					var txt:TextItem = new TextItem();
+					txt.source = item.xml;
+					return txt;
+				}
+				else { // wild card for all if (item.name == PlayItem.FILE) {
+					var can:PhotoItem = new PhotoItem();
+					can.toolTip = item.source;
+					return can;
+				}
+			}
+
+			private function completeHandler(event:Event):void
+			{
+				if (_playList.selectedIndex < (_playList.length - 1)) { 
+					_playList.selectedIndex = _playList.selectedIndex + 1;
+				}
+				else {
+					_playList.playing = false; // reached the end of photo show.
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

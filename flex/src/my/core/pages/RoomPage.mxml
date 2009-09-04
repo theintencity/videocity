@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This page displays the view for a room. There are three states: (1) In this state the user has no visiting 
+access yet, and the doors are locked. The user must upload a visiting card to enter the room. Alternatively,
+the user can knock on the door to signal the owner in real-time or leave an offline video message for the owner.
+(2) In the second state, the user has uploaded the visiting card but is standing outside the room. The user
+may join the room, or decide to leave a message without entering the room. If the user enters the room, the
+owner and everyone else in the room are notified. Hence for privacy reason, the user may decide to not join
+the room. (3) In the third state, the user has entered the room, and is present in the room. The presence
+status of the user for this room becomes active. The user sees other people and media in this room, as well
+as can contribute to video chat and media sharing with others in this room.
+
+When the user visits a target page such as http://server/kundan@39peers.net and the room 'kundan@39peers.net'
+is not public, then the view state for the user is (1). If the room is public, the client automatically
+downloads the visiting card from the server, and puts the state in (2). When the user uploads the visiting card
+for a room 'kundan@39peers.net', and the user is not the owner of this room, then his view state is set to
+(2). If the user is already the owner then he is put in state (3) directly. When the user clicks on the 
+join button in state (2), he is moved to state (3) and joins the room. In state (3) there is an option to 
+leave the room.
+ 
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
+	xmlns:containers="my.containers.*" xmlns:card="my.card.*" xmlns:core="my.core.*"
+	name="roomPage" styleName="roomPage" width="100%" height="100%" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	mouseDown="mouseDownHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.DynamicEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.CollectionEvent;
+			import mx.events.PropertyChangeEvent;
+
+			import my.core.Room;
+			import my.core.RoomMember;
+			import my.core.User;
+			import my.core.Controller;
+			import my.core.Constant;
+			import my.containers.BaseBox;
+			import my.play.PlayListBox;
+			import my.play.PlayList;
+			import my.video.VideoBox;
+			import my.text.TextBox;
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			private var _room:Room;
+			private var _user:User;
+			private var _controller:Controller;
+			
+			[Bindable]
+			/*
+			 * Number of boxes in this room's callBox currently.
+			 */
+			private var numBoxes:Number = 0;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The user property for this page. It gets popagated to the associated room if needed.
+			 */
+			public function get user():User
+			{
+				return _user;
+			}
+			public function set user(value:User):void
+			{
+				var old:User = _user;
+				_user = value;
+				if (old != value) {
+					if (room != null)
+						room.user = user;
+				}
+			}
+			
+			[Bindable]
+			/**
+			 * The data model is a room object. 
+			 */
+			public function get room():Room
+			{
+				return _room;
+			}
+			public function set room(value:Room):void
+			{
+				var old:Room = _room;
+				_room = value;
+				if (old != value) {
+					if (old != null) {
+						if (old.user != null) 
+							old.user = null
+						old.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
+					}
+					if (value != null) {
+						value.user = user;
+						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
+						if (value.card != null && targetImage != null)
+							targetImage.data = value.card;
+					}
+					else {
+						if (targetImage != null)
+							targetImage.data = null;
+					}
+				}
+			}
+			
+			[Bindable]
+			/**
+			 * The controller for this application.
+			 */
+			public function get controller():Controller
+			{
+				return _controller;
+			}
+			public function set controller(value:Controller):void
+			{
+				_controller = value;
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function roomChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (event.property == "card") {
+					targetImage.data = room.card;
+				}
+			}
+			
+			private function targetImageHandler(event:Event):void
+			{
+				if (room != null && room.card != null)
+					targetImage.data = room.card;
+			}
+			
+			private function mouseDownHandler(event:MouseEvent):void
+			{
+				if (event.target != this) 
+					event.stopPropagation();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea styleName="roomTitle"
+		width="100%" height="30" y="5" selectable="false" editable="false"
+		text="{_('You are on {0}', room == null || room.url == null ? _('empty room') : room.url)}"/>
+	
+	<!--
+	<mx:Box visible="{numBoxes == 0 &amp;&amp; (room.url == null || room.connected) &amp;&amp; !door1.locked &amp;&amp; !door2.locked}"
+		width="100%" height="100%"
+		horizontalAlign="center" verticalAlign="middle" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		>
+		<mx:Text text="Empty Room" styleName="large" mouseChildren="false"/>
+		<mx:Text text="Upload private login card to decorate your room" styleName="small" mouseChildren="false" 
+			visible="{user.isGuest}"/>
+	</mx:Box>
+	-->
+	
+	<containers:ContainerBox id="callBox" width="100%" height="100%" 
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		childAdd="numBoxes = callBox.numChildren" childRemove="numBoxes = Math.max(callBox.numChildren - 1, 0)"
+		mouseMove="if (callBox.mouseX &lt; 20) memberList.show(); 
+			else if (callBox.mouseX &gt; 50) memberList.hide(); "/>
+	
+	<core:BoxController user="{user}" box="{callBox}" controller="{controller}"/>
+	
+	<core:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
+		itemRenderer="my.core.RoomMember" dataProvider="{room.members}"/>
+	
+	<containers:Door id="door2" y="35"
+		locked="{room != null &amp;&amp; room.card != null &amp;&amp; !room.connected &amp;&amp; numBoxes == 0}">
+		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+			horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<card:CardBox id="targetImage" x="40" y="40"
+				download="controller.downloadCard(targetImage.data)"
+				creationComplete="targetImageHandler(event)"/>
+			<mx:Button label="{_('Enter this room')}" styleName="blackButtonStyle" width="100%"
+				click="controller.joinRoomHandler(room)"/>
+			<mx:Button label="{_('Record a message')}" styleName="blackButtonStyle" width="100%"
+				click="controller.leaveMessageHandler(room)"/>
+		</mx:VBox>
+		
+		<mx:Canvas width="230" height="100%"
+			horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+				horizontalScrollPolicy="off" verticalScrollPolicy="off" paddingLeft="0" paddingRight="0"
+				visible="{room != null &amp;&amp; room.isOwner}"
+				>
+				<mx:TextArea styleName="multiline" width="230" height="80"
+					selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					text="{_(Constant.HELP_ROOM_LOGIN)}"/>
+				<mx:HBox width="100%">
+					<mx:Button label="{_('Public')}" styleName="blackButtonStyle" width="100%"
+						toolTip="{_('Make your room as public')}"
+						click="controller.setRoomAccess(room, 'public')"/>
+					<mx:Button label="{_('Private')}" styleName="blackButtonStyle" width="100%"
+						toolTip="{_('Make your room as private')}"
+						click="controller.setRoomAccess(room, 'private')"/>
+				</mx:HBox>
+			</mx:VBox>
+			
+			<mx:TextArea styleName="multiline" width="230" height="100%"
+				selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+				visible="{room == null || !room.isOwner}"
+				text="{Constant.HELP_ROOM}"/>
+		</mx:Canvas>
+	</containers:Door>
+	
+	<containers:Door id="door1" y="35"
+		locked="{room != null &amp;&amp; room.card == null}">
+		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+			horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:Button label="{_('Upload visiting card')}" styleName="blackButtonStyle" width="100%"
+				click="controller.uploadCard()"/>
+			<mx:Button label="{_('Knock on the door')}" styleName="blackButtonStyle" width="100%"
+				click="controller.knockRoomHandler(room)"/>
+			<mx:Button label="{_('Send an email message')}" styleName="blackButtonStyle" width="100%"
+				click="controller.sendEmailHandler(room)"/>
+		</mx:VBox>
+		
+		<mx:TextArea styleName="multiline" width="230" height="100%"
+			selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+			text="{Constant.HELP_ROOM_TARGET}"/>
+	</containers:Door>
+
+	<!--		
+	<mx:Button styleName="noAccessStyle"
+		width="{numBoxes == 0 ? this.width : 30}" height="{numBoxes == 0 ? this.height : 30}"
+		visible="{(room == null || room.url == null) &amp;&amp; !door1.locked &amp;&amp; !door2.locked}" 
+		resizeEffect="resizeEffect" toolTip="{_('No room access. Upload your login card')}"/>
+		
+	<mx:Resize id="resizeEffect" duration="400"/>
+	-->
+
+</mx:Canvas>

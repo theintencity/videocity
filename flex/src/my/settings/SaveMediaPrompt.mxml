@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The SaveMediaPrompt dialog box is displayed when the user clicks on the save button of a play list.
+The dialog box gives four options to the user: save the currently playing media to local computer,
+share the play list with other participants in the room like real-time collaboration and media viewing,  
+upload the play list on this user's main room if this user is logged in like decorating your
+public guest room, and 
+send the play list to the owner of this room like sending a video message.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" styleName="settingsStyle"
+	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.DynamicEvent;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			
+			import my.controls.Prompt;
+			import my.core.Constant;
+			import my.core.User;
+			import my.core.Room;
+			import my.play.PlayItem;
+			import my.play.PlayList;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The associated play list object.
+			 */
+			public var playList:PlayList;
+			
+			[Bindable]
+			/**
+			 * The current play item object.
+			 */
+			public var playItem:PlayItem;
+			
+			[Bindable]
+			/**
+			 * The associated room object.
+			 */
+			public var room:Room;
+
+			[Bindable]
+			/**
+			 * The associated user object.
+			 */
+			public var user:User;
+
+			//--------------------------------------
+			// STATIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * This is the main method that is used to display the dialog box on a given playList.
+			 * It launches a new SaveMediaPrompt, listens for events, and dispatches appropriate event
+			 * on the user object.
+			 */
+			public static function show(playList:PlayList):void
+			{
+				var child:SaveMediaPrompt = new SaveMediaPrompt();
+				child.playList = playList;
+				child.playItem = playList.selectedItem;
+				child.user = playList != null ? playList.user : null;
+				child.room = playList != null && playList.user != null ? playList.user.selected : null;
+				
+				var m:Prompt = Prompt.show(null, "Save this content", Alert.CANCEL);
+				
+				m.innerCanvas.addChild(child);
+				m.innerCanvas.verticalScrollPolicy = m.innerCanvas.horizontalScrollPolicy = "off";
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			// when the user clicks on a button, dispatch the playList event on the user object.
+			private function buttonHandler(type:String):void
+			{
+				PopUpManager.removePopUp(this.parent.parent as Prompt);
+				var event:DynamicEvent = new DynamicEvent(Constant.PLAY_LIST);
+				event.command = type;
+				event.playList = playList;
+				event.playItem = playItem;
+				event.user = user;
+				event.room = room;
+				user.dispatchEvent(event);
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler(Constant.SAVE)">
+		<mx:Label text="{'1. ' + _('save file to your computer')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="downloadButtonStyle" toolTip="{_('save')}"/>
+	</mx:HBox>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler(Constant.SHARE)">
+		<mx:Label text="{'2. ' + _('share in this room with others')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="rightButtonStyle" toolTip="{_('share')}"/>
+	</mx:HBox>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler(Constant.UPLOAD)">
+		<mx:Label text="{'3. ' + _('upload to your room permanently')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="uploadButtonStyle" toolTip="{_('upload')}"/>
+	</mx:HBox>
+	
+	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		click="buttonHandler(Constant.SEND)">
+		<mx:Label text="{'4. ' + _('send to the owner of this room')}"/>
+		<mx:Spacer width="100%"/>
+		<controls:BButton styleName="fullScreenButtonStyle" toolTip="{_('send')}"/>
+	</mx:HBox>
+</mx:VBox>

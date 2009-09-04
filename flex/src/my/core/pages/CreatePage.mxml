@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The room creation page includes user interface for creating a new room (and associated card). 
+This is also used as the signup page for new users to create login card and default user room.
+
+There are two parts: user input and card editor views. The user input view has two parts: user information
+and room information. If the user is already logged in then the user information is reused from the login
+card, otherwise the user is prompted to enter his full name and email, and upload or capture a photo.
+The room information has optional room name and list of keywords. If the room name is not supplied, then
+the room name is set as same as the user name. As the user enters input, the card editor views are automatically
+updated in real-time. However, the card is invalid until it gets signed by the server side. Once the 
+user clicks on the 'Create' button, the client sends the information to the server for signing. The server
+sends the card in an email to the user's email address.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:view="view.*" xmlns:card="my.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.photo.*" 
+	name="createPage" styleName="createBox"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.containers.Panel;
+			import mx.controls.Image;
+			
+			import my.card.VisitingCard;
+			import my.core.Room;
+			import my.core.User;
+			import my.core.Controller;
+			import my.core.Constant;
+			
+			//--------------------------------------
+			// PRIVATE PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/*
+			 * The internal room object that stores information about the newly created room.
+			 */
+			private var newRoom:Room = new Room();
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The controller that gets invoked by this view to modify the associated models.
+			 */
+			public var controller:Controller;
+			
+			[Bindable]
+			/**
+			 * The associated user object of the currently logged in user.
+			 */
+			public var user:User;
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * Reset this view if the internal room object is same as the one supplied
+			 * in this method. When resetting the view the name and keywords list are set to empty string,
+			 * and owner's name, email and photo are reset.
+			 */
+			public function reset(room:Room):void
+			{
+				if (room == newRoom) {
+					newRoom = new Room();
+					createKeywordsText.text = createNameText.text = '';
+					controller.updateOwnerHandler(newRoom, createOwnerText.text);
+					controller.updateEmailHandler(newRoom, createEmailText.text);
+					newRoom.setPhoto(photoBox.image);
+				}
+			}
+			
+			/**
+			 * When the user uploads a new login card, the controller invokes the update method to 
+			 * update the photo of this view's room object based on the photo extracted from the 
+			 * login card.
+			 */
+			public function update():void
+			{
+				if (newRoom != null && cardImage != null && cardImage.data != null) {
+					if (cardImage.data.photoRect != null) {
+						var rect:Rectangle = VisitingCard(cardImage.data).photoRect;
+						var snap:BitmapData = new BitmapData(rect.width, rect.height, true, 0x00FFFFFF);
+						snap.draw(cardImage.image, new Matrix(1, 0, 0, 1, -rect.x, -rect.y));
+						var image:Image = new Image();
+						image.width  = rect.width;
+						image.height = rect.height;
+						image.maintainAspectRatio = true;
+						image.load(new Bitmap(snap));
+						newRoom.setPhoto(image);
+						trace("updating photo to " + newRoom.photo);
+					}
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas visible="{user.isGuest}"
+		width="210" height="130" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		
+		<mx:Text text="{_('Identify Yourself Below')}" styleName="regular"
+			width="100%" x="10" y="10" textAlign="left"/>
+		
+		<photo:Photo id="photoBox"
+			width="100" height="100" x="20" y="30"
+			complete="if (newRoom) newRoom.setPhoto(photoBox.image);"/>
+		
+		<controls:TextLabel id="createOwnerText" styleName="grey" label="{_('Full Name')}"
+			width="85" x="130" y="30" fontSize="10"
+			change="controller.updateOwnerHandler(newRoom, createOwnerText.text)"/>
+			
+		<controls:TextLabel id="createEmailText" styleName="grey" label="{_('Email')}"
+			width="85" x="130" y="60" fontSize="10"
+			change="controller.updateEmailHandler(newRoom, createEmailText.text)"/>
+			
+		<mx:Label text="{_('or') + ', ' + _('use card')}" styleName="small"
+			x="130" y="90"/>
+			
+		<mx:Button styleName="blackButtonStyle" label="{_('Upload Card')}" toolTip="{_('import data from your existing login card')}"
+			width="85" x="130" y="110" paddingLeft="0" paddingRight="0"
+			click="controller.uploadCard()"/>
+	</mx:Canvas>
+	
+	<card:CardBox id="cardImage" visible="{!user.isGuest}" data="{user.card}"
+		x="20" y="10"
+		download="controller.downloadCard(cardImage.data)"/>
+		
+	<mx:Text text="{_('Create new video room')}" styleName="regular"
+		width="100%" x="10" y="140" textAlign="left"/>
+
+	<controls:TextLabel id="createNameText" label="{_('Optional name of your room')}" styleName="grey"
+		width="195" x="20" y="160" fontSize="10"
+		change="controller.updateNameHandler(newRoom, createNameText.text)"/>
+	<controls:TextLabel id="createKeywordsText" label="{_('List of keywords about your room')}" styleName="grey"
+		width="195" x="20" y="190" fontSize="10"
+		change="controller.updateKeywordsHandler(newRoom, createKeywordsText.text)"/>
+
+	<mx:HBox width="230" x="0" y="220" horizontalAlign="center">
+		<mx:Button label="{_('Create')}" styleName="blackButtonStyle"
+			click="controller.createButtonHandler(newRoom, user.isGuest ? loginCard.rawData : user.card.rawData, visitingCard.rawData)"/>
+		<mx:Button label="{_('Cancel')}" styleName="blackButtonStyle"
+			click="controller.createCancelHandler()"/>
+	</mx:HBox>
+		
+	<mx:Text text="{_('Create your access cards')}" styleName="regular"
+		width="100%" x="230" y="10" textAlign="left"/>
+	
+	<mx:Accordion id="cardList" width="220" x="240" y="40"
+		selectedIndex="0" creationPolicy="all">
+
+		<mx:Canvas label="{_('What are these cards?') + ' &gt;&gt;'}"
+			width="220" height="140" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:TextArea styleName="multiline"
+				width="220" height="130"
+				editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off" paddingBottom="0"
+				htmlText="{Constant.HELP_CARD}" link="cardList.selectedIndex = event.text == 'visiting' ? 1 : 2"/>
+		</mx:Canvas>
+		
+		<card:CardEditor id="visitingCard" label="{_('Your Visiting Card') + ' &gt;&gt;'}" 
+			width="200" height="120" x="10" y="5" room="{newRoom}" editable="true"/>
+		
+		<card:CardEditor id="loginCard" label="{_('Your Login Card') + ' &gt;&gt;'}" 
+			width="200" height="120" x="10" y="5" room="{newRoom}" editable="true"
+			title="{VisitingCard.PRIVATE_LOGIN_CARD}"/>
+	</mx:Accordion>
+				
+</mx:Canvas>

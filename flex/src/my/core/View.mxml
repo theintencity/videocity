@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This is the main view and controller of the application. It includes other components to layout the view, as well
+as instantiates other controllers to connect the view and model. The data model (User) is supplied by the 
+main application.
+
+A developer wanting to understand the design of this software, should start looking at the code from this file.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:core="my.core.*" xmlns:pages="my.core.pages.*"
+	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import my.core.User;
+			import my.controls.PostIt;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model supplied by the application when using this component.
+			 */
+			public var user:User;
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			/**
+			 * The method shows a status message in this view using the PostIt component.
+			 * 
+			 * @param msg The text/HTML string to be displayed in the status message.
+			 */
+			public function postIt(msg:String):void
+			{
+				trace("postIt msg=" + msg);
+				PostIt.show(msg, this);
+			}
+			
+
+		]]>
+	</mx:Script>
+	
+	<!--
+	The main controller receives events from various user interface elements, and updates model or view
+	accordingly. For instance, it gets events from menu click on the ControlBar.
+	-->
+	<core:Controller id="control" user="{user}" view="{this}"/>
+	
+	<!--
+	The script controller controls the script, playlist and streams in a room.
+	-->
+	<core:RoomController id="scriptController" user="{user}" main="{this}" controller="{control}"/>
+
+	<!--
+	The view contains several components. There is a main window area which covers most of the of the view.
+	This main area is actually a sliding-window which allows multiple pages to be installed dynamically in this
+	window. The lower 20px bar is the control bar with various buttons. The state of the buttons change based on
+	the current state of this view or model (user). The control bar also includes a menu which controls the
+	model further. Finally there is a PostIt display which can be launched any time to notify of some event.
+	-->
+	
+	<containers:SlidingWindow id="win" styleName="windowStyle" width="100%" height="{this.height-controlBar.height}"
+		direction="horizontal" numColumns="3" visibleCount="1" allowDrag="true" 
+		selectedIndex="{user.selectedIndex}" selectedChange="user.selectedIndex=win.selectedIndex">
+
+		<pages:IntroPage   id="introPage"  controller="{control}" user="{user}" parentExpand="{this}"/>
+		<pages:CreatePage  id="createPage" controller="{control}" user="{user}"/>
+		<!-- These RoomPage pages are added dynamically by controller.
+		<pages:TargetPage  id="targetPage" controller="{control}" user="{user}"/>
+		<pages:RoomPage    id="myRoomPage" name="myRoomPage" controller="{control}" user="{user}" room="{user.myroom}"/>
+		-->
+		
+	</containers:SlidingWindow>
+	
+	<mx:Canvas width="100%" height="20" bottom="0" backgroundColor="#b7b8b9"/>
+	
+	<core:ControlBar id="controlBar" user="{user}" bottom="0"/>
+	
+</mx:Canvas>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The introduction page is the first page displayed for the application when the user is not logged in and
+is not visiting another person's video page. This page contains links to play introductory help videos 
+describing the purpose of the application as well as links to most common tasks in the application such as
+creating a new video room, joining an exiting room and logging in to your room.
+-->
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+	name="introPage" styleName="introBox"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			
+			import my.core.Controller;
+			import my.core.User;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The controller which is used by this view to update the underlying model or perform some
+			 * actions.
+			 */
+			public var controller:Controller;
+			
+			[Bindable]
+			/**
+			 * The associated user object representing the local user.
+			 */
+			public var user:User;
+			
+			[Bindable]
+			/**
+			 * The application can set the parentExpand property so that the introductory videos are played
+			 * in this UI component.
+			 */
+			public var parentExpand:UIComponent;
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas width="220" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Label text="What is this?" styleName="large" x="30" y="5"/>
+		<video:PlayVideo width="120" height="90" x="40" y="25" parentExpand="{parentExpand}"
+			label="{_('what is the Internet video city?')}" 
+			source="{user.HELP_INTRO_URL}" textsource="{user.HELP_INTRO_URL + '.txt'}"/>
+
+		<mx:Label text="Why Sign-up?" styleName="large" x="30" y="120"/>
+		<video:PlayVideo width="120" height="90" x="40" y="140" parentExpand="{parentExpand}"
+			label="{_('why should I sign-up?')}" 
+			source="{user.HELP_SIGNUP_URL}" textsource="{user.HELP_SIGNUP_URL + '.txt'}"/>
+	</mx:Canvas>
+	
+	<mx:VBox width="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="0">
+		<mx:VBox styleName="roundedBox" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="10">
+			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
+				click="controller.createRoomHandler()">
+				<mx:Label text="{_('Create a new video room')}" styleName="regular" paddingLeft="-20"/>
+				<mx:Label text="{_('enter email and name') + ' &gt;&gt;'}" styleName="small"/>
+			</mx:VBox>
+	
+			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
+				click="controller.uploadCard()">
+				<mx:Label text="{_('Join an existing room')}" styleName="regular" paddingLeft="-20"/>
+				<mx:Label text="{_('upload Internet visiting card') + ' &gt;&gt;'}" styleName="small"/>
+			</mx:VBox>
+				
+			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
+				click="controller.uploadCard()">
+				<mx:Label text="{user.isGuest ? _('Login to your room') : _('Login as another user')}" styleName="regular" paddingLeft="-20"/>
+				<mx:Label text="{_('upload private login card') + ' &gt;&gt;'}" styleName="small"/>
+			</mx:VBox>
+		</mx:VBox>
+		
+		<mx:Spacer height="10"/>
+		
+		<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
+			click="controller.gotoGuestRoom()" visible="{!user.isGuest}">
+			<mx:Label text="{_('Welcome {0}', user.name)}" styleName="regular" paddingLeft="20"/>
+			<mx:Label text="{_('decorate your public guest room') + ' &gt;&gt;'}" styleName="small" paddingLeft="40"/>
+		</mx:VBox>
+	</mx:VBox>
+</mx:HBox>

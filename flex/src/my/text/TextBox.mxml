@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+The TextBox component is used for text chat in a room.
+It attaches itself to the room, and listens for message event to update its view. It plays a beep sound
+when an incoming message is received. The message history is vertically scrollable. The name of the sender
+is displayed before the message. The time of the message is displayed periodically.
+-->
+
+<containers:BaseBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:controls="my.controls.*" 
+	name="text" width="100%" height="100%">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.events.TimerEvent;
+			import flash.utils.Timer;
+	
+			import mx.events.DynamicEvent;
+			import mx.controls.Text;
+			import mx.controls.TextInput;
+			import mx.core.SoundAsset;
+			import mx.collections.IList;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import my.core.Constant;
+			import my.core.Util;
+			import my.core.Room;
+			import my.controls.FullScreen;
+			
+			//--------------------------------------
+			// CLASS CONSTANTS
+			//--------------------------------------
+			
+			/**
+			 * Maximum size of the text history to display in the box. Default is last 50 messages.
+			 */
+	        private static const HISTORY_LENGTH:uint = 50;
+	        
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+	        // associated room object for this text chat 
+			private var _room:Room;
+			
+			// timer to print the last message time
+			private var _lastTimer:Timer;
+			
+			// last message time
+			private var _lastTime:Date;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Associated room object in which this text box is associated.
+			 */
+			public function get room():Room
+			{
+				return _room;
+			}
+			public function set room(value:Room):void
+			{
+				var oldValue:Room = _room;
+				_room = value;
+				if (oldValue != value) {
+					if (oldValue != null) {
+						oldValue.removeEventListener(Constant.MESSAGE, messageHandler);
+					}
+					if (value != null) {
+						value.addEventListener(Constant.MESSAGE, messageHandler, false, 0, true);
+					}
+				}
+			}
+	    	
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+	
+	        /**
+	         * Send a text message from the local user in this room, and also update the history.
+	         */
+			public function send(text:String):void 
+			{
+				if (text.length > 0) {
+					// first send the text message.
+					room.send(text); 
+					
+					// clean up the text by removing any new lines first.
+					var display:String = text.replace(/[\r\n]/g, "");
+					addHistory(display, 'You', new Date(), 0x0090d0);
+				}
+	
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function messageHandler(event:DynamicEvent):void
+			{
+				addHistory(event.text, event.sender, event.time, 0x3c9900);
+				if (playing)
+					beep.play([this]);
+	        }
+	        
+	        private function addHistory(text:String, sender:String, time:Date, color:uint=0x00d090):void 
+	        {
+	        	var timeStr:String = Util.readableTime(time);
+	        	var htmlText:String = historyText.htmlText;
+	        	if (htmlText == '')
+	        		htmlText += '<font color="#808080">First message on ' + timeStr + '</font><br/>';
+	        	
+	        	if (sender != null)
+					htmlText += '<font color="#' + color.toString(16) + '">' + sender + '</font>: ' + text + '<br/>'
+				else
+					htmlText += '<font color="#808080">' + text + '</font><br/>';
+				
+				historyText.htmlText = htmlText;
+				historyText.validateNow();
+				callLater(adjustVerticalScroll);
+			
+				if (_lastTimer == null) {
+					_lastTimer = new Timer(60000, 1);
+					_lastTimer.addEventListener(TimerEvent.TIMER, lastTimerHandler, false, 0, true);
+				}	
+				
+				_lastTime = time;
+				if (_lastTimer.running) {
+					_lastTimer.stop();
+					_lastTimer.reset();
+					_lastTimer.start();
+				}
+				else {
+					_lastTimer.start();
+				}
+	        }
+	        
+	        private function lastTimerHandler(event:TimerEvent):void
+	        {
+	        	if (_lastTime != null)
+		        	historyText.htmlText += '<font color="#808080">Last message on ' + Util.readableTime(_lastTime) + '</font><br/>';
+		        _lastTime = null;
+	        }
+			
+			private function adjustVerticalScroll():void
+			{
+				historyText.verticalScrollPosition = historyText.maxVerticalScrollPosition;
+			}
+			
+	    	private function inputHandler(event:Event):void
+	    	{
+	    		var inputText:TextInput = event.currentTarget as TextInput;
+	    		if (inputText != null && inputText.text != '') {
+	    			var str:String = inputText.text;
+					inputText.text = '';
+					inputText.validateNow();
+					send(str);
+	    		}
+	    	}
+	    	
+	    	private function linkHandler(event:TextEvent):void
+	    	{
+	    		// user clicked on a link in history view
+	    		// TODO: implement this
+	    	}
+		]]>
+	</mx:Script>
+	
+	<!--
+	The view contains two parts: a TextArea for displaying the history and a TextInput to allow entering
+	text message. Additionally, a help text is displayed to prompt the user as to where he can type.
+	-->
+	
+	<mx:VBox styleName="chatHistoryBox" width="100%" height="100%"
+		alpha="1.0" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		mouseDown="event.stopPropagation()">
+		<mx:TextArea id="historyText" styleName="chatHistory" width="100%" height="100%"
+			htmlText="" verticalScrollPolicy="on" horizontalScrollPolicy="off" editable="false"
+			link="linkHandler(event)"/>
+		
+		<mx:TextInput styleName="chatInput" width="100%" height="20" enter="inputHandler(event)"
+			toolTip="{FullScreen.fullScreen ? _('Cannot enter text in full screen') : _('Type text and press enter to send')}"
+			rollOver="helpText.visible = false" click="helpText.visible = false"/>
+	</mx:VBox>
+	
+	<mx:Label id="helpText" text="{_('Type text here')}" color="#ffffff" bottom="0" left="5"
+		rollOver="helpText.visible = false" click="helpText.visible = false"/>
+	
+	<mx:SoundEffect id="beep" source="@Embed('resource/snap.mp3')" volumeFrom="0.1" volumeTo="0.1"/>
+	
+</containers:BaseBox>

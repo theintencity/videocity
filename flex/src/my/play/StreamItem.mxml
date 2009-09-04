@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:Metadata>
+		/**
+		 * Dispatched when the underlying Play object dispatches the Stop event.
+		 */
+		[Event(name="playComplete", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			import mx.events.ResizeEvent;
+			
+			import my.core.Constant;
+			import my.controls.Prompt;
+			import my.video.Play;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _video:Video;
+			private var _data:Play;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data property represents a Play object that stores the streaming state.
+			 */
+			override public function get data():Object
+			{
+				return _data;
+			}
+			override public function set data(value:Object):void
+			{
+				if (value != null && value is Play)
+					_data = value as Play;
+			}
+			
+			public function get video():Video
+			{
+				return _video;
+			}
+			public function set video(value:Video):void
+			{
+				var oldValue:Video = _video;
+				_video = value;
+				if (value != oldValue) {
+					var index:int = oldValue != null ? this.getChildIndex(oldValue.parent) : 0;
+					if (oldValue != null)
+						this.removeChild(oldValue.parent);
+					if (value != null) {
+						var parent:UIComponent = new UIComponent();
+						parent.addChild(value);
+						parent.percentWidth = parent.percentHeight = 100;
+						resizeVideoHandler(null);
+						parent.addEventListener(ResizeEvent.RESIZE, resizeVideoHandler, false, 0, true);
+						this.addChildAt(parent, index);
+					}
+				}
+			}
+			
+			//--------------------------------------
+			// PUBLIC METHODS
+			//--------------------------------------
+			
+			public function play():void
+			{
+				if (_data != null) {
+					_data.playing = true;
+					
+					this.video = new Video();
+					_data.video = this.video;
+					_data.addEventListener("stop", playEventHandler, false, 0, true);
+					_data.open();
+				}
+			}
+			
+			public function pause():void
+			{
+				if (_data != null) {
+					_data.playing = false;
+					_data.removeEventListener("stop", playEventHandler);
+					_data.close();
+					if (this.video != null) {
+						this.video.clear();
+						this.video = null;
+					}
+				}
+			}
+			
+			public function close():void
+			{
+				pause();
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			
+			private function playEventHandler(event:Event):void
+			{
+				if (event.type == "stop") {
+					pause();
+					dispatchEvent(new Event(Constant.PLAY_COMPLETE));
+				}
+			}
+			
+			private function resizeVideoHandler(event:ResizeEvent):void
+			{
+				if (_video != null) {
+					_video.width = _video.parent.width;
+					_video.height = _video.parent.height;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+</mx:Canvas>

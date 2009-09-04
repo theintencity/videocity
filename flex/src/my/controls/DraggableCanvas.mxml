@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+
+<!--
+This component extends Canvas to make it draggable. It also disables any mouse events to children and scrolling
+of this component. The dragging is enabled only if draggable property is set.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	mouseChildren="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	mouseDown="if (draggable) this.startDrag()" mouseUp="if (draggable) this.stopDrag()">
+	
+	<mx:Script>
+		<![CDATA[
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * Whether to enable dragging or not? Default is false.
+			 */
+			public var draggable:Boolean = false;
+		]]>
+	</mx:Script>
+</mx:Canvas>
