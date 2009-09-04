@@ -1,11 +1,13 @@
 <page>
 	<show id="a1a2a3a4" description="my favorite bollywood songs">
-		<text>This play list contains couple of bollywood songs from youtube. Click on the play button below to start playing the songs.</text>
+		<text description="Introduction">This play list contains a play list of my favorite bollywood songs. Click on the play button below to start playing the songs.</text>
+		<video src="http://www.youtube.com/watch?v=TczKK_zJVBg" description="chehra kya dekhte ho" />
 		<video src="http://www.youtube.com/watch?v=Zpvkr3OeT_Q" description="ek baar de de mujhe chance soniye" />
 		<video src="http://www.youtube.com/watch?v=bAdpTqcQcFM" description="jag sara jag sara nikhar gaya" />
+		<video src="http://www.youtube.com/watch?v=HkWDGvBU0ZQ" description="is pyar se meri taraf" />
 	</show>
 	<show id="b1b2b3b4" description="my presentation on VoIP">
-		<text interval="15000">Click on the play or forward button below. First you will see my photo, then you will my slides on Introduction to VoIP using SIP. Click on the layout button below multiple times to see various views of this play list.</text>
+		<text interval="15000" description="Introduction">Click on the play or forward button below. First you will see my photo, then you will my slides on Introduction to VoIP using SIP. Click on the layout button below multiple times to see various views of this play list.</text>
 
 		<image src="http://www.cs.columbia.edu/~kns10/images/person/face.jpg" description="Kundan Singh" />
 

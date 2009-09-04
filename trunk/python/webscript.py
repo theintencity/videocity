@@ -113,6 +113,9 @@ def _makePath(url, filename, randomize=False, subdir=''):
     path = 'www/users' + u.path + '/' + (subdir + '/' if subdir else '') + (str(random.randint(10000,99999)) + '-' if randomize else '') + filename
     url0 = urlparse.urlunparse((u.scheme, u.netloc, path, '', '', ''))
     return (url0, path)
+
+def _makeDir(path):
+    if not os.path.exists(os.path.dirname(path)): os.makedirs(os.path.dirname(path), 0755)
     
 def upload(query):
     if filter(lambda x: x not in query, ('target', 'filedata')): raise Exception((400, 'Must supply target and filedata to upload'))
@@ -132,7 +135,7 @@ def upload(query):
         file['src'] = url
         ext = os.path.splitext(name)[1].lower(); file.tag = 'video' if ext == '.flv' else 'image' if ext[1:] in ('jpg','png','jpeg','gif','swf') else file.tag
         if _debug: print 'file=', name, 'content=', len(content)
-        if not os.path.exists(os.path.dirname(path)): os.makedirs(os.path.dirname(path), 0755)
+        _makeDir(path)
         fp = open(path, 'w'); fp.write(content); fp.close()
     url, path = _makePath(url=card.url, filename=target)
     try: fp = open(path); old = XML(fp.read()); fp.close()
@@ -178,7 +181,7 @@ def access(query):
         url, path = _makePath(url=room, filename='visitingCard.png')
         if _debug: print 'changing', room, 'to', type, 'file', path
         try:
-            if not os.path.exists(os.path.dirname(path)): os.makedirs(os.path.dirname(path), 0755)
+            _makeDir(path)
             if type == 'public': file = open(path, "w"); file.write(visitingcard.data); file.close();
             else: os.remove(path)
         except: 
@@ -186,6 +189,25 @@ def access(query):
         return _result(code='success')
     except Exception, e: traceback and traceback.print_exc(); return _error(e)
 
+def convert(query):
+    try: 
+        if filter(lambda x: x not in query, ('filename', 'filedata', 'visitingcard')): raise Exception((400, 'Must supply filename, filedata and visitingcard to convert'))
+        filename, filedata, visitingcard = map(lambda x: query.get(x)[0], ('filename', 'filedata', 'visitingcard'))
+        filedata, visitingcard = b64decode(filedata), vcard.Card(b64decode(visitingcard))
+        url, path = _makePath(url=visitingcard.url, filename=filename[7:], randomize=True, subdir='public')
+        if _debug: print 'convert', filename, url, path
+        _makeDir(path)
+        file = open(path, 'w'); file.write(filedata); file.close();
+        froot, ext = map(lambda x: x.lower(), os.path.splitext(path))
+        if ext != '.flv': # need to actually convert to the flv format
+            newpath = froot + '.flv'
+            # TODO: This is a blocking operation. Make sure we use multi-threading or multi-processing
+            e = os.system('ffmpeg -y -i %s -ar 22050 -ab 96k -f flv %s'%(path, newpath))
+            if os.path.exists(newpath): # successfully converted to FLV
+                url = os.path.splitext(url)[0] + '.flv'
+        return _result(core='success', url=url)
+    except Exception, e: traceback and traceback.print_exc(); return _error(e)
+    
 def delete(path): # this is actually invoked in a different thread by videocity module.
     try: 
         file, dir = 'www/users/%s/active.xml'%(path), 'www/users/%s/active'%(path)
@@ -194,5 +216,5 @@ def delete(path): # this is actually invoked in a different thread by videocity 
     except: print sys.exc_info()
     
     
-scripts = dict(create=create, login=login, verify=verify, upload=upload, trash=trash, access=access)
+scripts = dict(create=create, login=login, verify=verify, upload=upload, trash=trash, access=access, convert=convert)
 

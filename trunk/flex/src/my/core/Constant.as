@@ -43,6 +43,7 @@ package my.core
 		public static const SHARE:String       = "share";
 		public static const SEND:String        = "send";
 		public static const UPLOAD:String      = "upload";
+		public static const CONVERT:String     = "convert";
 
 		public static const ACCESS:String  = "access";
 		

@@ -20,6 +20,8 @@ package my.play
 	
 	import my.core.User;
 	import my.core.Util;
+	import my.core.Constant;
+	import my.controls.Prompt;
 	
 	/**
 	 * Represents a play-list that is used as the data model for PlayListBox. Each item in this list is
@@ -106,16 +108,23 @@ package my.play
 					value.@id = Util.createId();
 					
 				var index:int = 0;
+				var context:Object;
 				for each (var xml:XML in value.children()) {
 					if (xml.localName() == PlayItem.SHOW) {
-						var context:Object = {index: index};
-						user.httpRequest(user.getProxiedURL(xml.@src), "GET", "e4x", null, context, slideHandler);
+						context = {index: index};
+						user.httpRequest(user.getProxiedURL(xml.@src), "GET", "e4x", null, context, showHandler);
+					}
+					else if (xml.localName() == PlayItem.FILE && PlayItem.getFileType(xml.@src) == PlayItem.VIDEO 
+						&& index < _content.length && _content[index] is FileReference) {
+						context = {index: index, xml: xml};
+						var params:Object = {filename: String(xml.@src), filedata: Util.base64encode(_content[index].data), visitingcard: Util.base64encode(user.selected.card.rawData)};
+						user.httpSend(Constant.CONVERT, params, context, videoHandler);
 					}
 					else {
 						var item:PlayItem = new PlayItem(xml, _user, index < _content.length ? _content[index] : null);
 						this.addItem(item);
-						index = index + 1;
 					}
+					index = index + 1;
 				}
 			}
 			_updatingData = false;
@@ -265,7 +274,7 @@ package my.play
 		 * TODO: note that this is not re-entrant. In particular if two show items are in progress, then 
 		 * it won't merge the resolved items correctly.
 		 */
-		private function slideHandler(context:Object, result:XML):void
+		private function showHandler(context:Object, result:XML):void
 		{
 			var index:int = context.index;
 			
@@ -274,6 +283,25 @@ package my.play
 				
 			if (selectedIndex == -1 && this.length > 0)
 				selectedIndex = 0;
+		}
+		
+		/*
+		 * When the convert RPC returns, we update the XML description with the resolved URL of the video.
+		 */
+		private function videoHandler(context:Object, result:XML):void
+		{
+			var index:int = context.index;
+			var xml:XML = context.xml;
+			if (result.url != undefined) {
+				xml.setLocalName(PlayItem.VIDEO);
+				xml.@src = String(result.url);
+				this.addItemAt(new PlayItem(xml, _user), index < this.length ? index : this.length);
+				if (selectedIndex == -1 && this.length > 0)
+					selectedIndex = 0;
+			}
+			else {
+				Prompt.show("Cannot convert or upload your video file " + String(xml.@src), "Error in video upload");
+			}
 		}
 	}
 }
