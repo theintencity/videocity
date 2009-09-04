@@ -73,7 +73,7 @@ package my.core
 		private static var cardTypes:FileFilter = new FileFilter("Card (*.png)", "*.png");
 		
 		// file extensions for uploading local files.
-		private static var fileTypes:FileFilter = new FileFilter("Files (*.png, *.jpg, *.jpeg, *.gif, *.flv)", "*.png;*.jpg;*.jpeg;*.gif;*.flv");
+		private static var fileTypes:FileFilter = new FileFilter("Files (*.png, *.jpg, *.jpeg, *.gif, *.flv, *.avi, *.mpg, *.mpeg)", "*.png;*.jpg;*.jpeg;*.gif;*.flv;*.avi;*.mpg;*.mpeg");
 		
 		//--------------------------------------
 		// PRIVATE VARIABLES

@@ -115,27 +115,6 @@ package my.play
 		}
 
 		//--------------------------------------
-		// PRIVATE METHODS
-		//--------------------------------------
-		
-		/**
-		 * Get the file type such as "file", "image" or "video" using the file extension of the given
-		 * file name. Only mpg, mpeg and flv video file extensions and jpg, jpeg, png and gif image
-		 * file extensions are recognized.
-		 */
-		private function getFileType(name:String):String
-		{
-			var type:String = FILE;
-			var index:int = name.lastIndexOf('.');
-			var ext:String = (index >= 0 ? name.substr(index+1).toLowerCase() : '');
-			if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif')
-				type = IMAGE;
-			else if (ext == 'mpg' || ext == 'mpeg' || ext == 'flv')
-				type = VIDEO;
-			return type;
-		}
-		
-		//--------------------------------------
 		// STATIC METHODS
 		//--------------------------------------
 		
@@ -145,7 +124,7 @@ package my.play
 		 */
 		public static function describeFile(file:FileReference):XML
 		{
-			return XML('<file src="file://' + file.name + '" description="' + (file.data == null ? 'Cannot load: ' : '') + file.name + '" />');
+			return XML('<file src="file://' + file.name.toLowerCase() + '" description="' + (file.data == null ? 'Cannot load: ' : '') + file.name + '" />');
 		}
 		
 		/**
@@ -171,6 +150,23 @@ package my.play
 				return XML('<show description="Recorded video"><stream src="' + url + '" id="' + id + '" description="Recorded' + (name != null ? ' by ' + name : '') + '"/></show>');
 			else
 				return XML('<show/');
+		}
+
+		/**
+		 * Get the file type such as "file", "image" or "video" using the file extension of the given
+		 * file name. Only mpg, mpeg and flv video file extensions and jpg, jpeg, png and gif image
+		 * file extensions are recognized.
+		 */
+		public static function getFileType(name:String):String
+		{
+			var type:String = FILE;
+			var index:int = name.lastIndexOf('.');
+			var ext:String = (index >= 0 ? name.substr(index+1).toLowerCase() : '');
+			if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif')
+				type = IMAGE;
+			else if (ext == 'avi' || ext == 'mpg' || ext == 'mpeg' || ext == 'flv')
+				type = VIDEO;
+			return type;
 		}
 	}
 }
