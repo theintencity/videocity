@@ -3,7 +3,7 @@
 
 =Introduction=
 
-This article helps to get started with software. This is "work in progress" and we recommend that you use SVN to checkout the source code to get started. The videocity server side of the project has two other dependencies: p2p-sip and rtmplite. The server side runs in Python 2.5 and client is ActionScript 3.0. The client requires a browser with Flash Player 10.0.22 or higher installed. For getting started, we will use the same machine for both client and server.
+This article helps you to get started with the {{{videocity}}} software. This is "work in progress" and we recommend that you use SVN to checkout the source code to get started. The {{{videocity}}} server side of the project has two other dependencies: p2p-sip and rtmplite. The server side runs in Python 2.5 and client is ActionScript 3.0. The client requires a browser with Flash Player 10.0.22 or higher installed. For getting started, we will use the same machine for both client and server.
 
 =Install Python=
 
