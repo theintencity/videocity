@@ -23,7 +23,7 @@ First we create a {{{project}} directory in your home directory. Then checkout t
 bash$ mkdir ~/project
 bash$ cd ~/project
 bash$ svn checkout http://p2p-sip.googlecode.com/svn/trunk/ p2p-sip
-bash$ svn checkout http://rtmplite.googlecode.com/svn/trunk/ videocity
+bash$ svn checkout http://rtmplite.googlecode.com/svn/trunk/ rtmplite
 bash$ svn checkout http://videocity.googlecode.com/svn/trunk/ videocity
 }}}
 
