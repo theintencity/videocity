@@ -11,7 +11,7 @@ Each play list itself is an XML element {{{<show/>}}}. In the room view, when yo
 =Description=
 
 An example to understand the format is best to start with. An example "index.xml" file describing a room is shown below.
-{{{<page>
+{{{&lt;page&gt;
   <show id="a73be56d" description="a song">
     <text description="brief description">Text describing this play list</text>
     <video src="http://www.youtube.com/watch?v=TczKK_zJVBg" description="chehra" />
@@ -70,6 +70,4 @@ The implementation stores the content of the file along with the play item for l
 =Conclusion=
 
 We have described the format of a room, mail box and play list. These are still "work-in-progress" and new ideas are welcome. For example, we would like to keep the real-time participant video information as well in the "active.xml" file. Perhaps an application or game sharing can be built by allowing third-party play items in the play list. For example, {{{<app src="..." plugin="..."/>}}} can represent a shared application or shared flash game, where the plugin attribute gives the location of the application or SWF file that can be used as a child in the play list to actually display the application or game interface, and the src attribute gives the location of the context or state of the game. For example, all users playing from location "http://gameserver/room5" get connected to the same game context or state, and can play the multi-player game or use the multi-party application.
-
-
 
