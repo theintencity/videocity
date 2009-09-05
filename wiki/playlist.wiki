@@ -1,4 +1,4 @@
-#summary Description of room and play list specifications using XML
+#summary XML specification of room and play list
 #labels Phase-Implementation
 
 = Introduction =
