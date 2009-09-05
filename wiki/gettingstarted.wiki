@@ -53,7 +53,9 @@ C:\\projects\\videocity> /Python25/python.exe python/videocity.py
 
 =Do a quick smoke test=
 
-Once your server is running, you can do a quick test by launching your web browser such as FireFox (Unix, MacOS or Windows), Safari (MacOS) or Internet Explorer (Windows) application. Point your browser to open URL "http://localhost:5080". This will open the main page of the {{{videocity}}} application and has embedded Flash application for the client side of the software. 
+Once your server is running, you can do a quick test by launching your web browser such as FireFox (Unix, MacOS or Windows), Safari (MacOS) or Internet Explorer (Windows) application. You will also need Flash Player 10.0.22 or higher installed in your browser. If applicable, please install the Flash Player from [http://get.adobe.com/flashplayer/ http://get.adobe.com/flashplayer/] first.
+
+Open your browser and point your browser to open URL "http://localhost:5080". This will open the main page of the {{{videocity}}} application and has embedded Flash application for the client side of the software. 
 
 You can follow the help on that page to sign up, create your room and soft-cards, and enter your room. Alternatively, you can go to a pre-created room page at URL "http://localhost:5080/kundansingh_99@yahoo.com". You can see the server logs on the server console to see the HTTP requests made by client. 
 
