@@ -53,7 +53,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             ext = os.path.splitext(s.path)[1]
             if ext in _supported:
                 fname = os.path.join(os.curdir, s.path)
-                f = open(fname)
+                f = open(fname, 'rb')
                 s.send_response(200)
                 s.send_header('Content-Type', _supported[ext])
                 s.end_headers()
