@@ -29,7 +29,7 @@ bash$ svn checkout http://videocity.googlecode.com/svn/trunk/ videocity
 
 ===On Windows XP or Vista===
 
-Please install an SVN client such as [http://tortoisesvn.net/ TortoiseSVN] for Windows. Once installed, create a project directory such as {{{c:\\project}}}, and checkout these three projects in the directory {{{http://p2p-sip.googlecode.com/svn/trunk/}}}, {{{http://rtmplite.googlecode.com/svn/trunk/}}}, {{{http://videocity.googlecode.com/svn/trunk/}}}. If you are using TortoiseSVN, open windows explorer, and go to {{{c:\\project}}} directory. Then right click and do "SVN Checkout". Specify the URL say {{{http://p2p-sip.googlecode.com/svn/trunk/}}} and checkout directory as {{{c:\\project\\p2p-sip}}}, and click on "OK". Then repeat the procedure for other two URLs specified above, with respective directory names.
+Please install an SVN client such as [http://tortoisesvn.net/ TortoiseSVN] for Windows. Once installed, create a project directory such as {{{c:\project}}}, and checkout these three projects in the directory {{{http://p2p-sip.googlecode.com/svn/trunk/}}}, {{{http://rtmplite.googlecode.com/svn/trunk/}}}, {{{http://videocity.googlecode.com/svn/trunk/}}}. If you are using TortoiseSVN, open windows explorer, and go to {{{c:\project}}} directory. Then right click and do "SVN Checkout". Specify the URL say {{{http://p2p-sip.googlecode.com/svn/trunk/}}} and checkout directory as {{{c:\project\p2p-sip}}}, and click on "OK". Then repeat the procedure for other two URLs specified above, with respective directory names.
 
 =Run the server=
 
@@ -46,9 +46,9 @@ bash$ python python/videocity.py
 ===On Windows XP or Vista===
 
 {{{
-C:\\projects> cd videocity
-C:\\projects\\videocity> set PYTHONPATH=../p2p-sip/src;../rtmplite;.
-C:\\projects\\videocity> c:\\Python25\\python.exe python\\videocity.py
+C:\projects> cd videocity
+C:\projects\videocity> set PYTHONPATH=..\p2p-sip\src;..\rtmplite;.
+C:\projects\videocity> c:\Python25\python.exe python\videocity.py
 }}}
 
 =Do a quick smoke test=
