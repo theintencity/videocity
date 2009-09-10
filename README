@@ -9,6 +9,7 @@ INSTALL
 -------
 
 On Windows (XP or Vista):
+------------------------
 
 Extract the supplied .zip file.
 
@@ -29,6 +30,21 @@ To close and uninstall, open your task manager (using Ctrl-Alt-Del),
 identify the videocity.exe process, and kill that process.
 Then delete the .zip file your downloaded as well as extracted
 directory structure.
+
+On Mac OS X:
+-----------
+
+Download and run the given .app file.
+
+Once it runs, open a browser and visit the following URLs
+
+http://localhost:5080
+http://localhost:5080/kundansingh_99@yahoo.com
+
+There is no uninstaller for videocity.app
+
+To close, right click on the videocity process icon in the task bar, 
+and perform a "Force Quit". Then delete the downloaded .app file.
 
 --
 Mamta Singh
