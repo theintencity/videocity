@@ -24,7 +24,7 @@ def recurse(actual, pseudo):
         result += recurse(path, pseudo + '/' + name)
     return result
 
-DATA_FILES = [('', ['../LICENSING'])]
+DATA_FILES = [('', ['../LICENSING', '../README'])]
 DATA_FILES += recurse('../data', 'data') + recurse('../www', 'www')
 
 print 'data-files are\n' + '\n'.join(map(lambda x: str(x[0]) + ': ' + str(x[1]), DATA_FILES))
