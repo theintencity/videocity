@@ -1,0 +1,36 @@
+The Internet Video City project
+-------------------------------
+
+Visit http://code.google.com/p/videocity/ for details on how to install,
+and get started with the project.
+
+
+INSTALL
+-------
+
+On Windows (XP or Vista):
+
+Extract the supplied .zip file.
+
+It will create a new directory containing videocity.exe executable.
+
+Double click on the videocity.exe file or run it from command prompt.
+The executable must be run from the same directory where the executable
+exists.
+
+Then open a browser and visit the following URLs
+
+http://localhost:5080
+http://localhost:5080/kundansingh_99@yahoo.com
+
+There is no uninstaller for videocity.exe
+
+To close and uninstall, open your task manager (using Ctrl-Alt-Del),
+identify the videocity.exe process, and kill that process.
+Then delete the .zip file your downloaded as well as extracted
+directory structure.
+
+--
+Mamta Singh
+mamtasingh05@gmail.com
+Updated: 9/9/9
