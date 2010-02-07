@@ -15,7 +15,7 @@ The component also periodically displays the current FPS (frames-per-second) of 
 <video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
 	label="You" name="local"
 	add="addHandler(event)" remove="removeHandler(event)"
-	rollOver="hover=true" rollOut="hover=false" xmlns:controls="my.controls.*">
+	xmlns:controls="my.controls.*">
 	
 	<mx:Script>
 		<![CDATA[
@@ -29,12 +29,6 @@ The component also periodically displays the current FPS (frames-per-second) of 
 			
 			private var _user:User = null;
 			private var ratio:Number = 4/3;
-			
-			[Bindable]
-			/*
-			 * whether user has mouse over this.
-			 */
-			private var hover:Boolean = false;
 			
 			// the timer that is used to periodically display the video properties.
 			private var timer:Timer;

@@ -17,6 +17,7 @@ An AIR-based application will have a different main file similar to this.
 	
   	<mx:Script>
 		<![CDATA[
+			import mx.events.ResizeEvent;
 			import my.settings.LoginSettings;
 			import my.controls.FullScreen;
 			import my.core.Constant;
@@ -75,6 +76,7 @@ An AIR-based application will have a different main file similar to this.
 				installJavaScriptAPI();
 				installContextMenu();
 				activateDevice();
+				addEventListener(ResizeEvent.RESIZE, resizeHandler, false, 1000, true);
 			}
 			
 			/*
@@ -152,9 +154,26 @@ An AIR-based application will have a different main file similar to this.
 			{
 				FullScreen.toggleFullScreen();
 			}
+			
+			/*
+			 * When application is resized to full screen, resize main view only if not stretched.
+			 */
+			private function resizeHandler(event:Event):void
+			{
+				if (stage.displayState == "fullScreen") {
+					if (stage.fullScreenSourceRect != null) {
+						main.width = main.width+1;
+						main.height = main.height+1;
+					}
+				}
+				else {
+					main.percentWidth = 100;
+					main.percentHeight = 100;
+				}
+			}
 		]]>
 	</mx:Script>
 	
-    <core:View id="main" user="{user}"/>
+    <core:View id="main" name="main" user="{user}"/>
     
 </mx:Application>

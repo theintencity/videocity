@@ -8,24 +8,22 @@ package my.core
 	
 	import mx.containers.Canvas;
 	import mx.core.Application;
+	import mx.effects.AnimateProperty;
+	import mx.effects.Parallel;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	import mx.events.FlexEvent;
 	import mx.events.PropertyChangeEvent;
 	
-	import my.core.User;
-	import my.core.View;
-	import my.controls.Prompt;
-	import my.controls.PauseCanvas;
-	import my.containers.ContainerBox;
 	import my.containers.BaseBox;
-//	import my.phone.PhoneBox;
-	import my.video.Play;
-	import my.video.RecordVideoBox;
-	import my.video.VideoBox;
-	import my.text.TextBox;
-	import my.play.PlayListBox;
+	import my.containers.ContainerBox;
+	import my.controls.PauseCanvas;
+	import my.controls.Prompt;
 	import my.play.PlayItem;
 	import my.play.PlayList;
+	import my.play.PlayListBox;
+	import my.video.RecordVideoBox;
+	import my.video.VideoBox;
 	
 	/**
 	 * The controller for the ContainerBox object. It should handle adding and removing from the container.
@@ -39,7 +37,9 @@ package my.core
 		private var _user:User;
 		private var _box:ContainerBox;
 		private var _controller:Controller;
+		private var _fullBox:BaseBox = null;
 		
+
 		//--------------------------------------
 		// CONSTRUCTOR
 		//--------------------------------------
@@ -167,9 +167,51 @@ package my.core
 				box.removeChild(event.currentTarget as DisplayObject);
 		}
 		
+		// suppress the add and remove events from the child when the child is moved from one place to another.
+		private function suppressEvent(event:Event):void
+		{
+			event.stopImmediatePropagation();
+		}
+		
 		private function maximizeHandler(event:Event):void
 		{
-			box.maximized = (box.maximized == event.target ? null : event.target as DisplayObject);
+			if (box.maximized == event.currentTarget) {
+				_fullBox = event.currentTarget as BaseBox
+				box.maximized = null;
+				_fullBox.addEventListener(FlexEvent.ADD, suppressEvent, false, 10000, true);
+				_fullBox.addEventListener(FlexEvent.REMOVE, suppressEvent, false, 10000, true);
+				_box.animateOnResize = false;
+				_box.removeChild(_fullBox);
+				_box.animateOnResize = true;
+				Application.application.addChild(_fullBox);
+				Application.application.validateNow();
+				_fullBox.removeEventListener(FlexEvent.ADD, suppressEvent);
+				_fullBox.removeEventListener(FlexEvent.REMOVE, suppressEvent);
+				_fullBox.addEventListener(BaseBox.MAXIMIZE, maximizeHandler, false, 0, true);
+				_fullBox.styleName = "baseBoxFull";
+				_fullBox.autoHide = true;
+				_fullBox.width = Application.application.width;
+				_fullBox.height = Application.application.height;
+			}
+			else if (_fullBox != null) {
+				//fullBox.removeEventListener(BaseBox.MAXIMIZE, maximizeHandler);
+				_fullBox.addEventListener(FlexEvent.ADD, suppressEvent, false, 10000, true);
+				_fullBox.addEventListener(FlexEvent.REMOVE, suppressEvent, false, 10000, true);
+				Application.application.removeChild(_fullBox);
+				Application.application.validateNow();
+				_fullBox.removeEventListener(FlexEvent.ADD, suppressEvent);
+				_fullBox.removeEventListener(FlexEvent.REMOVE, suppressEvent);
+				_fullBox.autoHide = false;
+				_fullBox.styleName = "baseBox";
+				_box.animateOnResize = false;
+				_box.addChild(_fullBox);
+				_box.animateOnResize = true;
+				_fullBox = null;
+			}
+			else {
+				box.maximized = event.currentTarget as DisplayObject;
+			}
+			//box.maximized = (box.maximized == event.target ? null : event.target as DisplayObject);
 		}
 		
 		private function dockHandler(event:Event):void

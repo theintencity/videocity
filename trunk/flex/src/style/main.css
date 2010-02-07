@@ -189,6 +189,15 @@ ToolTip {
 	border-color: #808080;
 }
 
+.baseBoxFull {
+	background-color: #000000;
+	border-style: solid;
+	border-thickness: 0;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
 
 .roomTitle {
 	border-style: solid;

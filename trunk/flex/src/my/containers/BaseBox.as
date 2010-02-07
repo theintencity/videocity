@@ -4,6 +4,8 @@ package my.containers
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Button;
@@ -51,7 +53,7 @@ package my.containers
 		/*
 		 * Whether the user has mouse rolled over this box or not? The top-bar automatically hides on roll-out.
 		 */
-		private var hover:Boolean = false;
+		protected var hover:Boolean = false;
 		
 		/*
 		 * In the docked mode, there is a drag button on the bottom right corner which is used to re-size the
@@ -103,6 +105,16 @@ package my.containers
 		 * Whether the current component is in playing or paused state.
 		 */
 		private var _playing:Boolean = true;
+		
+		/*
+		 * Whether to auto-hide the status after a timeout or not?
+		 */
+		private var _autoHide:Boolean = false;
+		
+		/*
+		 * Timeout for auto-hide of the status bar.
+		 */
+		private var _autoHideTimer:Timer = null;
 		
 		//--------------------------------------
 		// CONSTRUCTOR
@@ -228,6 +240,29 @@ package my.containers
 			}
 		}
 		
+		/**
+		 * Whether this component auto-hides the status bar or not?
+		 */
+		public function get autoHide():Boolean
+		{
+			return _autoHide;
+		}
+		public function set autoHide(value:Boolean):void
+		{
+			var oldValue:Boolean = _autoHide;
+			_autoHide = value;
+			if (value != oldValue) {
+				if (value) {
+					this.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler, false, 0, true);
+					startAutoHideTimer();
+				}
+				else {
+					this.removeEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
+					stopAutoHideTimer();
+				}
+			}
+		}
+		
 		//--------------------------------------
 		// PUBLIC METHODS
 		//--------------------------------------
@@ -297,6 +332,10 @@ package my.containers
 				_titleBar.y = 0;
 			}
 			this.hover = true;
+			
+			if (autoHide) {
+				startAutoHideTimer();
+			}
 		}
 		private function rollOutHandler(event:MouseEvent):void
 		{
@@ -305,6 +344,52 @@ package my.containers
 				_titleBar.y = -15;
 			}
 			this.hover = false;
+			
+			if (autoHide) {
+				stopAutoHideTimer();
+			}
+		}
+		
+		private function mouseMoveHandler(event:MouseEvent):void
+		{
+			
+			if (!this.hover) {
+				if (_titleBar) {
+					_titleBar.endEffectsStarted();
+					_titleBar.y = 0;
+				}
+				this.hover = true;
+			}
+				
+			startAutoHideTimer();
+		}
+		
+		private function startAutoHideTimer():void
+		{
+			stopAutoHideTimer();
+			if (_autoHideTimer == null) {
+				_autoHideTimer = new Timer(3000, 1);
+				_autoHideTimer.addEventListener(TimerEvent.TIMER, autoHideTimerHandler, false, 0, true);
+				_autoHideTimer.start();
+			}
+		}
+		private function stopAutoHideTimer():void
+		{
+			if (_autoHideTimer != null) {
+				_autoHideTimer.stop();
+				_autoHideTimer = null;
+			}
+		}
+		private function autoHideTimerHandler(event:TimerEvent):void
+		{
+			_autoHideTimer = null;
+			if (_autoHide) {
+				if (_titleBar) {
+					_titleBar.endEffectsStarted();
+					_titleBar.y = -15;
+				}
+				this.hover = false;
+			}
 		}
 		
 		/*

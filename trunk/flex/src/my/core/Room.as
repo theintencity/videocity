@@ -757,7 +757,7 @@ package my.core
 		private function loadInternalBitmap(bm:Bitmap):void
 		{
 			// assume that the file name was snapshot.jpg
-			var xml:XML = <show><file src="file://snapshot.jpg" description="Captured Photo"/></show>;
+			var xml:XML = <show><file src="file://snapshot.jpg" smoothing="true" description="Captured Photo"/></show>;
 			var jpgEncoder:JPEGEncoder = new JPEGEncoder();
 			var data:ByteArray = jpgEncoder.encode(bm.bitmapData);
 			this.files.addItem(new PlayList(xml, [data], user));

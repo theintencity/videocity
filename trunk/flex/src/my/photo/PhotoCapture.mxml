@@ -268,7 +268,12 @@ and extract only what is needed.
 
 			private function dragMouseMoveHandler(event:MouseEvent):void
 			{
-				if (stage != null) {
+				/**
+				 * TODO: for some reason, in Flex SDK 3.2, if a picture is uploaded then the mouseMove event gives incorrect
+				 * stageX,Y and this.mouseX,Y values. If you move the focus to another application and bring back the focus,
+				 * it seems to work well after that. The problem doesn't happen for live camera capture.
+				 */ 
+				if (stage != null && this.mouseX >= 0 && this.mouseX <= this.width && this.mouseY >= 0 && this.mouseY <= this.height) {
 					if (maintainAspectRatio) {
 						var diff:int = Math.round(Math.max(this.mouseX-win.x-win.width, this.mouseY-win.y-win.height));
 						if (win.width + 2*diff > THUMB_WIDTH && win.height + 2*diff > THUMB_HEIGHT) {

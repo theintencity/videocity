@@ -1,63 +1,46 @@
 /* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
 package my.core
 {	
-	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.events.DataEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.SecurityErrorEvent;
-	
 	import flash.display.DisplayObject;
-		
+	import flash.events.DataEvent;
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.MouseEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.events.TimerEvent;
+	import flash.geom.Rectangle;
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
 	import flash.net.FileReferenceList;
-	import flash.utils.Timer;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	import flash.utils.Dictionary;
 	import flash.system.Security;
 	import flash.system.System;
-	import flash.events.TextEvent;
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	
-	import mx.core.Application;
-	import mx.core.ByteArrayAsset;
+	import mx.containers.Canvas;
 	import mx.controls.Alert;
-	import mx.controls.Text;
-	import mx.controls.Image;
+	import mx.core.Application;
 	import mx.events.PropertyChangeEvent;
-	import mx.events.DynamicEvent;
-	import mx.utils.Base64Decoder;
-	import mx.utils.StringUtil;
-	import mx.utils.URLUtil;
-	import mx.managers.SystemManager;
 	import mx.managers.PopUpManager;
-	import mx.rpc.Responder;
+	import mx.utils.StringUtil;
 	
 	import my.card.CardEditor;
 	import my.card.VisitingCard;
-	import my.core.pages.RoomPage;
-	import my.core.pages.CreatePage;
-	import my.core.View;
-	import my.core.Room;
-	import my.core.User;
-	import my.core.Util;
-	import my.controls.Layout;
-	import my.controls.Prompt;
-	import my.controls.FullScreen;
-	import my.controls.TextLabel;
 	import my.containers.BaseBox;
 	import my.containers.ContainerBox;
-	import my.containers.SlidingWindow;
-	import my.settings.LoginSettings;
-	import my.settings.DeviceSettings;
-	import my.settings.PhoneSettings;
-	import my.settings.AddMediaPrompt;
-	import my.video.LiveVideoBox;
-	import my.text.TextBox;
-	import my.play.PlayItem;
-	import my.play.PlayList;
+	import my.controls.FullScreen;
+	import my.controls.Layout;
+	import my.controls.PostIt;
+	import my.controls.Prompt;
+	import my.core.pages.CreatePage;
+	import my.core.pages.RoomPage;
 	import my.photo.PhotoCapture;
+	import my.settings.AddMediaPrompt;
+	import my.settings.DeviceSettings;
+	import my.settings.LoginSettings;
+	import my.text.TextBox;
+	import my.video.LiveVideoBox;
 	
 	/**
 	 * The controller object that receives events from the various page views and controls the model
@@ -977,12 +960,13 @@ package my.core
 			case Constant.SMOOTH:     if (user) user.smoothing = !user.smoothing; break;
 			case Constant.FULL_SCREEN:FullScreen.toggleFullScreen(); break;
 			case Constant.STRETCH:    FullScreen.toggleFullScreen(true); break;
+			case Constant.SELECT:     startSelectScreen(); break;
 			case Constant.SETTINGS:   Security.showSettings(); break;
 			case Constant.DEVICE:     DeviceSettings.show(user); break;
 			case Constant.PHONE:      Prompt.show("This feature is currently not implemented.", "Not Implemented"); break; // PhoneSettings.show(); break;
 			case Constant.EMBED:      showEmbedSettings(); break;
 			case Constant.SEARCH:     Prompt.show("This feature is currently not implemented.", "Not Implemented"); break;
-			
+				
 			case Constant.LOGIN:
 				if (user != null) {
 					if (user.isGuest) uploadCard(); 
@@ -999,6 +983,21 @@ package my.core
 				}
 				break;
 			}
+		}
+
+		/**
+		 * Return an array [activeBox, activePlayList]
+		 */
+		public function getMaximizedBox():Array
+		{
+			var callBox:ContainerBox = this.activeBox;
+			var playlist:DisplayObject = null;
+			if (callBox != null) {
+				if (callBox.maximized != null) {
+					playlist = callBox.maximized;
+				}
+			}
+			return [callBox, playlist]
 		}
 		
 		public function getRoomView(room:Room):RoomPage
@@ -1029,6 +1028,60 @@ package my.core
 					user.selected.load(capture.selectedPhoto.getChildAt(0));
 			}
 			capture = null;
+		}
+		
+		private function startSelectScreen():void
+		{
+			if (!FullScreen.fullScreen) {
+				PostIt.show("<b>Drag &amp; Select<br/>a region</b>", Application.application.root);
+				Application.application.mouseChildren = false;
+				Application.application.addEventListener(MouseEvent.MOUSE_DOWN, selectMouseDownHandler, false, 0, true);
+			}
+		}
+		
+		private var dragRect:Canvas = null;
+		
+		private function selectMouseDownHandler(event:MouseEvent):void
+		{
+			Application.application.removeEventListener(MouseEvent.MOUSE_DOWN, selectMouseDownHandler);
+			Application.application.addEventListener(MouseEvent.MOUSE_UP, selectMouseUpHandler, false, 0, true);
+			Application.application.addEventListener(MouseEvent.MOUSE_MOVE, selectMouseMoveHandler, false, 0, true);
+			dragRect = new Canvas();
+			dragRect.setStyle("borderStyle", "solid");
+			dragRect.setStyle("borderColor", 0xffffff);
+			dragRect.setStyle("borderThickness", 1);
+			dragRect.setStyle("backgroundAlpha", 0);
+			dragRect.x = Application.application.mouseX;
+			dragRect.y = Application.application.mouseY;
+			dragRect.width = dragRect.height = 0;
+			Application.application.addChild(dragRect);
+		}
+		
+		private function selectMouseMoveHandler(event:MouseEvent):void
+		{
+			if (dragRect != null) {
+				dragRect.width = Application.application.mouseX - dragRect.x;
+				dragRect.height = Application.application.mouseY - dragRect.y;
+			}
+		}
+		
+		private function selectMouseUpHandler(event:MouseEvent):void
+		{
+			Application.application.mouseChildren = true;
+			Application.application.removeEventListener(MouseEvent.MOUSE_UP, selectMouseUpHandler);
+			Application.application.removeEventListener(MouseEvent.MOUSE_MOVE, selectMouseMoveHandler);
+			
+			if (dragRect != null) {
+				var rect:Rectangle = new Rectangle(dragRect.x, dragRect.y, dragRect.x+dragRect.width, dragRect.y+dragRect.height);
+				Application.application.removeChild(dragRect);
+				dragRect = null;
+				
+				trace("rect=" + rect.x + "," + rect.y + " " + rect.width + "x" + rect.height);
+				if (rect.width >= 10 && rect.height >= 10) {
+					FullScreen.toggleFullScreen(true, rect);
+				}
+			}
+			
 		}
 	}
 }

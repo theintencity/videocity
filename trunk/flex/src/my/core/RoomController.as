@@ -1,41 +1,36 @@
 /* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
 package my.core
 {
-	import flash.events.Event;
-	import flash.events.DataEvent;
-	import flash.events.ErrorEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.SecurityErrorEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
-	import flash.net.NetStream;
-	import flash.net.FileReference;
-	import flash.net.URLRequest;
+	import flash.events.DataEvent;
+	import flash.events.ErrorEvent;
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
 	import flash.media.Video;
-
-	import mx.events.PropertyChangeEvent;
-	import mx.events.DynamicEvent;
+	import flash.net.FileReference;
+	import flash.net.NetStream;
+	import flash.net.URLRequest;
+	
+	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	import mx.rpc.http.HTTPService;
-	import mx.rpc.events.ResultEvent;
+	import mx.events.DynamicEvent;
+	import mx.events.PropertyChangeEvent;
 	import mx.rpc.events.FaultEvent;
-	import mx.core.Application;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
 	
-	import my.core.User;
-	import my.core.View;
-	import my.core.Room;
-	import my.core.Util;
-	import my.core.pages.RoomPage;
-	import my.controls.Prompt;
-	import my.containers.BaseBox;
-	import my.play.PlayListBox;
-	import my.play.PlayList;
-	import my.play.PlayItem;
-	import my.video.VideoBox;
 	import my.containers.ContainerBox;
-	import my.controls.TrashButton;
 	import my.controls.PostIt;
+	import my.controls.Prompt;
+	import my.controls.TrashButton;
+	import my.core.pages.RoomPage;
+	import my.play.PlayItem;
+	import my.play.PlayList;
+	import my.play.PlayListBox;
+	import my.video.VideoBox;
 	
 	/**
 	 * Controller to update the page based on the user's script, streams or files..
@@ -331,9 +326,11 @@ package my.core
 		
 		private function httpResponseHandler(event:Event):void
 		{
-			var http:HTTPService = event.target as HTTPService;
-			var p:Object = pending[http.url]
-			delete pending[http.url];
+			//var http:HTTPService = event.currentTarget as HTTPService;
+			// in new SDK, the target is HTTPOperation, but does have url property.
+			var url:String = event.currentTarget.url as String;
+			var p:Object = pending[url]
+			delete pending[url];
 			if (event is ResultEvent) {
 				var result:ResultEvent = event as ResultEvent;
 				var xml:XML = result.result as XML;

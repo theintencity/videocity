@@ -35,6 +35,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 				{event: Constant.SMOOTH,      label: _('Smooth Video')},
 				{event: Constant.FULL_SCREEN, label: _('Fullscreen')},
 				{event: Constant.STRETCH,     label: _('Stretch Full')},
+				{event: Constant.SELECT,      label: _('Stretch selected')},
 				null,
 				{event: Constant.SETTINGS,    label: _('Device Selection')},
 				{event: Constant.DEVICE,      label: _('Device Settings')},

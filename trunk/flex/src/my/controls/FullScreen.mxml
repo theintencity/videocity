@@ -35,12 +35,18 @@ to full screen mode optionally with hardware stretching.
 			 * 
 			 * @param stretch Whether to use hardware scaling to stretch or not? Default is false.
 			 */
-			public static function toggleFullScreen(stretch:Boolean = false):void
+			public static function toggleFullScreen(stretch:Boolean = false, rect:Rectangle = null):void
 			{
 				var stage:Stage = Application.application.stage;
 				if (stage != null) {
-					if (stretch && stage.hasOwnProperty('fullScreenSourceRect')) 
-						stage.fullScreenSourceRect = new Rectangle(0, 0, Application.application.width, Application.application.height);
+					if (stretch && stage.hasOwnProperty('fullScreenSourceRect')) {
+						if (rect == null) {
+							stage.fullScreenSourceRect = new Rectangle(0, 0, Application.application.width, Application.application.height);
+						}
+						else {
+							stage.fullScreenSourceRect = rect;
+						}
+					}
 					stage.displayState = stage.displayState == StageDisplayState.FULL_SCREEN ? StageDisplayState.NORMAL : StageDisplayState.FULL_SCREEN;
 				}
 			}
