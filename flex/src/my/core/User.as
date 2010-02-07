@@ -1,29 +1,23 @@
 /* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
 package my.core
 {
-	import flash.events.Event;
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
-	import flash.net.URLRequest;
 	import flash.net.URLLoaderDataFormat;
+	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
-		
-	import mx.rpc.http.HTTPService;
-	import mx.rpc.AsyncToken;
-	import mx.rpc.events.ResultEvent;
-	import mx.rpc.events.FaultEvent;
 	
-	import mx.collections.ArrayCollection;
-	import mx.controls.Image;
-	import mx.controls.Alert;
 	import mx.core.Application;
-	import mx.events.PropertyChangeEvent;
-	import mx.events.PropertyChangeEventKind;
+	import mx.rpc.AsyncToken;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
 	
-	import my.controls.Prompt;
 	import my.card.VisitingCard;
+	import my.controls.Prompt;
 	
 	/**
 	 * Dispatched when a control button is clicked. Possible values of data property:
@@ -516,9 +510,9 @@ package my.core
 			http.method = method;
 			http.resultFormat = resultFormat;
 			
-			http.send(params);
+			var token:AsyncToken = http.send(params);
 			
-			_http[http] = {context: context, success: success, fault: fault};
+			_http[token] = {context: context, success: success, fault: fault, url: url};
 		}
 		
 		//--------------------------------------
@@ -527,17 +521,17 @@ package my.core
 		
 		private function httpCompleteHandler(event:Event):void 
 		{
-			var http:HTTPService = event.target as HTTPService;
-			var value:Object = (http in _http ? _http[http] : null);
+			var token:AsyncToken = (event is ResultEvent ? ResultEvent(event).token : FaultEvent(event).token);
+			var value:Object = (token in _http ? _http[token] : null);
 			var context:Object = (value != null && value.context != undefined ? value.context : null);
 			var success:Function =  (value != null && value.success != undefined ? value.success : null);
 			var fault:Function =  (value != null && value.fault != undefined ? value.fault : null);
 			
-			delete _http[http]
+			delete _http[token]
 			if (event is ResultEvent) {
-				var result:XML = ResultEvent(event).result as XML;
-				if (result.error != undefined) {
-					Prompt.show("Error in " + http.url + ": " + String(result.error), "Error requesting web service");
+				var result:XML = XML(ResultEvent(event).result);
+				if (result == null || result.error != undefined) {
+					Prompt.show("Error in " + context.url + ": " + (result != null ? String(result.error) : "null"), "Error requesting web service");
 					if (fault != null)
 						fault(context, result);
 				}
@@ -548,7 +542,7 @@ package my.core
 				}
 			}
 			else {
-				Prompt.show("Error in " + http.url + "\n" + (event is FaultEvent ? FaultEvent(event).message : ''), "Error requesting web service");
+				Prompt.show("Error in " + context.url + "\n" + (event is FaultEvent ? FaultEvent(event).message : ''), "Error requesting web service");
 			}
 		}
 		

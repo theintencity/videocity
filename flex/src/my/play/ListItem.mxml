@@ -132,6 +132,8 @@ child depending on the current PlayItem.
 				}
 				else if (item.name == PlayItem.IMAGE) {
 					var fg:PhotoItem = new PhotoItem();
+					if (item.xml.@smoothing != undefined && String(item.xml.@smoothing) == "true")
+						fg.smoothBitmapContent = true;
 					fg.source = (item.content != null ? item.content : item.source);
 					return fg;
 				}

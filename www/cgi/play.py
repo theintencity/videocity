@@ -25,11 +25,13 @@ class myobject: pass
 u = myobject()
 
 u.__dict__ = dict(zip(('scheme', 'user', 'password', 'host', 'port', 'path', 'parameters', 'headers'), _syntax.match(url or '').groups()))
+u.headers = dict([tuple(nv.split('=', 1)) for nv in u.headers.split('&')]) if u.headers else {}
 
-videoid = slideid = None
+videoid = slideid = videoplaylist = None
 if u.scheme == 'http' and u.path is not None:
     if re.match('(([a-z][a-z]\.)|(www\.))?youtube\.', u.host or ''):
-        videoid = u.path[3:] if u.path.startswith('/v/') else (filter(lambda x: x.startswith('v='), u.headers.split('&') if u.headers else [])[0][2:] if u.path.startswith('/watch') else '')
+        videoplaylist = u.headers['p'] if u.path == '/view_play_list' and 'p' in u.headers else ''
+        videoid = u.path[3:] if u.path.startswith('/v/') else u.headers.get('v', '' if u.path.startswith('/watch') else '')
     elif u.host == 'www.slideshare.net' and not u.path.startswith('/secret'):
         slideid = u.path[1:]
 
@@ -39,6 +41,7 @@ if videoid:
     print 'getting for videoid', videoid
     data = dict(map(lambda y: (y[0], y[2]), map(lambda x: x.partition('=') , urllib.urlopen('http://youtube.com/get_video_info?video_id=' + videoid).read().split('&'))))
     url = 'http://www.youtube.com/get_video.php?video_id=' + videoid + '&t=' + data['token'];
+    if 'fmt' in u.headers: url += '&fmt=' + u.headers['fmt']
     # headers = get_headers(url,1);
     #if !is_array(headers['Location']): url = $headers['Location'];
     #else:
@@ -52,6 +55,20 @@ if videoid:
     else: # else redirect to the url
         print >>result, '302 Redirect'
         print >>result, 'Location:', url
+elif videoplaylist:
+    print 'getting for videoplaylist', videoplaylist
+    data = urllib.urlopen(url).read()
+    def uniq(seq):
+        last = None
+        for x in seq:
+            if x != last:
+                last = x
+                yield x
+    matches = [x for x in uniq(re.findall('href="/watch\?v=([^"&]+)', data))]
+    if 'fmt' in u.headers: matches = ['%s&fmt=%s'%(x, u.headers['fmt']) for x in matches]
+    data = "<show>%s</show>"%(''.join(['<video src="http://www.youtube.com/watch?v=%s"/>'%(id,) for id in matches]),)
+    print >>result, '200 OK\n'
+    print >>result, data
 elif slideid:
     data = urllib.urlopen('http://www.slideshare.net/' + slideid).read()
     matches = re.search('"doc":\s*"([^"]+)"', data)

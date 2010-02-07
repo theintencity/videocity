@@ -11,7 +11,7 @@ using the PlayList class.
 
 <containers:BaseBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:controls="my.controls.*" xmlns:play="my.play.*"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
-	rollOver="hover=true" rollOut="hover=false" add="addHandler(event)" remove="removeHandler(event)"
+	add="addHandler(event)" remove="removeHandler(event)"
 	dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)">
 	
 	<mx:Metadata>
@@ -70,12 +70,6 @@ using the PlayList class.
 			 */
 			private var _playList:PlayList;
 			
-			[Bindable]
-			/*
-			 * Whether the user has mouse overed this view?
-			 */
-			private var hover:Boolean;
-			
 			//--------------------------------------
 			// GETTERS/SETTERS
 			//--------------------------------------
@@ -128,7 +122,8 @@ using the PlayList class.
 			{
 				this.removeEventListener(TrashButton.TRASH, trashHandler);
 				TrashButton.removeTrashable(this);
-				_playList.close();
+				if (_playList != null)
+					_playList.close();
 				//_playList = null;
 			}
 			

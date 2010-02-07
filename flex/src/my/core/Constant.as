@@ -92,6 +92,7 @@ package my.core
 		public static const SMOOTH:String      = "smooth";
 		public static const FULL_SCREEN:String = "fullScreen";
 		public static const STRETCH:String     = "stretch";
+		public static const SELECT:String      = "select";
 		public static const SETTINGS:String    = "settings";
 		public static const DEVICE:String      = "device";
 		public static const PHONE:String       = "phone"; 

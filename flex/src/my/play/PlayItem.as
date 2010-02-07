@@ -133,7 +133,9 @@ package my.play
 		 */
 		public static function describeURL(url:String, desc:String=''):XML
 		{
-			if (url.indexOf("http://www.youtube.com/") == 0)
+			if (url.indexOf("http://www.youtube.com/view_play_list") == 0)
+				return XML('<show><show src="' + url + '" description="' + (desc == null ? 'YouTube' : desc) + '" /></show>');
+			else if (url.indexOf("http://www.youtube.com/") == 0)
 				return XML('<show><video src="' + url + '" description="' + (desc == null ? 'YouTube' : desc) + '" /></show>');
 			else if (url.indexOf("http://www.slideshare.net/") == 0)
 				return XML('<show><show src="' + url + '" description="' + (desc == null ? 'SlideShare' : desc) + '" /></show>');
