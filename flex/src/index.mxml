@@ -32,7 +32,7 @@ An AIR-based application will have a different main file similar to this.
 			/**
 			 * The local user object that represents the current state. This is the main data model for this
 			 * application. Most of the view depends on the state of user, and the controllers update the state.
-			 * This is passes to other components as reference.
+			 * This is passed to other components as reference.
 			 */
 			private var user:User = new User();
 			
@@ -88,12 +88,17 @@ An AIR-based application will have a different main file similar to this.
 				for (var s:String in this.parameters) {
 					if (User.allowedParameters.indexOf(s) >= 0) {
 						try {
+							trace("setting " + s + "=" + this.parameters[s]); 
 							user[s] = this.parameters[s];
 						}
 						catch (e:Error) {
 							trace("ignoring error in setting parameter: " + e);
 						}
 					}
+				}
+				
+				if (('enter' in this.parameters) && user.selected != null) {
+					main.control.joinRoomHandler(user.selected);
 				}
 			}
 			

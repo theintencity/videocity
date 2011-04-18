@@ -3,7 +3,7 @@
 
 <!--
 The LiveVideoBox component is used to display the local video captured from the camera. There can be only
-only LiveVideoBox component instance in an application. The Controller has the reference to the singleton
+one LiveVideoBox component instance in an application. The Controller has the reference to the singleton
 video object.
 
 The local video is displayed with horizontal flip so that it appears as a mirror to the user. The component
@@ -166,7 +166,11 @@ The component also periodically displays the current FPS (frames-per-second) of 
 	<mx:TextArea id="status" visible="{hover}" 
 		top="15" left="10" right="10" height="30"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off"
-		borderThickness="0" borderStyle="solid" backgroundAlpha="0" color="0xffffff" fontSize="9"
+		borderThickness="0" borderStyle="solid" backgroundAlpha="0" color="#ffffff" fontSize="9"
 		selectable="false" editable="false"
 		/>
+		
+	<mx:Text visible="{!user.camActive}" text="Audio-only"
+		horizontalCenter="0" verticalCenter="0" 
+		color="#ffffff" />
 </video:VideoBox>

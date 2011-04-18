@@ -103,7 +103,7 @@ It calls the ActionScript API on Camera and Microphone objects to perform these 
 					change="user.camWidth=String(sizeBox.selectedItem).split('x')[0]"/>
 				<mx:ComboBox id="fpsBox" styleName="smallComboBox" width="40" height="14"
 					dataProvider="{[12, 6, 15, 30]}"
-					creationComplete="fpsBox.selectedItem=(user.camera != null ? user.camera.currentFPS : user.camFPS)"
+					creationComplete="fpsBox.selectedItem=user.camFPS"
 					change="user.camFPS=fpsBox.selectedItem as Number"/>
 				<mx:Label text="fps"/>
 			</mx:HBox>

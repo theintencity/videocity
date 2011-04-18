@@ -17,6 +17,7 @@ package {
 		var result:String = ResourceManager.getInstance().getString("main", format.split(" ").join("_"), args);
 		if (result == null) {
 			result = format;
+			// TODO: string.replace only replaces first occurrence.
 			for (var i:int=0; i<args.length; ++i) 
 				result = result.replace("{" + i.toString() + "}", args[i] != null ? args[i].toString() : 'null');
 		}
