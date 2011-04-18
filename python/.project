@@ -3,6 +3,9 @@
 	<name>videocity</name>
 	<comment></comment>
 	<projects>
+		<project>p2p-sip</project>
+		<project>restlite</project>
+		<project>rtmplite</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -207,8 +207,23 @@ def runRTMP(addr=('0.0.0.0', 1935)): # create and run a flash server instance
     if _debug: print time.asctime(), 'Flash server starts', addr
     try: multitask.run()
     except KeyboardInterrupt: thread.interrupt_main()
-    
+
 if __name__ == '__main__':
     thread.start_new_thread(runRTMP, ()) # Flash server started in separate thread
-    runHTTP() # Web server runs in the main thread
+    #runHTTP() # Web server runs in the main thread
+    thread.start_new_thread(runHTTP, ())
     
+    if sys.platform == 'darwin':
+        import FrameWork
+        class MainApp(FrameWork.Application):
+            def __init__(self, *args, **kwargs):
+                FrameWork.Application.__init__(self, *args, **kwargs)
+            def getabouttext(self):
+                return 'Videocity 1.0'
+            def do_about(self, *args):
+                pass
+        app = MainApp()
+        app.mainloop()
+    else:
+        while True:
+            time.sleep(10)
