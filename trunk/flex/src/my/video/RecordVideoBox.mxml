@@ -129,7 +129,7 @@ to store the recording state.
 					var hh:int = Math.floor(duration / 3600);
 					var value:String = (mm < 10 ? '0' + mm.toString() : mm.toString()) + ":" + (ss < 10 ? '0' + ss.toString() : ss.toString());;
 					if (hh > 0)
-						value = hh.toString() + ":" + durationAsString;
+						value = hh.toString() + ":" + value;
 					durationAsString = value;
 					durationLabel.visible = Timer(event.target).currentCount % 2 == 1;
 				}

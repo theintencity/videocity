@@ -8,8 +8,9 @@ package my.core
 	import flash.events.TimerEvent;
 	import flash.media.Camera;
 	import flash.media.Microphone;
-	import flash.media.SoundTransform;
 	import flash.media.SoundMixer;
+	import flash.media.SoundTransform;
+	import flash.system.Capabilities;
 	import flash.system.Security;
 	import flash.system.SecurityPanel;
 	import flash.utils.Timer;
@@ -190,7 +191,7 @@ package my.core
 				else {
 					if (_camera == null) {
 						var index:int = Camera.names.indexOf("USB Video Class Video");
-						if (index >= 0) 
+						if (index >= 0 && Capabilities.os.indexOf("Mac") >= 0) 
 							_camera = Camera.getCamera(index.toString());
 						else
 							_camera = Camera.getCamera();
