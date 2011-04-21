@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
+/* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
 package my.core
 {
 	import flash.events.DataEvent;
@@ -29,7 +29,7 @@ package my.core
 	import mx.graphics.codec.JPEGEncoder;
 	
 	import my.controls.Prompt;
-	import my.card.VisitingCard;
+	import my.core.room.card.VisitingCard;
 	import my.play.PlayItem;
 	import my.play.PlayList;
 	

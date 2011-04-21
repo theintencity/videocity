@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
+/* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
 package my.core
 {
 	import flash.events.DataEvent;
@@ -16,7 +16,7 @@ package my.core
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
-	import my.card.VisitingCard;
+	import my.core.room.card.VisitingCard;
 	import my.controls.Prompt;
 	
 	/**

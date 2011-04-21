@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 The LoginSettings dialog box is displayed when the user is already logged in and clicks on the signup or 
@@ -16,7 +16,7 @@ next time his browser will automatically login when visiting this site.
 			import mx.controls.Alert;
 			import my.controls.Prompt;
 			import my.core.User;
-			import my.card.VisitingCard;
+			import my.core.room.card.VisitingCard;
 			
 			//--------------------------------------
 			// PRIVATE VARIABLES

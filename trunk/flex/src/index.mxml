@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 This is the main Flash application file for the Internet Video City sample front end. 
@@ -22,7 +22,7 @@ An AIR-based application will have a different main file similar to this.
 			import my.controls.FullScreen;
 			import my.core.Constant;
 			import my.core.User;
-			import my.card.VisitingCard;
+			import my.core.room.card.VisitingCard;
 		
 			//--------------------------------------
 			// PRIVATE PROPERTIES

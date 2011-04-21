@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 This page displays the view for a room. There are three states: (1) In this state the user has no visiting 
@@ -23,7 +23,7 @@ leave the room.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
-	xmlns:containers="my.containers.*" xmlns:card="my.card.*" xmlns:core="my.core.*"
+	xmlns:containers="my.containers.*" xmlns:card="my.core.room.card.*" xmlns:core="my.core.*"
 	name="roomPage" styleName="roomPage" width="100%" height="100%" 
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
 	mouseDown="mouseDownHandler(event)">

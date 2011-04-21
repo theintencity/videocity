@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 The LiveVideoBox component is used to display the local video captured from the camera. There can be only
