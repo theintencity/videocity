@@ -16,7 +16,7 @@ next time his browser will automatically login when visiting this site.
 			import mx.controls.Alert;
 			import my.controls.Prompt;
 			import my.core.User;
-			import my.core.room.card.VisitingCard;
+			import my.core.card.VisitingCard;
 			
 			//--------------------------------------
 			// PRIVATE VARIABLES

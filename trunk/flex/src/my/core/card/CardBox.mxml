@@ -21,8 +21,6 @@ the user mouse-overs. The data model for this view is a VisitingCard object.
 	
 	<mx:Script>
 		<![CDATA[
-			import my.core.room.card.VisitingCard;
-			
 			//--------------------------------------
 			// CLASS CONSTANTS
 			//--------------------------------------

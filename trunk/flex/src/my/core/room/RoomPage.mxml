@@ -23,7 +23,7 @@ leave the room.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
-	xmlns:containers="my.containers.*" xmlns:card="my.core.room.card.*" xmlns:room="my.core.room.*"
+	xmlns:containers="my.containers.*" xmlns:card="my.core.card.*" xmlns:room="my.core.room.*"
 	name="roomPage" styleName="roomPage" width="100%" height="100%" 
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
 	mouseDown="mouseDownHandler(event)">

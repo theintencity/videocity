@@ -32,7 +32,7 @@ package my.core.room
 	import my.core.Constant;
 	import my.core.playlist.PlayItem;
 	import my.core.playlist.PlayList;
-	import my.core.room.card.VisitingCard;
+	import my.core.card.VisitingCard;
 	import my.core.User;
 	import my.core.Util;
 	
