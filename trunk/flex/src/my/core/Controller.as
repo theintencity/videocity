@@ -34,7 +34,7 @@ package my.core
 	import my.core.card.CardEditor;
 	import my.core.card.VisitingCard;
 	import my.core.CreatePage;
-	import my.core.photo.PhotoCapture;
+	import my.core.video.snap.PhotoCapture;
 	import my.core.room.Room;
 	import my.core.room.RoomPage;
 	import my.core.room.TextBox;

@@ -16,7 +16,7 @@ sends the card in an email to the user's email address.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:view="view.*" xmlns:card="my.core.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.core.photo.*" 
+	xmlns:view="view.*" xmlns:card="my.core.card.*" xmlns:controls="my.controls.*" xmlns:snap="my.core.video.snap.*" 
 	name="createPage" styleName="createBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
@@ -109,7 +109,7 @@ sends the card in an email to the user's email address.
 		<mx:Text text="{_('Identify Yourself Below')}" styleName="regular"
 			width="100%" x="10" y="10" textAlign="left"/>
 		
-		<photo:Photo id="photoBox"
+		<snap:Photo id="photoBox"
 			width="100" height="100" x="20" y="30"
 			complete="if (newRoom) newRoom.setPhoto(photoBox.image);"/>
 		
