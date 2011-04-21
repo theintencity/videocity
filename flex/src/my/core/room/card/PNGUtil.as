@@ -1,4 +1,4 @@
-package my.card
+package my.core.room.card
 {
 	import flash.utils.ByteArray;
 	

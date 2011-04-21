@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 This component displays a card's image. It also displays a overlay button to allow downloading the card when
@@ -21,7 +21,7 @@ the user mouse-overs. The data model for this view is a VisitingCard object.
 	
 	<mx:Script>
 		<![CDATA[
-			import my.card.VisitingCard;
+			import my.core.room.card.VisitingCard;
 			
 			//--------------------------------------
 			// CLASS CONSTANTS

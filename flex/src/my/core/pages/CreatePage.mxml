@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 The room creation page includes user interface for creating a new room (and associated card). 
@@ -15,7 +15,8 @@ user clicks on the 'Create' button, the client sends the information to the serv
 sends the card in an email to the user's email address.
 -->
 
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:view="view.*" xmlns:card="my.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.photo.*" 
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:view="view.*" xmlns:card="my.core.room.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.photo.*" 
 	name="createPage" styleName="createBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
@@ -25,7 +26,7 @@ sends the card in an email to the user's email address.
 			import mx.containers.Panel;
 			import mx.controls.Image;
 			
-			import my.card.VisitingCard;
+			import my.core.room.card.VisitingCard;
 			import my.core.Room;
 			import my.core.User;
 			import my.core.Controller;

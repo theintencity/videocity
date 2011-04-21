@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
+/* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
 package my.controls
 {
 	import flash.display.Graphics;

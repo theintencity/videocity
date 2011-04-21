@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, Kundan Singh. See LICENSING for details. */
+/* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
 package my.core
 {	
 	import flash.display.DisplayObject;
@@ -25,8 +25,8 @@ package my.core
 	import mx.managers.PopUpManager;
 	import mx.utils.StringUtil;
 	
-	import my.card.CardEditor;
-	import my.card.VisitingCard;
+	import my.core.room.card.CardEditor;
+	import my.core.room.card.VisitingCard;
 	import my.containers.BaseBox;
 	import my.containers.ContainerBox;
 	import my.controls.FullScreen;

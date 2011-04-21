@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2009, Kundan Singh. See LICENSING for details. -->
+<!-- Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. -->
 
 <!--
 This component displays a card editor. The actual editing of text and photo is done outside this
@@ -13,7 +13,8 @@ the room property, so that the editor can capture updates to the Room's photo pr
 photo element.
 -->
 
-<controls:CCard xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*" xmlns:card="my.card.*" styleName="cardEditor" 
+<controls:CCard xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:controls="my.controls.*" xmlns:card="my.core.room.card.*" styleName="cardEditor" 
 	backgroundColor="{_skin.titleColor}" mouseDown="event.stopPropagation()" initialize="initializeHandler(event)" 
 	rollOver="if (editable) hover=true;" rollOut="if (editable) hover=false;">
 	
@@ -27,7 +28,7 @@ photo element.
 			import my.core.Util;
 			import my.core.Room;
 			import my.core.Constant;
-			import my.card.VisitingCard;
+			import my.core.room.card.VisitingCard;
 			
 			//--------------------------------------
 			// CLASS CONSTANTS
