@@ -16,7 +16,7 @@ sends the card in an email to the user's email address.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:view="view.*" xmlns:card="my.core.room.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.photo.*" 
+	xmlns:view="view.*" xmlns:card="my.core.room.card.*" xmlns:controls="my.controls.*" xmlns:photo="my.core.photo.*" 
 	name="createPage" styleName="createBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
@@ -27,7 +27,7 @@ sends the card in an email to the user's email address.
 			import mx.controls.Image;
 			
 			import my.core.room.card.VisitingCard;
-			import my.core.Room;
+			import my.core.room.Room;
 			import my.core.User;
 			import my.core.Controller;
 			import my.core.Constant;

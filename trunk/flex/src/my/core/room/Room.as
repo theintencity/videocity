@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.core
+package my.core.room
 {
 	import flash.events.DataEvent;
 	import flash.events.ErrorEvent;
@@ -29,9 +29,12 @@ package my.core
 	import mx.graphics.codec.JPEGEncoder;
 	
 	import my.controls.Prompt;
+	import my.core.Constant;
+	import my.core.playlist.PlayItem;
+	import my.core.playlist.PlayList;
 	import my.core.room.card.VisitingCard;
-	import my.play.PlayItem;
-	import my.play.PlayList;
+	import my.core.User;
+	import my.core.Util;
 	
 	/**
 	 * Dispatched when the members property changes.

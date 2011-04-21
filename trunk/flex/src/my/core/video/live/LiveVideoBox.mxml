@@ -12,7 +12,7 @@ attaches and detaches its camera based on the camera property of the user object
 The component also periodically displays the current FPS (frames-per-second) of the camera video.
 -->
 
-<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.core.video.*"
 	label="You" name="local"
 	add="addHandler(event)" remove="removeHandler(event)"
 	xmlns:controls="my.controls.*">

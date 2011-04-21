@@ -16,6 +16,7 @@ package my.core
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
+	import my.core.room.Room;
 	import my.core.room.card.VisitingCard;
 	import my.controls.Prompt;
 	

@@ -23,7 +23,7 @@ leave the room.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
-	xmlns:containers="my.containers.*" xmlns:card="my.core.room.card.*" xmlns:core="my.core.*"
+	xmlns:containers="my.containers.*" xmlns:card="my.core.room.card.*" xmlns:room="my.core.room.*"
 	name="roomPage" styleName="roomPage" width="100%" height="100%" 
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
 	mouseDown="mouseDownHandler(event)">
@@ -35,16 +35,16 @@ leave the room.
 			import mx.events.CollectionEvent;
 			import mx.events.PropertyChangeEvent;
 
-			import my.core.Room;
-			import my.core.RoomMember;
+			import my.core.room.Room;
+			import my.core.room.RoomMember;
 			import my.core.User;
 			import my.core.Controller;
 			import my.core.Constant;
 			import my.containers.BaseBox;
-			import my.play.PlayListBox;
-			import my.play.PlayList;
-			import my.video.VideoBox;
-			import my.text.TextBox;
+			import my.core.playlist.PlayListBox;
+			import my.core.playlist.PlayList;
+			import my.core.video.VideoBox;
+			import my.core.room.TextBox;
 			
 			//--------------------------------------
 			// PRIVATE PROPERTIES
@@ -173,10 +173,10 @@ leave the room.
 		mouseMove="if (callBox.mouseX &lt; 20) memberList.show(); 
 			else if (callBox.mouseX &gt; 50) memberList.hide(); "/>
 	
-	<core:BoxController user="{user}" box="{callBox}" controller="{controller}"/>
+	<room:BoxController user="{user}" box="{callBox}" controller="{controller}"/>
 	
-	<core:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
-		itemRenderer="my.core.RoomMember" dataProvider="{room.members}"/>
+	<room:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
+		itemRenderer="my.core.room.RoomMember" dataProvider="{room.members}"/>
 	
 	<containers:Door id="door2" y="35"
 		locked="{room != null &amp;&amp; room.card != null &amp;&amp; !room.connected &amp;&amp; numBoxes == 0}">

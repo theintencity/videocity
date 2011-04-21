@@ -1,4 +1,4 @@
-package my.core {
+package my.core.room {
 	
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;

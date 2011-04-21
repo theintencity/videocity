@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.play
+package my.core.playlist
 {
 	import flash.utils.ByteArray;
 	import flash.net.FileReference;

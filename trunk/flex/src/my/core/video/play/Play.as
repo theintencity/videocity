@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.video
+package my.core.video.play
 {
 	import flash.events.ErrorEvent;
 	import flash.events.Event;

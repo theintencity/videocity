@@ -8,7 +8,7 @@ package my.core.room.card
 	import mx.controls.Image;
 	import mx.utils.Base64Decoder;
 	
-	import my.core.Room;
+	import my.core.room.Room;
 	
 	/**
 	 * This is an immutable object representing a visiting card.

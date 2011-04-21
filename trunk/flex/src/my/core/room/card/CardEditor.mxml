@@ -26,8 +26,8 @@ photo element.
 			import mx.utils.ObjectProxy;
 			
 			import my.core.Util;
-			import my.core.Room;
 			import my.core.Constant;
+			import my.core.room.Room;
 			import my.core.room.card.VisitingCard;
 			
 			//--------------------------------------
