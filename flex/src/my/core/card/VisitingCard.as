@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.core.room.card
+package my.core.card
 {
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;

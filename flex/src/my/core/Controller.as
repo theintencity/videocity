@@ -31,10 +31,10 @@ package my.core
 	import my.controls.Layout;
 	import my.controls.PostIt;
 	import my.controls.Prompt;
-	import my.core.create.CreatePage;
+	import my.core.card.CardEditor;
+	import my.core.card.VisitingCard;
+	import my.core.CreatePage;
 	import my.core.photo.PhotoCapture;
-	import my.core.room.card.CardEditor;
-	import my.core.room.card.VisitingCard;
 	import my.core.room.Room;
 	import my.core.room.RoomPage;
 	import my.core.room.TextBox;
