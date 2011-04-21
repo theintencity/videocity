@@ -33,8 +33,8 @@ package my.core
 	import my.controls.Layout;
 	import my.controls.PostIt;
 	import my.controls.Prompt;
-	import my.core.pages.CreatePage;
-	import my.core.pages.RoomPage;
+	import my.core.create.CreatePage;
+	import my.core.room.RoomPage;
 	import my.photo.PhotoCapture;
 	import my.settings.AddMediaPrompt;
 	import my.settings.DeviceSettings;
