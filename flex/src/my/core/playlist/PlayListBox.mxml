@@ -9,7 +9,7 @@ such as PlayListItem, PlayListItems, PlayListEdit to show the individual views. 
 using the PlayList class.
 -->
 
-<containers:BaseBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:controls="my.controls.*" xmlns:play="my.play.*"
+<containers:BaseBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:controls="my.controls.*" xmlns:play="my.core.playlist.*"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
 	add="addHandler(event)" remove="removeHandler(event)"
 	dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)">
@@ -39,14 +39,14 @@ using the PlayList class.
 			import mx.controls.VideoDisplay;
 			import mx.controls.Alert;
 
-			import my.core.User;
-			import my.core.Room;
-			import my.core.Constant;
 			import my.controls.Prompt;
 			import my.controls.TrashButton;
-			import my.play.PlayItem;
-			import my.play.PlayList;
-			import my.settings.SaveMediaPrompt;
+			import my.core.User;
+			import my.core.Constant;
+			import my.core.playlist.PlayItem;
+			import my.core.playlist.PlayList;
+			import my.core.room.Room;
+			import my.core.settings.SaveMediaPrompt;
 
 			//--------------------------------------
 			// CLASS CONSTANTS

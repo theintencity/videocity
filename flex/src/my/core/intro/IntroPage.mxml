@@ -8,7 +8,7 @@ describing the purpose of the application as well as links to most common tasks 
 creating a new video room, joining an exiting room and logging in to your room.
 -->
 
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:videoplay="my.core.video.play.*"
 	name="introPage" styleName="introBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
@@ -47,12 +47,12 @@ creating a new video room, joining an exiting room and logging in to your room.
 	
 	<mx:Canvas width="220" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 		<mx:Label text="What is this?" styleName="large" x="30" y="5"/>
-		<video:PlayVideo width="120" height="90" x="40" y="25" parentExpand="{parentExpand}"
+		<videoplay:PlayVideo width="120" height="90" x="40" y="25" parentExpand="{parentExpand}"
 			label="{_('what is the Internet video city?')}" 
 			source="{user.HELP_INTRO_URL}" textsource="{user.HELP_INTRO_URL + '.txt'}"/>
 
 		<mx:Label text="Why Sign-up?" styleName="large" x="30" y="120"/>
-		<video:PlayVideo width="120" height="90" x="40" y="140" parentExpand="{parentExpand}"
+		<videoplay:PlayVideo width="120" height="90" x="40" y="140" parentExpand="{parentExpand}"
 			label="{_('why should I sign-up?')}" 
 			source="{user.HELP_SIGNUP_URL}" textsource="{user.HELP_SIGNUP_URL + '.txt'}"/>
 	</mx:Canvas>

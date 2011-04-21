@@ -25,6 +25,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			import mx.events.PropertyChangeEvent;
 			
 			import my.core.Constant;
+			import my.core.room.Room;
 			
 			
 			//--------------------------------------

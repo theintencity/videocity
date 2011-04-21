@@ -26,7 +26,7 @@ is displayed before the message. The time of the message is displayed periodical
 			
 			import my.core.Constant;
 			import my.core.Util;
-			import my.core.Room;
+			import my.core.room.Room;
 			import my.controls.FullScreen;
 			
 			//--------------------------------------

@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.core
+package my.core.room
 {
 	import flash.display.DisplayObject;
 	import flash.events.DataEvent;
@@ -19,11 +19,13 @@ package my.core
 	import my.containers.ContainerBox;
 	import my.controls.PauseCanvas;
 	import my.controls.Prompt;
-	import my.play.PlayItem;
-	import my.play.PlayList;
-	import my.play.PlayListBox;
-	import my.video.RecordVideoBox;
-	import my.video.VideoBox;
+	import my.core.Controller;
+	import my.core.User;
+	import my.core.playlist.PlayItem;
+	import my.core.playlist.PlayList;
+	import my.core.playlist.PlayListBox;
+	import my.core.video.VideoBox;
+	import my.core.video.record.RecordVideoBox;
 	
 	/**
 	 * The controller for the ContainerBox object. It should handle adding and removing from the container.

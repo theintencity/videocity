@@ -16,7 +16,7 @@
 			
 			import my.core.Constant;
 			import my.controls.Prompt;
-			import my.video.Play;
+			import my.core.video.play.Play;
 			
 			//--------------------------------------
 			// PRIVATE VARIABLES

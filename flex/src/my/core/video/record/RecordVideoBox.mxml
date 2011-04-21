@@ -6,7 +6,7 @@ The RecordVideoBox represents a video recorder box. It uses the underlying data 
 to store the recording state.
 -->
 
-<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.video.*"
+<video:VideoBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:video="my.core.video.*"
 	label="Recording" name="record"
 	add="addHandler(event)" remove="removeHandler(event)"
 	>

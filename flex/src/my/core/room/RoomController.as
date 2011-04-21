@@ -1,5 +1,5 @@
 /* Copyright (c) 2009-2011, Kundan Singh. See LICENSING for details. */
-package my.core
+package my.core.room
 {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
@@ -27,10 +27,15 @@ package my.core
 	import my.controls.Prompt;
 	import my.controls.TrashButton;
 	import my.core.room.RoomPage;
-	import my.play.PlayItem;
-	import my.play.PlayList;
-	import my.play.PlayListBox;
-	import my.video.VideoBox;
+	import my.core.playlist.PlayItem;
+	import my.core.playlist.PlayList;
+	import my.core.playlist.PlayListBox;
+	import my.core.User;
+	import my.core.View;
+	import my.core.Controller;
+	import my.core.Constant;
+	import my.core.Util;
+	import my.core.video.VideoBox;
 	
 	/**
 	 * Controller to update the page based on the user's script, streams or files..

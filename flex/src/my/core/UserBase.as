@@ -21,7 +21,7 @@ package my.core
 	import mx.events.PropertyChangeEventKind;
 	
 	import my.controls.Prompt;
-	import my.video.Record;
+	import my.core.video.record.Record;
 	
 	/**
 	 * Dispatched when the camera active state changes.

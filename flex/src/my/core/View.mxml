@@ -10,7 +10,7 @@ A developer wanting to understand the design of this software, should start look
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:containers="my.containers.*" xmlns:core="my.core.*" xmlns:intro="my.core.intro.*" xmlns:create="my.core.create.*"
+	xmlns:containers="my.containers.*" xmlns:core="my.core.*" xmlns:intro="my.core.intro.*" xmlns:create="my.core.create.*" xmlns:room="my.core.room.*"
 	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
 	<mx:Script>
@@ -56,7 +56,7 @@ A developer wanting to understand the design of this software, should start look
 	<!--
 	The script controller controls the script, playlist and streams in a room.
 	-->
-	<core:RoomController id="scriptController" user="{user}" main="{this}" controller="{control}"/>
+	<room:RoomController id="scriptController" user="{user}" main="{this}" controller="{control}"/>
 
 	<!--
 	The view contains several components. There is a main window area which covers most of the of the view.

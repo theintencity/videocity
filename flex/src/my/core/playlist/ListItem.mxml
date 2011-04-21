@@ -15,7 +15,7 @@ child depending on the current PlayItem.
 			import mx.events.CollectionEvent;
 
 			import my.core.Constant;
-			import my.video.Play;
+			import my.core.video.play.Play;
 
 			//--------------------------------------
 			// PRIVATE VARIABLES

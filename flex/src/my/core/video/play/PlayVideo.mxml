@@ -20,7 +20,7 @@ The main use of this component is to playback help videos or recorded messages i
 used to playback videos in thumbsnail view.
 -->
 
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:text="my.text.*" styleName="videoBox"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:text="my.core.video.play.*" styleName="videoBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off" initialize="initializeHandler(event)">
 	
 	<mx:Script>

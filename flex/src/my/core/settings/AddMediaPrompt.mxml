@@ -21,8 +21,8 @@ Controller handles these events on the user object as if they are coming from th
 			import my.controls.Prompt;
 			import my.core.Constant;
 			import my.core.User;
-			import my.core.Room;
-			import my.play.PlayItem;
+			import my.core.room.Room;
+			import my.core.playlist.PlayItem;
 			
 			[Bindable]
 			/**

@@ -22,9 +22,9 @@ send the play list to the owner of this room like sending a video message.
 			import my.controls.Prompt;
 			import my.core.Constant;
 			import my.core.User;
-			import my.core.Room;
-			import my.play.PlayItem;
-			import my.play.PlayList;
+			import my.core.room.Room;
+			import my.core.playlist.PlayItem;
+			import my.core.playlist.PlayList;
 			
 			//--------------------------------------
 			// PUBLIC PROPERTIES

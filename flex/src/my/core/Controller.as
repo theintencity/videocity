@@ -25,8 +25,6 @@ package my.core
 	import mx.managers.PopUpManager;
 	import mx.utils.StringUtil;
 	
-	import my.core.room.card.CardEditor;
-	import my.core.room.card.VisitingCard;
 	import my.containers.BaseBox;
 	import my.containers.ContainerBox;
 	import my.controls.FullScreen;
@@ -34,13 +32,16 @@ package my.core
 	import my.controls.PostIt;
 	import my.controls.Prompt;
 	import my.core.create.CreatePage;
+	import my.core.photo.PhotoCapture;
+	import my.core.room.card.CardEditor;
+	import my.core.room.card.VisitingCard;
+	import my.core.room.Room;
 	import my.core.room.RoomPage;
-	import my.photo.PhotoCapture;
-	import my.settings.AddMediaPrompt;
-	import my.settings.DeviceSettings;
-	import my.settings.LoginSettings;
-	import my.text.TextBox;
-	import my.video.LiveVideoBox;
+	import my.core.room.TextBox;
+	import my.core.settings.AddMediaPrompt;
+	import my.core.settings.DeviceSettings;
+	import my.core.settings.LoginSettings;
+	import my.core.video.live.LiveVideoBox;
 	
 	/**
 	 * The controller object that receives events from the various page views and controls the model
