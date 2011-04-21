@@ -26,7 +26,7 @@ package my.core
 	import my.controls.PostIt;
 	import my.controls.Prompt;
 	import my.controls.TrashButton;
-	import my.core.pages.RoomPage;
+	import my.core.room.RoomPage;
 	import my.play.PlayItem;
 	import my.play.PlayList;
 	import my.play.PlayListBox;
