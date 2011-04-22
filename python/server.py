@@ -10,7 +10,7 @@ from __future__ import with_statement
 import os, sys, string, cgi, time, thread, cStringIO, traceback, random, mimetypes, re
 try: from OpenSSL import SSL
 except: print 'WARNING: cannot import OpenSSL. Disabling crypto and HTTPS.'
-try: import multitask, rtmp, webscript, restlite, restapi, terminal
+try: import multitask, rtmp, webscript, restlite, restapi
 except: print 'Please set PYTHONPATH to include p2p-sip/src, rtmplite/ and restlite/'; exit(-1)
 
 import socket
@@ -146,10 +146,10 @@ class Call(rtmp.App):
         self.clientId += 1; client.clientId = self.clientId
         def invokeAdded(self, client): # invoke the added and published callbacks on this client, and added on other clients.
             for other in filter(lambda x: x != client, self.clients):
-                client.call('added', str(other.clientId))
-                other.call('added', str(client.clientId))
+                yield client.call('added', str(other.clientId))
+                yield other.call('added', str(client.clientId))
             for stream in filter(lambda x: x.client != client, self.publishers.values()):
-                client.call('published', str(stream.client.clientId), stream.name)
+                yield client.call('published', str(stream.client.clientId), stream.name)
             yield
         multitask.add(invokeAdded(self, client)) # need to invoke later so that connection is established before callback
 #        if _debug:
@@ -166,33 +166,39 @@ class Call(rtmp.App):
         if hasattr(self, '_bwthread'): self._bwthread.close()
         def invokeRemoved(self, client): # invoke the removed callbacks on other clients
             for other in filter(lambda x: x != client, self.clients):
-                other.call('removed', str(client.clientId))
+                yield other.call('removed', str(client.clientId))
             yield
         if filter(lambda x: x != client, self.clients): multitask.add(invokeRemoved(self, client))
         else: webscript.delete(path=client.path.partition('/')[2])
     def onPublish(self, client, stream):
         rtmp.App.onPublish(self, client, stream)
-        for other in filter(lambda x: x != client, self.clients):
-            other.call('published', str(client.clientId), stream.name)
+        def publishInternal(self, client, stream):
+            for other in filter(lambda x: x != client, self.clients):
+                yield other.call('published', str(client.clientId), stream.name)
+        multitask.add(publishInternal(self, client, stream))
     def onClose(self, client, stream):
         rtmp.App.onClose(self, client, stream)
-        for other in filter(lambda x: x != client, self.clients):
-            other.call('unpublished', str(client.clientId), stream.name)
-    def onCommand(self, client, cmd, *args):
-        if cmd == 'broadcast': # broadcast the command to everyone else in the call
+        def closeInternal(self, client, stream):
             for other in filter(lambda x: x != client, self.clients):
-                other.call(cmd, str(client.clientId), *args)
-        elif cmd == 'unicast': # send the command to the given identifier (identified by client.clientId).
-            for other in filter(lambda x: x.clientId == int(args[0]), self.clients):
-                other.call(cmd, str(client.clientId), *args[1:])
-        elif cmd == 'multicast': # send the command to multiple identifiers
-            ids = map(lambda x: int(x.strip()), args[0].split(',; \t'))
-            for other in filter(lambda x: x.clientId in ids, self.clients):
-                other.call(cmd, str(client.clientId), *args[1:])
-        elif cmd == 'anycast': # send the command to any identifier other than us.
-            others = filter(lambda x: x != client, self.clients)
-            if others:
-                random.choice(others).call(cmd, str(client.clientId), *args)
+                yield other.call('unpublished', str(client.clientId), stream.name)
+        multitask.add(closeInternal(self, client, stream))
+    def onCommand(self, client, cmd, *args):
+        def commandInternal(self, client, cmd, *args):
+            if cmd == 'broadcast': # broadcast the command to everyone else in the call
+                for other in filter(lambda x: x != client, self.clients):
+                    yield other.call(cmd, str(client.clientId), *args)
+            elif cmd == 'unicast': # send the command to the given identifier (identified by client.clientId).
+                for other in filter(lambda x: x.clientId == int(args[0]), self.clients):
+                    yield other.call(cmd, str(client.clientId), *args[1:])
+            elif cmd == 'multicast': # send the command to multiple identifiers
+                ids = map(lambda x: int(x.strip()), args[0].split(',; \t'))
+                for other in filter(lambda x: x.clientId in ids, self.clients):
+                    yield other.call(cmd, str(client.clientId), *args[1:])
+            elif cmd == 'anycast': # send the command to any identifier other than us.
+                others = filter(lambda x: x != client, self.clients)
+                if others:
+                    yield random.choice(others).call(cmd, str(client.clientId), *args)
+        multitask.add(commandInternal(self, client, cmd, *args))
 
 # The main routine to start, run and stop the service
 def runHTTP(addr=('0.0.0.0', 5080)): # create and run a web server instance
@@ -235,7 +241,7 @@ def runHTTPS(addr=('0.0.0.0', 5443)): # create and run a secure web server insta
 def runRTMP(addr=('0.0.0.0', 1935)): # create and run a flash server instance
     server = rtmp.FlashServer()
     server.apps = dict({'record': Record, 'call': Call}) # only support call and record applications  
-    server.root = 'www/flvs'
+    server.root = 'www/flvs/'
     server.start(*addr)
     if _debug: print time.asctime(), 'Flash server starts', addr
     try: multitask.run()
