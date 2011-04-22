@@ -19,7 +19,6 @@ package my.core.room
 	import my.containers.ContainerBox;
 	import my.controls.PauseCanvas;
 	import my.controls.Prompt;
-	import my.core.Controller;
 	import my.core.User;
 	import my.core.playlist.PlayItem;
 	import my.core.playlist.PlayList;
@@ -38,7 +37,6 @@ package my.core.room
 		
 		private var _user:User;
 		private var _box:ContainerBox;
-		private var _controller:Controller;
 		private var _fullBox:BaseBox = null;
 		
 
@@ -67,13 +65,11 @@ package my.core.room
 				if (oldValue != null) {
 					oldValue.removeEventListener("cameraChange", deviceChangeHandler);
 					oldValue.removeEventListener("micChange", deviceChangeHandler);
-					oldValue.removeEventListener("control", controlHandler);
 					oldValue.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler);
 				}
 				if (value != null) {
 					value.addEventListener("cameraChange", deviceChangeHandler, false, 0, true);
 					value.addEventListener("micChange", deviceChangeHandler, false, 0, true);
-					value.addEventListener("control", controlHandler, false, 0, true);
 					value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler, false, 0, true);
 				}
 			}
@@ -99,33 +95,23 @@ package my.core.room
 			}
 		}
 		
-		public function get controller():Controller
-		{
-			return _controller;
-		}
-		public function set controller(value:Controller):void
-		{
-			var oldValue:Controller = _controller;
-			_controller = value;
-		}
-		
 		//--------------------------------------
 		// PRIVATE METHODS
 		//--------------------------------------
 		
-		private function controlHandler(event:DataEvent):void
-		{
-			if (controller.activeBox == box) {
-//				if (event.data == "phone") {
-//					if (box.getChildByName("phone") == null) {
-//						var item:PhoneBox = new PhoneBox();
-//						item.user = user;
-//						controller.selectBox(box);
-//						box.addChild(item);
-//					}
-//				}
-			}
-		}
+//		private function controlHandler(event:DataEvent):void
+//		{
+//			if (controller.activeBox == box) {
+////				if (event.data == "phone") {
+////					if (box.getChildByName("phone") == null) {
+////						var item:PhoneBox = new PhoneBox();
+////						item.user = user;
+////						controller.selectBox(box);
+////						box.addChild(item);
+////					}
+////				}
+//			}
+//		}
 		
 		private function callToHandler(event:DataEvent):void
 		{

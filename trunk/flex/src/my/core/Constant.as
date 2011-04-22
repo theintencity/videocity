@@ -17,16 +17,14 @@ package my.core
 		public static const INDEX_CREATE:int  = 1;
 		
 		/**
-		 * The event type used for DataEvent dispatched on User object.
+		 * The event type used for DataEvent dispatched on Room object.
 		 * createRoom: when a new room is created in the view.
 		 * destroyRoom: when a room is removed from the view.
-		 * selectRoom: when the user wants to move to the given room.
 		 * enterRoom: when the user joins a room and connection is complete.
 		 * exitRoom: when the user leaves a room.
 		 */
 		public static const CREATE_ROOM:String  = "createRoom";
 		public static const DESTROY_ROOM:String = "destroyRoom";
-		public static const SELECT_ROOM:String  = "selectRoom";
 		public static const ENTER_ROOM:String   = "enterRoom";
 		public static const EXIT_ROOM:String    = "exitRoom";
 		
@@ -34,6 +32,7 @@ package my.core
 		 * The event type used for received text message on a Room object.
 		 */
 		public static const MESSAGE:String = "message";
+		public static const TOGGLE_TEXT:String = "toggleText";
 		
 		/**
 		 * The event type and commands used by Play List to dispatch on User object.
@@ -93,8 +92,9 @@ package my.core
 		public static const FULL_SCREEN:String = "fullScreen";
 		public static const STRETCH:String     = "stretch";
 		public static const SELECT:String      = "select";
-		public static const SETTINGS:String    = "settings";
-		public static const DEVICE:String      = "device";
+		public static const DEVICE_SELECTION:String   = "deviceSelection";
+		public static const DEVICE_SETTINGS:String    = "deviceSettings";
+		public static const PHONE_SETTINGS:String     = "phoneSettings";
 		public static const PHONE:String       = "phone"; 
 		public static const EMBED:String       = "embed";
 		public static const SEARCH:String      = "search";
@@ -104,18 +104,29 @@ package my.core
 		
 		/**
 		 * The data property of the DataEvent when type "control".
+		 * Dispatch by User.
 		 */
 		public static const HOME:String        = "home";
 		public static const LAYOUT:String      = "layout";
-		public static const LOAD:String        = "load";
 		public static const CREATE:String      = "create";
 		// following are already defined in this file.
 		// public static const UPLOAD:String      = "upload";
 		// public static const MESSAGE:String     = "messgae";
 		// public static const PHONE:String       = "phone"; 
 		public static const UPLOAD_CARD:String = "uploadCard";
-		public static const CREATE_NEW_ROOM:String = "createNewRoom"; // dispatched from IntroPage
-		public static const GOTO_GUEST_ROOM:String = "gotoGuestRoom"; // dispatched from IntroPage
+		
+		/**
+		 * The data property of the DataEvent when type is "control".
+		 * Dispatched by Room.
+		 */
+		public static const KNOCK:String       = "knock";
+		public static const SEND_EMAIL:String  = "sendEmail";
+		public static const JOIN_ROOM:String   = "joinRoom";
+		public static const LEAVE_MESSAGE:String = "leaveMessage";
+		// public static const PUBLIC
+		// public static const PRIVATE
+		public static const LOAD:String        = "load";
+		
 		
 		/**
 		 * The name of the company typically used in card editor to display the name of the issuer.

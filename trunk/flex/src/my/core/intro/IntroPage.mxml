@@ -35,6 +35,21 @@ creating a new video room, joining an exiting room and logging in to your room.
 			 * in this UI component.
 			 */
 			public var parentExpand:UIComponent;
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			/**
+			 * When the user clicks on the 'go to ...' button in the introduction page, locate the user's
+			 * logged in room page, and switch to that page.
+			 */
+			private function gotoGuestRoom():void {
+				if (user != null && user.card != null) {
+					user.selected = user.getRoom(user.card.url);
+				}
+			}
+			
 		]]>
 	</mx:Script>
 	
@@ -53,7 +68,7 @@ creating a new video room, joining an exiting room and logging in to your room.
 	<mx:VBox width="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="0">
 		<mx:VBox styleName="roundedBox" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="10">
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE_NEW_ROOM))">
+				click="user.selectedIndex = Constant.INDEX_CREATE">
 				<mx:Label text="{_('Create a new video room')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('enter email and name') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>
@@ -74,7 +89,7 @@ creating a new video room, joining an exiting room and logging in to your room.
 		<mx:Spacer height="10"/>
 		
 		<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0" visible="{!user.isGuest}"
-			click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.GOTO_GUEST_ROOM))">
+			click="gotoGuestRoom()">
 			<mx:Label text="{_('Welcome {0}', user.name)}" styleName="regular" paddingLeft="20"/>
 			<mx:Label text="{_('decorate your public guest room') + ' &gt;&gt;'}" styleName="small" paddingLeft="40"/>
 		</mx:VBox>

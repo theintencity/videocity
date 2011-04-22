@@ -98,7 +98,7 @@ An AIR-based application will have a different main file similar to this.
 				}
 				
 				if (('enter' in this.parameters) && user.selected != null) {
-					main.control.joinRoomHandler(user.selected);
+					user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM));
 				}
 			}
 			

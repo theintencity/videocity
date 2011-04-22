@@ -38,9 +38,9 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 				{event: Constant.STRETCH,     label: _('Stretch Full')},
 				{event: Constant.SELECT,      label: _('Stretch selected')},
 				null,
-				{event: Constant.SETTINGS,    label: _('Device Selection')},
-				{event: Constant.DEVICE,      label: _('Device Settings')},
-				{event: Constant.PHONE,       label: _('VoIP Settings')},
+				{event: Constant.DEVICE_SELECTION,  label: _('Device Selection')},
+				{event: Constant.DEVICE_SETTINGS,   label: _('Device Settings')},
+				{event: Constant.PHONE_SETTINGS,    label: _('VoIP Settings')},
 				null,
 				{event: Constant.EMBED,       label: '</> ' + _('URL') + ' & ' + _('Embed')},
 				{event: Constant.SEARCH,      label: '>> ' + _('search')},
@@ -199,7 +199,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="rightButtonStyle" name="{_('Enter this room')}"
-					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.ENTER_ROOM))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.ENTER_ROOM))"/>
 			</mx:AddChild>
 		</mx:State>
 			
@@ -231,7 +231,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="snapButtonStyle" name="{_('Take camera snapshot')}"
-					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CAPTURE))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CAPTURE))"/>
 			</mx:AddChild>
 			
 			<mx:AddChild relativeTo="{seperator}" position="before">
@@ -239,7 +239,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="phoneButtonStyle" name="{_('Add VoIP or phone dialing')}"
-					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PHONE))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PHONE))"/>
 			</mx:AddChild>
 			
 			<mx:AddChild relativeTo="{seperator}" position="before">
@@ -247,7 +247,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="textButtonStyle" name="{_('Add text chat')}"
-					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.MESSAGE))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.TOGGLE_TEXT))"/>
 			</mx:AddChild>
 			
 			<mx:AddChild relativeTo="{seperator}" position="before">
@@ -255,7 +255,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="leftButtonStyle" name="{_('Exit from this room')}"
-					click="user.dispatchEvent(new DataEvent(Constant.EXIT_ROOM, false, false, user.selected.url))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.EXIT_ROOM))"/>
 			</mx:AddChild>
 			
 			<mx:AddChild relativeTo="{seperator}" position="before">
@@ -271,7 +271,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="uploadButtonStyle" name="{_('Add photos or videos to this room')}"
-					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LOAD))"/>
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LOAD))"/>
 			</mx:AddChild>
 			
 			<mx:AddChild relativeTo="{seperator}" position="before">
@@ -279,7 +279,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<controls:BButton styleName="lockButtonStyle" name="{_('Lock viewers to your screen')}"
-					toggle="true" click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, ''))"/>
+					toggle="true" click="user.selected.lock = BButton(event.currentTarget).selected"/>
 			</mx:AddChild>
 			
 		</mx:State>

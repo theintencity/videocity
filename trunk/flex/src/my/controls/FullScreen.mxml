@@ -13,6 +13,7 @@ to full screen mode optionally with hardware stretching.
 	<mx:Script>
 		<![CDATA[
 			import mx.core.Application;
+			import mx.containers.Canvas;
 			
 			//--------------------------------------
 			// CLASS VARIABLES
@@ -51,6 +52,18 @@ to full screen mode optionally with hardware stretching.
 				}
 			}
 			
+			/**
+			 * Method to start the screen selection to stretch to full screen.
+			 */
+			public static function startSelectScreen():void
+			{
+				if (!FullScreen.fullScreen) {
+					PostIt.show("<b>Drag &amp; Select<br/>a region</b>", Application.application.root);
+					Application.application.mouseChildren = false;
+					Application.application.addEventListener(MouseEvent.MOUSE_DOWN, selectMouseDownHandler, false, 0, true);
+				}
+			}
+			
 			//--------------------------------------
 			// PRIVATE METHODS
 			//--------------------------------------
@@ -80,6 +93,54 @@ to full screen mode optionally with hardware stretching.
 			{
 				if (stage != null) {
 					stage.displayState = stage.displayState == StageDisplayState.FULL_SCREEN ? StageDisplayState.NORMAL : StageDisplayState.FULL_SCREEN;
+				}
+			}
+			
+			/*
+			 * Select a part of the screen to stretch.
+			 */
+			
+			private static var dragRect:Canvas = null;
+			
+			private static function selectMouseDownHandler(event:MouseEvent):void
+			{
+				Application.application.removeEventListener(MouseEvent.MOUSE_DOWN, selectMouseDownHandler);
+				Application.application.addEventListener(MouseEvent.MOUSE_UP, selectMouseUpHandler, false, 0, true);
+				Application.application.addEventListener(MouseEvent.MOUSE_MOVE, selectMouseMoveHandler, false, 0, true);
+				dragRect = new Canvas();
+				dragRect.setStyle("borderStyle", "solid");
+				dragRect.setStyle("borderColor", 0xffffff);
+				dragRect.setStyle("borderThickness", 1);
+				dragRect.setStyle("backgroundAlpha", 0);
+				dragRect.x = Application.application.mouseX;
+				dragRect.y = Application.application.mouseY;
+				dragRect.width = dragRect.height = 0;
+				Application.application.addChild(dragRect);
+			}
+			
+			private static function selectMouseMoveHandler(event:MouseEvent):void
+			{
+				if (dragRect != null) {
+					dragRect.width = Application.application.mouseX - dragRect.x;
+					dragRect.height = Application.application.mouseY - dragRect.y;
+				}
+			}
+			
+			private static function selectMouseUpHandler(event:MouseEvent):void
+			{
+				Application.application.mouseChildren = true;
+				Application.application.removeEventListener(MouseEvent.MOUSE_UP, selectMouseUpHandler);
+				Application.application.removeEventListener(MouseEvent.MOUSE_MOVE, selectMouseMoveHandler);
+				
+				if (dragRect != null) {
+					var rect:Rectangle = new Rectangle(dragRect.x, dragRect.y, dragRect.x+dragRect.width, dragRect.y+dragRect.height);
+					Application.application.removeChild(dragRect);
+					dragRect = null;
+					
+					trace("rect=" + rect.x + "," + rect.y + " " + rect.width + "x" + rect.height);
+					if (rect.width >= 10 && rect.height >= 10) {
+						FullScreen.toggleFullScreen(true, rect);
+					}
 				}
 			}
 			
