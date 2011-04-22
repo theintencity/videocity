@@ -38,6 +38,7 @@ package my.core.room {
 		
 		override flash_proxy function callProperty(methodName:*, ... args):* 
 		{
+			trace("callback invoke " + methodName);
 			if (target != null) {
 				if (methods == null || methods.indexOf(methodName.toString()) >= 0) {
 					try {
