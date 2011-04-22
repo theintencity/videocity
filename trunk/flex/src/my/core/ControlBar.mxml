@@ -274,6 +274,14 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 					click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LOAD))"/>
 			</mx:AddChild>
 			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="lockButtonStyle" name="{_('Lock viewers to your screen')}"
+					toggle="true" click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, ''))"/>
+			</mx:AddChild>
+			
 		</mx:State>
 		
 	</containers:states>

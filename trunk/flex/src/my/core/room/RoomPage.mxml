@@ -222,7 +222,7 @@ leave the room.
 		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
 			horizontalScrollPolicy="off" verticalScrollPolicy="off">
 			<mx:Button label="{_('Upload visiting card')}" styleName="blackButtonStyle" width="100%"
-				click="controller.uploadCard()"/>
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))"/>
 			<mx:Button label="{_('Knock on the door')}" styleName="blackButtonStyle" width="100%"
 				click="controller.knockRoomHandler(room)"/>
 			<mx:Button label="{_('Send an email message')}" styleName="blackButtonStyle" width="100%"

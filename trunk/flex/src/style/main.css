@@ -449,6 +449,15 @@ targetBox.VBox {
 	overSkin: ClassReference("my.skins.CamButtonSkin");
 }
 
+/* Lock button */
+.lockButtonStyle {
+	border-thickness: 0;
+	fill-colors: #cacaca, #b8b8b8;
+	fill-over-colors: #a0a0a0, #a0a0a0;
+	skin: ClassReference("my.skins.LockButtonSkin");
+	overSkin: ClassReference("my.skins.LockButtonSkin");
+}
+
 /* Mic mute and unmute button */
 .micButtonStyle {
 	border-thickness: 0;

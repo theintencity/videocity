@@ -10,7 +10,7 @@ A developer wanting to understand the design of this software, should start look
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:containers="my.containers.*" xmlns:core="my.core.*" xmlns:room="my.core.room.*"
+	xmlns:containers="my.containers.*" xmlns:core="my.core.*" xmlns:intro="my.core.intro.*" xmlns:create="my.core.create.*" xmlns:room="my.core.room.*"
 	width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
 	<mx:Script>
@@ -70,8 +70,8 @@ A developer wanting to understand the design of this software, should start look
 		direction="horizontal" numColumns="3" visibleCount="1" allowDrag="true" 
 		selectedIndex="{user.selectedIndex}" selectedChange="user.selectedIndex=win.selectedIndex">
 
-		<core:IntroPage   id="introPage"  controller="{control}" user="{user}" parentExpand="{this}"/>
-		<core:CreatePage  id="createPage" controller="{control}" user="{user}"/>
+		<intro:IntroPage   id="introPage"  user="{user}" parentExpand="{this}"/>
+		<create:CreatePage  id="createPage" user="{user}" controller="{control}"/>
 		<!-- These RoomPage pages are added dynamically by controller.
 		<pages:TargetPage  id="targetPage" controller="{control}" user="{user}"/>
 		<pages:RoomPage    id="myRoomPage" name="myRoomPage" controller="{control}" user="{user}" room="{user.myroom}"/>
