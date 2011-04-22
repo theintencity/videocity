@@ -16,19 +16,12 @@ creating a new video room, joining an exiting room and logging in to your room.
 		<![CDATA[
 			import mx.core.UIComponent;
 			
-			import my.core.Controller;
 			import my.core.User;
+			import my.core.Constant;
 			
 			//--------------------------------------
 			// PUBLIC PROPERTIES
 			//--------------------------------------
-			
-			[Bindable]
-			/**
-			 * The controller which is used by this view to update the underlying model or perform some
-			 * actions.
-			 */
-			public var controller:Controller;
 			
 			[Bindable]
 			/**
@@ -60,19 +53,19 @@ creating a new video room, joining an exiting room and logging in to your room.
 	<mx:VBox width="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="0">
 		<mx:VBox styleName="roundedBox" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="10">
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="controller.createRoomHandler()">
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE_NEW_ROOM))">
 				<mx:Label text="{_('Create a new video room')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('enter email and name') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>
 	
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="controller.uploadCard()">
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))">
 				<mx:Label text="{_('Join an existing room')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('upload Internet visiting card') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>
 				
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="controller.uploadCard()">
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))">
 				<mx:Label text="{user.isGuest ? _('Login to your room') : _('Login as another user')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('upload private login card') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>
@@ -80,8 +73,8 @@ creating a new video room, joining an exiting room and logging in to your room.
 		
 		<mx:Spacer height="10"/>
 		
-		<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-			click="controller.gotoGuestRoom()" visible="{!user.isGuest}">
+		<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0" visible="{!user.isGuest}"
+			click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.GOTO_GUEST_ROOM))">
 			<mx:Label text="{_('Welcome {0}', user.name)}" styleName="regular" paddingLeft="20"/>
 			<mx:Label text="{_('decorate your public guest room') + ' &gt;&gt;'}" styleName="small" paddingLeft="40"/>
 		</mx:VBox>

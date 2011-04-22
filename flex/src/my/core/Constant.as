@@ -113,6 +113,9 @@ package my.core
 		// public static const UPLOAD:String      = "upload";
 		// public static const MESSAGE:String     = "messgae";
 		// public static const PHONE:String       = "phone"; 
+		public static const UPLOAD_CARD:String = "uploadCard";
+		public static const CREATE_NEW_ROOM:String = "createNewRoom"; // dispatched from IntroPage
+		public static const GOTO_GUEST_ROOM:String = "gotoGuestRoom"; // dispatched from IntroPage
 		
 		/**
 		 * The name of the company typically used in card editor to display the name of the issuer.

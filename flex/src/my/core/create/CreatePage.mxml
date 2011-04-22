@@ -126,7 +126,7 @@ sends the card in an email to the user's email address.
 			
 		<mx:Button styleName="blackButtonStyle" label="{_('Upload Card')}" toolTip="{_('import data from your existing login card')}"
 			width="85" x="130" y="110" paddingLeft="0" paddingRight="0"
-			click="controller.uploadCard()"/>
+			click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))"/>
 	</mx:Canvas>
 	
 	<card:CardBox id="cardImage" visible="{!user.isGuest}" data="{user.card}"

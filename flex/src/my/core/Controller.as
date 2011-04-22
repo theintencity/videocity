@@ -33,7 +33,7 @@ package my.core
 	import my.controls.Prompt;
 	import my.core.card.CardEditor;
 	import my.core.card.VisitingCard;
-	import my.core.CreatePage;
+	import my.core.create.CreatePage;
 	import my.core.video.snap.PhotoCapture;
 	import my.core.room.Room;
 	import my.core.room.RoomPage;
@@ -342,11 +342,6 @@ package my.core
 		public function downloadCard(card:*):void
 		{
 			downloadCardInternal(card);
-		}
-		
-		public function uploadCard():void
-		{
-			uploadCardInternal();
 		}
 		
 		/*
@@ -692,7 +687,7 @@ package my.core
 				break;
 			case Constant.UPLOAD:
 				if (user.selected == null || !user.selected.connected)
-					uploadCard(); // upload card on other pages.
+					uploadCardInternal(); // upload card on other pages.
 				else
 					uploadFiles(); // upload files on connected room pages. May include a card.
 				break;
@@ -730,6 +725,15 @@ package my.core
 			case Constant.ENTER_ROOM:
 				if (user.selected != null)
 					joinRoomHandler(user.selected);
+				break;
+			case Constant.UPLOAD_CARD:
+				uploadCardInternal();
+				break;
+			case Constant.CREATE_NEW_ROOM:
+				createRoomHandler();
+				break;
+			case Constant.GOTO_GUEST_ROOM:
+				gotoGuestRoom();
 				break;
 			}
 		}
@@ -970,7 +974,7 @@ package my.core
 				
 			case Constant.LOGIN:
 				if (user != null) {
-					if (user.isGuest) uploadCard(); 
+					if (user.isGuest) uploadCardInternal(); 
 					else user.logout(); 
 				}
 				break;
