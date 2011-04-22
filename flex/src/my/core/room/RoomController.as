@@ -7,34 +7,44 @@ package my.core.room
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.events.SecurityErrorEvent;
+	import flash.events.TimerEvent;
 	import flash.media.Video;
 	import flash.net.FileReference;
 	import flash.net.NetStream;
 	import flash.net.URLRequest;
+	import flash.system.System;
+	import flash.utils.Timer;
 	
+	import mx.core.Application;
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
 	import mx.events.PropertyChangeEvent;
+	import mx.managers.PopUpManager;
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
 	import my.containers.ContainerBox;
+	import my.controls.FullScreen;
 	import my.controls.PostIt;
 	import my.controls.Prompt;
 	import my.controls.TrashButton;
-	import my.core.room.RoomPage;
+	import my.core.Controller;
+	import my.core.Constant;
 	import my.core.playlist.PlayItem;
 	import my.core.playlist.PlayList;
 	import my.core.playlist.PlayListBox;
+	import my.core.room.RoomPage;
+	import my.core.settings.AddMediaPrompt;
 	import my.core.User;
-	import my.core.View;
-	import my.core.Controller;
-	import my.core.Constant;
 	import my.core.Util;
+	import my.core.View;
+	import my.core.video.snap.PhotoCapture;
 	import my.core.video.VideoBox;
 	
 	/**
@@ -58,7 +68,7 @@ package my.core.room
 		/**
 		 * The associated main view.
 		 */
-		public var main:View;
+		public var view:View;
 		
 		/**
 		 * The associated controller.
@@ -94,15 +104,13 @@ package my.core.room
 			_user = value;
 			if (oldValue != value) {
 				if (oldValue != null) {
-					oldValue.removeEventListener(Constant.PLAY_LIST, playListHandler);
-					oldValue.removeEventListener(Constant.ENTER_ROOM, roomHandler);
-					oldValue.removeEventListener(Constant.EXIT_ROOM, roomHandler);
+					oldValue.removeEventListener(Constant.CREATE_ROOM, createHandler);
+					oldValue.removeEventListener(Constant.DESTROY_ROOM, destroyHandler);
 					oldValue.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler);
 				}
 				if (value != null) {
-					value.addEventListener(Constant.PLAY_LIST, playListHandler, false, 0, true);
-					value.addEventListener(Constant.ENTER_ROOM, roomHandler, false, 0, true);
-					value.addEventListener(Constant.EXIT_ROOM, roomHandler, false, 0, true);
+					value.addEventListener(Constant.CREATE_ROOM, createHandler, false, 0, true);
+					value.addEventListener(Constant.DESTROY_ROOM, destroyHandler, false, 0, true);
 					value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler, false, 0, true);
 				}
 			}
@@ -112,34 +120,50 @@ package my.core.room
 		// PRIVATE METHODS
 		//--------------------------------------
 		
-		private function roomHandler(event:DataEvent):void
+		/*
+		 * Following are invoked by user model related to room.
+		 */
+		private function createHandler(event:DataEvent):void
 		{
 			var room:Room = user.getRoom(event.data);
 			
-			switch (event.type) {
-			case Constant.ENTER_ROOM:
-				// a new room is created, fetch a welcome page if needed
-				room.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
-				room.addEventListener(Constant.MESSAGE, messageHandler, false, 10, true);
-				room.addEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler, false, 0, true);
-				room.addEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler, false, 0, true);
-				room.addEventListener(Constant.FILES_CHANGE, filesChangeHandler, false, 0, true);
-				if (room.connected)
-					scriptStart(room, Constant.PUBLIC);
-				break;
-			case Constant.EXIT_ROOM:
-				room.files.removeAll();
-				room.streams.removeAll();
-				room.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
-				room.removeEventListener(Constant.MESSAGE, messageHandler);
-				room.removeEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler);
-				room.removeEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler);
-				room.removeEventListener(Constant.FILES_CHANGE, filesChangeHandler);
-				scriptStop(room);
-				break;
+			var roomView:RoomPage = room.view;
+			if (roomView == null) {
+				roomView = new RoomPage();
+				roomView.user = user;
+				roomView.room = room;
+				room.view = roomView;
+				room.addEventListener(Constant.CONTROL, controlHandler, false, 0, true);
+				room.addEventListener(Constant.PLAY_LIST, playListHandler, false, 0, true);
+				view.win.addChild(roomView);
 			}
+			user.selected = room;
 		}
 		
+		private function destroyHandler(event:DataEvent):void
+		{
+			var room:Room = user.getRoom(event.data);
+			var roomView:RoomPage = room.view;
+			
+			user.selected = user.getPreviousRoom(room);
+			room.removeEventListener(Constant.CONTROL, controlHandler);
+			room.removeEventListener(Constant.PLAY_LIST, playListHandler);
+			if (room.connected)
+				room.disconnect();
+			if (roomView != null) {
+				// need to remove from view after a timeout for good animation effect.
+				var t:Timer = new Timer(1000, 1);
+				var removeChild:Function = function(event:Event):void {
+					t.removeEventListener(TimerEvent.TIMER, removeChild);
+					view.win.removeChild(roomView);
+					roomView.room = null;
+				}
+				t.addEventListener(TimerEvent.TIMER, removeChild);
+				t.start();
+			}
+			room.view = null;
+		}
+				
 		private function userChangeHandler(event:PropertyChangeEvent):void
 		{
 			if (event.property == "card" && event.oldValue != event.newValue) {
@@ -151,6 +175,78 @@ package my.core.room
 			}
 		}
 		
+		private function controlHandler(event:DataEvent):void
+		{
+			var room:Room = event.currentTarget as Room;
+			switch (event.data) {
+			case Constant.ENTER_ROOM:   enterRoom(room); break;
+			case Constant.EXIT_ROOM:    exitRoom(room); break;
+			case Constant.KNOCK:        knockRoomHandler(room); break;
+			case Constant.SEND_EMAIL:   sendEmailHandler(room); break;
+			case Constant.JOIN_ROOM:    joinRoomHandler(room);  break;
+			case Constant.LEAVE_MESSAGE: leaveMessageHandler(room); break;
+			case Constant.PUBLIC:
+			case Constant.PRIVATE:      setRoomAccess(room, event.data); break;
+			case Constant.LOAD:         AddMediaPrompt.show(user.selected); break;
+			case Constant.CREATE:
+				if (user.selected != null && user.selected.connected) {
+					user.selected.load(XML('<show description="Click to edit title"/>'));
+				}
+				break;
+			case Constant.CAPTURE:      captureHandler(event); break;
+			case Constant.PHONE:
+				Prompt.show("This feature is currently not implemented", "Not implemented yet");
+				break;
+				
+			case Constant.TOGGLE_TEXT:
+				if (user.selected != null) {
+					var roomPage:RoomPage = user.selected.view;
+					var box:ContainerBox = roomPage.callBox;
+					var text:TextBox = box.getChildByName("text") as TextBox;
+					if (text == null) {
+						text = new TextBox();
+						text.room = user.selected;
+						box.addChild(text);
+					}
+					else {
+						box.removeChild(text);
+					}
+				}
+				break;
+			}			
+		}
+		
+		private function enterRoom(room:Room):void
+		{
+			// a new room is created, fetch a welcome page if needed
+			room.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
+			room.addEventListener(Constant.MESSAGE, messageHandler, false, 10, true);
+			room.addEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler, false, 0, true);
+			room.addEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler, false, 0, true);
+			room.addEventListener(Constant.FILES_CHANGE, filesChangeHandler, false, 0, true);
+			if (room.connected)
+				scriptStart(room, Constant.PUBLIC);
+			if (user.selected != null)
+				user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM));
+		}
+		
+		private function exitRoom(room:Room):void
+		{
+			room.files.removeAll();
+			room.streams.removeAll();
+			room.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
+			room.removeEventListener(Constant.MESSAGE, messageHandler);
+			room.removeEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler);
+			room.removeEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler);
+			room.removeEventListener(Constant.FILES_CHANGE, filesChangeHandler);
+			scriptStop(room);
+
+			if (room.connected) 
+				room.disconnect();
+			else
+				user.selected = user.getPreviousRoom(room);
+		}
+		
 		private function roomChangeHandler(event:PropertyChangeEvent):void
 		{
 			var room:Room = event.currentTarget as Room;
@@ -160,7 +256,7 @@ package my.core.room
 				}
 				else {
 					scriptStop(room);
-					var roomPage:RoomPage = controller.getRoomView(room);
+					var roomPage:RoomPage = room.view as RoomPage;
 					roomPage.callBox.removeAllChildren();
 				}
 			}
@@ -169,8 +265,7 @@ package my.core.room
 		private function membersChangeHandler(event:CollectionEvent):void
 		{
 			var room:Room = event.currentTarget as Room;
-			var roomPage:RoomPage = controller.getRoomView(room);
-			var callBox:ContainerBox = roomPage != null ? roomPage.callBox : null;
+			var callBox:ContainerBox = room.view != null ? room.view.callBox : null;
 			var item:Object;
 			
 			switch (event.kind) {
@@ -186,6 +281,74 @@ package my.core.room
 			}
 		}
 		
+		private function knockRoomHandler(room:Room):void
+		{
+			Prompt.show("This feature is not yet implemented", "Not Implemented");
+		}
+		
+		private function sendEmailHandler(room:Room):void
+		{
+			var email:String = (room.email != null ? room.email : Util.url2email(room.url));
+			if (Util.isEmail(email)) {
+				var text:String = _("Dear Friend,\nPlease checkout the Internet Video City to live chat with me at\nhttp://{0}", user.server);
+				var closeHandler:Function = function(id:uint):void {
+					System.setClipboard(text);
+				};
+				Alert.okLabel = "copy";
+				Prompt.show("<p>" + text + "<br/><font color='#ff0000'>Copy this, paste in your email client and send email</font>", 
+					"Copy the email text to clipboard", Alert.OK, null, closeHandler);
+				Alert.okLabel = "OK";
+			}
+			else {
+				Prompt.show("<br/>Please enter a valid email address, e.g., bob@iptel.org"
+				 + "<br/><b>Invalid email address</b>: " + email + "."
+				 , "Error in parsing email address");
+			}
+		}
+		
+		public function leaveMessageHandler(room:Room):void
+		{
+			var closeHandler:Function = function(id:uint):void {
+				if (id == Alert.OK && !user.recording) 
+					user.recording = true;
+			}
+			Prompt.show("<br/>1. Click 'OK' to start recording.<br/>2. Click on <font color='#ff0000'>red</font> record button again to finish recording.<br/>3. Click on save button, then send to owner.", "How to record a video message", Alert.OK | Alert.CANCEL, null, closeHandler);
+		}
+		
+		private function joinRoomHandler(room:Room):void
+		{
+			user.join(room);
+			//user.selectedIndex = Constant.INDEX_CALL;
+		}
+		
+		private function setRoomAccess(room:Room, type:String):void
+		{
+			if (user.card != null && room.isOwner) {
+				if (room.card.isLoginCard && type == "public") {
+					Prompt.show("You must first upload the visiting card for this room to make it public", "Error changing room access");
+				}
+				else {
+					var params:Object = {
+						logincard: Util.base64encode(user.card.rawData),
+						room: room.url,
+						type: type
+					};
+					
+					if (type == "public")
+						params.visitingcard = Util.base64encode(room.card.rawData);
+					user.httpSend(Constant.ACCESS, params, {room: room, type: type}, setRoomAccessHandler);
+				}
+			}
+			else {
+				Prompt.show("You must login and be owner of the room to change the room access", "Error changing room access");
+			}
+		}
+		
+		private function setRoomAccessHandler(obj:Object, result:XML):void
+		{
+			Prompt.show('<br/>Your room is set to <font color="' + (obj.type == "public" ? '#00ff00' : '#ff0000') + '">"' + obj.type + '</font><br/><font color="#0000ff">' + obj.room.url + '</font>', "Room access changed");
+		}
+		
 		private function postIt(msg:String):void
 		{
 			var index:int = controller.view.win.selectedIndex;
@@ -196,8 +359,7 @@ package my.core.room
 		private function streamsChangeHandler(event:CollectionEvent):void
 		{
 			var room:Room = event.currentTarget as Room;
-			var roomPage:RoomPage = controller.getRoomView(room);
-			var callBox:ContainerBox = roomPage.callBox;
+			var callBox:ContainerBox = room.view.callBox;
 			
 			var box:VideoBox;
 			var video:Video;
@@ -251,8 +413,7 @@ package my.core.room
 		private function filesChangeHandler(event:CollectionEvent):void
 		{
 			var room:Room = event.currentTarget as Room;
-			var roomPage:RoomPage = controller.getRoomView(room);
-			var callBox:ContainerBox = roomPage.callBox;
+			var callBox:ContainerBox = room.view.callBox;
 			
 			var box:PlayListBox;
 			var obj:Object;
@@ -294,7 +455,7 @@ package my.core.room
 		private function messageHandler(event:DynamicEvent):void
 		{
 			var room:Room = event.currentTarget as Room;
-			controller.addTextBox(room);
+			addTextBox(room);
 		}
 		
 		private function scriptStart(room:Room, target:String):void
@@ -542,5 +703,42 @@ package my.core.room
 			
 			user.httpSend(TrashButton.TRASH, params, context);
 		}
+		
+		private function addTextBox(room:Room):void
+		{
+			var roomPage:RoomPage = room.view;
+			var box:ContainerBox = roomPage != null ? roomPage.callBox : null;
+			var text:TextBox = box != null ? box.getChildByName("text") as TextBox : null;
+			if (text == null) {
+				text = new TextBox();
+				text.room = room;
+				box.addChild(text);
+			}	
+		}
+		
+		private var capture:PhotoCapture;
+		
+		private function captureHandler(event:Event):void
+		{
+			if (user.selected != null && user.selected.connected) {
+				capture = PopUpManager.createPopUp(Application.application as DisplayObject, PhotoCapture, true) as PhotoCapture;
+				capture.addEventListener(Event.COMPLETE, captureCompleteHandler, false, 0, true);
+				capture.maintainAspectRatio = false;
+				PopUpManager.centerPopUp(capture);
+			}
+			else {
+				Prompt.show("You must be inside a room to launch this tool", "Error launching tool");
+			}
+		}
+		
+		private function captureCompleteHandler(event:Event):void
+		{
+			if (capture != null && capture.selectedPhoto != null) {
+				if (user.selected != null && user.selected.connected)
+					user.selected.load(capture.selectedPhoto.getChildAt(0));
+			}
+			capture = null;
+		}
+		
 	}
 }

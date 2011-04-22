@@ -38,7 +38,6 @@ leave the room.
 			import my.core.room.Room;
 			import my.core.room.RoomMember;
 			import my.core.User;
-			import my.core.Controller;
 			import my.core.Constant;
 			import my.containers.BaseBox;
 			import my.core.playlist.PlayListBox;
@@ -52,13 +51,13 @@ leave the room.
 			
 			private var _room:Room;
 			private var _user:User;
-			private var _controller:Controller;
 			
 			[Bindable]
 			/*
 			 * Number of boxes in this room's callBox currently.
 			 */
 			private var numBoxes:Number = 0;
+			
 			
 			//--------------------------------------
 			// GETTERS/SETTERS
@@ -113,19 +112,6 @@ leave the room.
 				}
 			}
 			
-			[Bindable]
-			/**
-			 * The controller for this application.
-			 */
-			public function get controller():Controller
-			{
-				return _controller;
-			}
-			public function set controller(value:Controller):void
-			{
-				_controller = value;
-			}
-			
 			//--------------------------------------
 			// PRIVATE METHODS
 			//--------------------------------------
@@ -173,7 +159,7 @@ leave the room.
 		mouseMove="if (callBox.mouseX &lt; 20) memberList.show(); 
 			else if (callBox.mouseX &gt; 50) memberList.hide(); "/>
 	
-	<room:BoxController user="{user}" box="{callBox}" controller="{controller}"/>
+	<room:BoxController user="{user}" box="{callBox}"/>
 	
 	<room:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
 		itemRenderer="my.core.room.RoomMember" dataProvider="{room.members}"/>
@@ -183,12 +169,12 @@ leave the room.
 		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
 			horizontalScrollPolicy="off" verticalScrollPolicy="off">
 			<card:CardBox id="targetImage" x="40" y="40"
-				download="controller.downloadCard(targetImage.data)"
+				download="user.downloadCard(targetImage.data)"
 				creationComplete="targetImageHandler(event)"/>
 			<mx:Button label="{_('Enter this room')}" styleName="blackButtonStyle" width="100%"
-				click="controller.joinRoomHandler(room)"/>
+				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM))"/>
 			<mx:Button label="{_('Record a message')}" styleName="blackButtonStyle" width="100%"
-				click="controller.leaveMessageHandler(room)"/>
+				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LEAVE_MESSAGE))"/>
 		</mx:VBox>
 		
 		<mx:Canvas width="230" height="100%"
@@ -203,10 +189,10 @@ leave the room.
 				<mx:HBox width="100%">
 					<mx:Button label="{_('Public')}" styleName="blackButtonStyle" width="100%"
 						toolTip="{_('Make your room as public')}"
-						click="controller.setRoomAccess(room, 'public')"/>
+						click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PUBLIC))"/>
 					<mx:Button label="{_('Private')}" styleName="blackButtonStyle" width="100%"
 						toolTip="{_('Make your room as private')}"
-						click="controller.setRoomAccess(room, 'private')"/>
+						click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PRIVATE))"/>
 				</mx:HBox>
 			</mx:VBox>
 			
@@ -224,9 +210,9 @@ leave the room.
 			<mx:Button label="{_('Upload visiting card')}" styleName="blackButtonStyle" width="100%"
 				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))"/>
 			<mx:Button label="{_('Knock on the door')}" styleName="blackButtonStyle" width="100%"
-				click="controller.knockRoomHandler(room)"/>
+				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.KNOCK))"/>
 			<mx:Button label="{_('Send an email message')}" styleName="blackButtonStyle" width="100%"
-				click="controller.sendEmailHandler(room)"/>
+				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.SEND_EMAIL))"/>
 		</mx:VBox>
 		
 		<mx:TextArea styleName="multiline" width="230" height="100%"

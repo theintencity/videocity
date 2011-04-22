@@ -54,9 +54,14 @@ A developer wanting to understand the design of this software, should start look
 	<core:Controller id="control" user="{user}" view="{this}"/>
 	
 	<!--
+	The file controller controls the upload and download of files.
+	-->
+	<core:FileController id="fileController" user="{user}"/>
+
+	<!--
 	The script controller controls the script, playlist and streams in a room.
 	-->
-	<room:RoomController id="scriptController" user="{user}" main="{this}" controller="{control}"/>
+	<room:RoomController id="roomController" user="{user}" view="{this}"/>
 
 	<!--
 	The view contains several components. There is a main window area which covers most of the of the view.
@@ -71,7 +76,7 @@ A developer wanting to understand the design of this software, should start look
 		selectedIndex="{user.selectedIndex}" selectedChange="user.selectedIndex=win.selectedIndex">
 
 		<intro:IntroPage   id="introPage"  user="{user}" parentExpand="{this}"/>
-		<create:CreatePage  id="createPage" user="{user}" controller="{control}"/>
+		<create:CreatePage  id="createPage" user="{user}"/>
 		<!-- These RoomPage pages are added dynamically by controller.
 		<pages:TargetPage  id="targetPage" controller="{control}" user="{user}"/>
 		<pages:RoomPage    id="myRoomPage" name="myRoomPage" controller="{control}" user="{user}" room="{user.myroom}"/>

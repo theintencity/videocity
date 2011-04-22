@@ -26,9 +26,9 @@ Controller handles these events on the user object as if they are coming from th
 			
 			[Bindable]
 			/**
-			 * The user object associated with this component.
+			 * The room object associated with this component.
 			 */
-			public var user:User;
+			public var room:Room;
 
 			//--------------------------------------
 			// STATIC METHODS
@@ -37,10 +37,10 @@ Controller handles these events on the user object as if they are coming from th
 			/**
 			 * The main method to launch this dialog box.
 			 */
-			public static function show(user:User):void
+			public static function show(room:Room):void
 			{
 				var child:AddMediaPrompt = new AddMediaPrompt();
-				child.user = user;
+				child.room = room;
 				
 				var m:Prompt = Prompt.show(null, "Add photo or video to the room", Alert.CANCEL);
 				
@@ -56,16 +56,16 @@ Controller handles these events on the user object as if they are coming from th
 			{
 				if (type == 'create') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);
-					user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE));
+					room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE));
 				}
 				else if (type == 'upload') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);
-					user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD));
+					room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD));
 				}
 				else if (url.text != '') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);
-					if (user.selected != null) {
-						user.selected.load(PlayItem.describeURL(url.text));
+					if (room != null) {
+						room.load(PlayItem.describeURL(url.text));
 					}
 				}
 			}

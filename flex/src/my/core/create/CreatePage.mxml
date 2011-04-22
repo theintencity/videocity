@@ -16,7 +16,7 @@ sends the card in an email to the user's email address.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:view="view.*" xmlns:card="my.core.card.*" xmlns:controls="my.controls.*" xmlns:snap="my.core.video.snap.*" 
+	xmlns:view="view.*" xmlns:card="my.core.card.*" xmlns:controls="my.controls.*" xmlns:snap="my.core.video.snap.*" xmlns:create="my.core.create.*"
 	name="createPage" styleName="createBox"
 	horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	
@@ -29,7 +29,6 @@ sends the card in an email to the user's email address.
 			import my.core.card.VisitingCard;
 			import my.core.room.Room;
 			import my.core.User;
-			import my.core.Controller;
 			import my.core.Constant;
 			
 			//--------------------------------------
@@ -45,12 +44,6 @@ sends the card in an email to the user's email address.
 			//--------------------------------------
 			// PUBLIC PROPERTIES
 			//--------------------------------------
-			
-			[Bindable]
-			/**
-			 * The controller that gets invoked by this view to modify the associated models.
-			 */
-			public var controller:Controller;
 			
 			[Bindable]
 			/**
@@ -103,6 +96,8 @@ sends the card in an email to the user's email address.
 		]]>
 	</mx:Script>
 	
+	<create:CreateController id="controller" view="{this}" user="{user}" />
+	
 	<mx:Canvas visible="{user.isGuest}"
 		width="210" height="130" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 		
@@ -131,7 +126,7 @@ sends the card in an email to the user's email address.
 	
 	<card:CardBox id="cardImage" visible="{!user.isGuest}" data="{user.card}"
 		x="20" y="10"
-		download="controller.downloadCard(cardImage.data)"/>
+		download="user.downloadCard(cardImage.data)"/>
 		
 	<mx:Text text="{_('Create new video room')}" styleName="regular"
 		width="100%" x="10" y="140" textAlign="left"/>

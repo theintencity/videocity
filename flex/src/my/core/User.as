@@ -19,6 +19,7 @@ package my.core
 	import my.core.room.Room;
 	import my.core.card.VisitingCard;
 	import my.controls.Prompt;
+	import mx.events.DynamicEvent;
 	
 	/**
 	 * Dispatched when a control button is clicked. Possible values of data property:
@@ -26,6 +27,11 @@ package my.core
 	 * @eventType my.core.Constant.CONTROL
 	 */
 	[Event(name="control", type="flash.events.DataEvent")]
+	
+	/**
+	 * Dispatched when a user wants to download a card.
+	 */
+	[Event(name="download", type="mx.events.DynamicEvent")] 
 	
 	/**
 	 * Dispatched when a menu item is selected. Possible values of data property:
@@ -49,27 +55,6 @@ package my.core
 	 * @eventType my.core.Constant.DESTROY_ROOM
  	 */
 	[Event(name="destroyRoom", type="flash.events.DataEvent")]
-	
-	/**
-	 * When the user enters a particular room, e.g., by clicking on join button.
-	 * The data property contains the room url which can be used in User.getRoom().
-	 * @eventType my.core.Constant.ENTER_ROOM
- 	 */
-	[Event(name="enterRoom", type="flash.events.DataEvent")]
-	
-	/**
-	 * When the user selects a particular room, e.g., on creation.
-	 * The data property contains the room url which can be used in User.getRoom().
-	 * @eventType my.core.Constant.SELECT_ROOM
- 	 */
-	[Event(name="selectRoom", type="flash.events.DataEvent")]
-	
-	/**
-	 * When the user exist a particular room.
-	 * The data property contains the room url which can be used in User.getRoom().
-	 * @eventType my.core.Constant.EXIT_ROOM
- 	 */
-	[Event(name="exitRoom", type="flash.events.DataEvent")]
 	
 	/**
 	 * Extends UserBase to support rooms and target..
@@ -231,7 +216,7 @@ package my.core
 				loadTargetCard(value);
 				dispatchEvent(new DataEvent(Constant.CREATE_ROOM, false, false, room.url));
 			}
-			dispatchEvent(new DataEvent(Constant.SELECT_ROOM, false, false, room.url)); 
+			this.selected = room;
 		}
 		
 		[Bindable]
@@ -427,8 +412,7 @@ package my.core
 				room.connect();
 			}
 			
-			dispatchEvent(new DataEvent(Constant.SELECT_ROOM, false, false, room.url));
-			
+			this.selected = room;
 			return room;
 		}
 		
@@ -439,7 +423,7 @@ package my.core
 		{
 			if (room != null) {
 				room.close();
-				dispatchEvent(new DataEvent("destroyRoom", false, false, room.url)); // dispatch event first
+				dispatchEvent(new DataEvent(Constant.DESTROY_ROOM, false, false, room.url)); // dispatch event first
 				delete _rooms[room.url];
 			}
 		}
@@ -514,6 +498,18 @@ package my.core
 			var token:AsyncToken = http.send(params);
 			
 			_http[token] = {context: context, success: success, fault: fault, url: url};
+		}
+		
+		/**
+		 * Dispatch an event to download the card, so that the controller can act on it.
+		 */
+		public function downloadCard(card:*, name:String=null):void
+		{
+			var event:DynamicEvent = new DynamicEvent(Constant.DOWNLOAD);
+			event.card = card;
+			if (name != null)
+				event.name = name;
+			dispatchEvent(event);
 		}
 		
 		//--------------------------------------

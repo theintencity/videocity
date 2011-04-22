@@ -37,6 +37,13 @@ package my.core.room
 	import my.core.Util;
 	
 	/**
+	 * Dispatched when a control button is clicked. Possible values of data property:
+	 * 'enterRoom', 'selectRoom', 'exitRoom'. This is dispatched on behalf in RoomController or RoomPage
+	 * @eventType my.core.Constant.CONTROL
+	 */
+	[Event(name="control", type="flash.events.DataEvent")]
+	
+	/**
 	 * Dispatched when the members property changes.
 	 */
 	[Event(name="membersChange", type="mx.collections.CollectionEvent")]
@@ -81,6 +88,7 @@ package my.core.room
 		private var _ns:NetStream;  // local published stream for local video
 		private var _stream:String; // local stream name that is published. This is randomly generated.
 		private var _user:User;     // the local user for this room -- set only for RoomPage.room.
+		private var _lock:Boolean = false;
 		
 		//--------------------------------------
 		// PUBLIC PROPERTIES
@@ -153,6 +161,12 @@ package my.core.room
 		 * Base64 encoded opaque key or certificate.
 		 */
 		public var key:String; 
+		
+		[Bindable]
+		/**
+		 * The view object of this data model is of type RoomPage.
+		 */
+		public var view:RoomPage;
 		
 		//--------------------------------------
 		// STATIC CONSTRUCTOR
@@ -352,6 +366,19 @@ package my.core.room
 			}
 		}
 		
+		[Bindable]
+		/**
+		 * Whether this room is locked to do shared screen or not?
+		 */
+		public function get lock():Boolean
+		{
+			return _lock;
+		}
+		public function set lock(value:Boolean):void
+		{
+			_lock = value;
+		}
+		
 		//--------------------------------------
 		// PUBLIC METHODS
 		//--------------------------------------
@@ -493,7 +520,7 @@ package my.core.room
 			switch (event.info.code) {
 			case "NetConnection.Connect.Success":
 				connected = true;
-				user.dispatchEvent(new DataEvent(Constant.ENTER_ROOM, false, false, url));
+				dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.ENTER_ROOM));
 				publishLocal();
 				break;
 			case "NetConnection.Connect.Closed":
