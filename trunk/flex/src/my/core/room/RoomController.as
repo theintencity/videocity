@@ -34,7 +34,6 @@ package my.core.room
 	import my.controls.PostIt;
 	import my.controls.Prompt;
 	import my.controls.TrashButton;
-	import my.core.Controller;
 	import my.core.Constant;
 	import my.core.playlist.PlayItem;
 	import my.core.playlist.PlayList;
@@ -69,11 +68,6 @@ package my.core.room
 		 * The associated main view.
 		 */
 		public var view:View;
-		
-		/**
-		 * The associated controller.
-		 */
-		public var controller:Controller;
 		
 		//--------------------------------------
 		// CONSTRUCTOR
@@ -351,8 +345,8 @@ package my.core.room
 		
 		private function postIt(msg:String):void
 		{
-			var index:int = controller.view.win.selectedIndex;
-			var page:DisplayObjectContainer = controller.view.win.getWindowAt(index) as DisplayObjectContainer;
+			var index:int = view.win.selectedIndex;
+			var page:DisplayObjectContainer = view.win.getWindowAt(index) as DisplayObjectContainer;
 			PostIt.show(msg, page);
 		}
 		
