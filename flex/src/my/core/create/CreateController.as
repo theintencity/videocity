@@ -200,7 +200,7 @@ package my.core.create
 						logincard: Util.base64encode(loginData),
 						visitingcard: Util.base64encode(visitingData)
 					};
-					user.httpSend(Constant.CREATE, params, room, roomCreateHandler);
+					user.httpSend(Constant.HTTP_ROOM_CREATE, params, room, roomCreateHandler);
 				}
 			}
 		}
@@ -234,7 +234,6 @@ package my.core.create
 				user.selectedIndex = Constant.INDEX_INTRO;
 				
 				var closeHandler:Function = function(id:uint):void {
-					var event:DynamicEvent = new DynamicEvent(Constant.DOWNLOAD);
 					if (id == Alert.YES && logincard != null)
 						user.downloadCard(logincard, 'loginCard.png');
 					else if (id == Alert.NO && visitingcard != null)

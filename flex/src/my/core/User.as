@@ -22,23 +22,24 @@ package my.core
 	import mx.events.DynamicEvent;
 	
 	/**
-	 * Dispatched when a control button is clicked. Possible values of data property:
-	 * 'upload', 'phone', 'layout', 'home', etc. This is dispatched by ControlBar on behalf.
-	 * @eventType my.core.Constant.CONTROL
+	 * Dispatched when a menu item is selected. Possible values of data property:
+	 * SHOW_SEARCH, LOGIN_LOGOUT, etc. This is dispatched by ControlBar on behalf.
+	 * @eventType my.core.Constant.MENU_CLICK
 	 */
-	[Event(name="control", type="flash.events.DataEvent")]
+	[Event(name="menuClick", type="flash.events.DataEvent")]
+	
+	/**
+	 * Dispatched when a control button is clicked. Possible values of data property:
+	 * UPLOAD_FILE, GOTO_HOME, GOTO_NEXT_ROOM. This is dispatched by ControlBar on behalf.
+	 * @eventType my.core.Constant.CONTROL_BAR
+	 */
+	[Event(name="controlBar", type="flash.events.DataEvent")]
 	
 	/**
 	 * Dispatched when a user wants to download a card.
+	 * @eventType my.core.Constant.DOWNLOAD_CARD
 	 */
-	[Event(name="download", type="mx.events.DynamicEvent")] 
-	
-	/**
-	 * Dispatched when a menu item is selected. Possible values of data property:
-	 * 'search', 'login', etc. This is dispatched by ControlBar on behalf.
-	 * @eventType my.core.Constant.MENU
-	 */
-	[Event(name="menu", type="flash.events.DataEvent")]
+	[Event(name="downloadCard", type="mx.events.DynamicEvent")] 
 	
 	/**
 	 * When a new room is created for this user view.
@@ -505,7 +506,7 @@ package my.core
 		 */
 		public function downloadCard(card:*, name:String=null):void
 		{
-			var event:DynamicEvent = new DynamicEvent(Constant.DOWNLOAD);
+			var event:DynamicEvent = new DynamicEvent(Constant.DOWNLOAD_CARD);
 			event.card = card;
 			if (name != null)
 				event.name = name;

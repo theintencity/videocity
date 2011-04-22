@@ -21,7 +21,6 @@ send the play list to the owner of this room like sending a video message.
 			
 			import my.controls.Prompt;
 			import my.core.Constant;
-			import my.core.User;
 			import my.core.room.Room;
 			import my.core.playlist.PlayItem;
 			import my.core.playlist.PlayList;
@@ -48,12 +47,6 @@ send the play list to the owner of this room like sending a video message.
 			 */
 			public var room:Room;
 
-			[Bindable]
-			/**
-			 * The associated user object.
-			 */
-			public var user:User;
-
 			//--------------------------------------
 			// STATIC METHODS
 			//--------------------------------------
@@ -68,8 +61,7 @@ send the play list to the owner of this room like sending a video message.
 				var child:SaveMediaPrompt = new SaveMediaPrompt();
 				child.playList = playList;
 				child.playItem = playList.selectedItem;
-				child.user = playList != null ? playList.user : null;
-				child.room = playList != null && playList.user != null ? playList.user.selected : null;
+				child.room = playList != null ? playList.room : null;
 				
 				var m:Prompt = Prompt.show(null, "Save this content", Alert.CANCEL);
 				
@@ -85,13 +77,15 @@ send the play list to the owner of this room like sending a video message.
 			private function buttonHandler(type:String):void
 			{
 				PopUpManager.removePopUp(this.parent.parent as Prompt);
-				var event:DynamicEvent = new DynamicEvent(Constant.PLAY_LIST);
-				event.command = type;
-				event.playList = playList;
-				event.playItem = playItem;
-				event.user = user;
-				event.room = room;
-				user.dispatchEvent(event);
+				if (room != null) {
+					var event:DynamicEvent = new DynamicEvent(Constant.CONTROL_PLAYLIST);
+					event.command = type;
+					event.playList = playList;
+					event.playItem = playItem;
+					room.dispatchEvent(event);
+				} else {
+					Prompt.show("Invalid room for this playlist", "Error");
+				}
 			}
 
 		]]>
@@ -99,7 +93,7 @@ send the play list to the owner of this room like sending a video message.
 	
 	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off"
-		click="buttonHandler(Constant.SAVE)">
+		click="buttonHandler(Constant.SAVE_PLAYLIST_FILE_LOCALLY)">
 		<mx:Label text="{'1. ' + _('save file to your computer')}"/>
 		<mx:Spacer width="100%"/>
 		<controls:BButton styleName="downloadButtonStyle" toolTip="{_('save')}"/>
@@ -107,7 +101,7 @@ send the play list to the owner of this room like sending a video message.
 	
 	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off"
-		click="buttonHandler(Constant.SHARE)">
+		click="buttonHandler(Constant.SHARE_PLAYLIST_WITH_OTHERS)">
 		<mx:Label text="{'2. ' + _('share in this room with others')}"/>
 		<mx:Spacer width="100%"/>
 		<controls:BButton styleName="rightButtonStyle" toolTip="{_('share')}"/>
@@ -115,7 +109,7 @@ send the play list to the owner of this room like sending a video message.
 	
 	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off"
-		click="buttonHandler(Constant.UPLOAD)">
+		click="buttonHandler(Constant.UPLOAD_PLAYLIST_TO_ROOM)">
 		<mx:Label text="{'3. ' + _('upload to your room permanently')}"/>
 		<mx:Spacer width="100%"/>
 		<controls:BButton styleName="uploadButtonStyle" toolTip="{_('upload')}"/>
@@ -123,7 +117,7 @@ send the play list to the owner of this room like sending a video message.
 	
 	<mx:HBox paddingLeft="0" paddingRight="0" horizontalGap="0" width="100%" horizontalAlign="left"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off"
-		click="buttonHandler(Constant.SEND)">
+		click="buttonHandler(Constant.SEND_PLAYLIST_TO_OWNER)">
 		<mx:Label text="{'4. ' + _('send to the owner of this room')}"/>
 		<mx:Spacer width="100%"/>
 		<controls:BButton styleName="fullScreenButtonStyle" toolTip="{_('send')}"/>

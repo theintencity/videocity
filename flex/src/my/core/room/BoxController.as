@@ -260,7 +260,7 @@ package my.core.room
 						}
 						else {
 							var play:PlayListBox = new PlayListBox();
-							play.playList = new PlayList(PlayItem.describeRecord(user.record.url, user.record.id, user.name), null, user);
+							play.playList = new PlayList(PlayItem.describeRecord(user.record.url, user.record.id, user.name), null, user.selected);
 							box.replaceChild(rec, play);
 						}
 					}

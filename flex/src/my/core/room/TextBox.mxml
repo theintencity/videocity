@@ -69,10 +69,10 @@ is displayed before the message. The time of the message is displayed periodical
 				_room = value;
 				if (oldValue != value) {
 					if (oldValue != null) {
-						oldValue.removeEventListener(Constant.MESSAGE, messageHandler);
+						oldValue.removeEventListener(Constant.RECEIVE_MESSAGE, messageHandler);
 					}
 					if (value != null) {
-						value.addEventListener(Constant.MESSAGE, messageHandler, false, 0, true);
+						value.addEventListener(Constant.RECEIVE_MESSAGE, messageHandler, false, 0, true);
 					}
 				}
 			}

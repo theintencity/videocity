@@ -56,7 +56,7 @@ play items.
 			{
 				if (event.rowIndex >= 0 && event.rowIndex < _playList.length) {
 					_playList.selectedIndex = event.rowIndex;
-					dispatchEvent(new Event(Constant.PLAY));
+					dispatchEvent(new Event("play"));
 				}
 			}
 

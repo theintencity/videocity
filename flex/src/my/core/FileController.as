@@ -57,12 +57,12 @@ package my.core
 			_user = value;
 			if (oldValue != value) {
 				if (oldValue != null) {
-					oldValue.removeEventListener(Constant.CONTROL, controlHandler);
-					oldValue.removeEventListener(Constant.DOWNLOAD, downloadHandler);
+					oldValue.removeEventListener(Constant.CONTROL_BAR, controlHandler);
+					oldValue.removeEventListener(Constant.DOWNLOAD_CARD, downloadHandler);
 				}
 				if (value != null) {
-					value.addEventListener(Constant.CONTROL, controlHandler, false, 0, true);
-					value.addEventListener(Constant.DOWNLOAD, downloadHandler, false, 0, true);
+					value.addEventListener(Constant.CONTROL_BAR, controlHandler, false, 0, true);
+					value.addEventListener(Constant.DOWNLOAD_CARD, downloadHandler, false, 0, true);
 				}
 			}
 		}
@@ -74,21 +74,13 @@ package my.core
 		private function controlHandler(event:DataEvent):void
 		{
 			switch (event.data) {
-			case Constant.UPLOAD:
-				if (user.selected == null || !user.selected.connected)
-					uploadCard(); // upload card on other pages.
-				else
-					uploadFiles(); // upload files on connected room pages. May include a card.
-				break;
 			case Constant.UPLOAD_CARD:
 				uploadCard();
 				break;
+			case Constant.UPLOAD_FILES:
+				uploadFiles();
+				break;
 			}
-		}
-		
-		private function downloadHandler(event:DynamicEvent):void
-		{
-			downloadCard(event.card, event.name != undefined ? event.name : null);
 		}
 		
 		private function uploadCard():void
@@ -244,8 +236,11 @@ package my.core
 			}
 		}
 		
-		public function downloadCard(card:*, name:String=null):void
+		private function downloadHandler(event:DynamicEvent):void
 		{
+			var card:* = event.card;
+			var name:String = event.name != undefined ? event.name : null;
+			
 			if (!(card is CardEditor) && !(card is VisitingCard))
 				throw new Error("must supply either a VisitingCard or a CardEditor object");
 			if (file == null && files == null) {

@@ -98,7 +98,7 @@ An AIR-based application will have a different main file similar to this.
 				}
 				
 				if (('enter' in this.parameters) && user.selected != null) {
-					user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM));
+					user.selected.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.TRY_ENTER_ROOM));
 				}
 			}
 			
@@ -165,7 +165,7 @@ An AIR-based application will have a different main file similar to this.
 			 */
 			private function resizeHandler(event:Event):void
 			{
-				if (stage.displayState == "fullScreen") {
+				if (stage.displayState == StageDisplayState.FULL_SCREEN) {
 					if (stage.fullScreenSourceRect != null) {
 						main.width = main.width+1;
 						main.height = main.height+1;

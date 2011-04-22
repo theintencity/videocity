@@ -17,13 +17,15 @@ application can take care of launching appropriate action.
 	<mx:Metadata>
 		/**
 		 * Dispatched when the download button is clicked on the control bar.
+		 * @eventType my.core.Constant.DOWNLOAD_PLAYLIST_FILES
 		 */
-		[Event(name="download", type="flash.events.Event")]
+		[Event(name="downloadPlaylistFiles", type="flash.events.Event")]
 		
 		/**
 		 * Dispatched when the layout button is clicked on the control bar.
+		 * @eventType my.core.Constant.CHANGE_PLAYLIST_LAYOUT
 		 */
-		[Event(name="layout", type="flash.events.Event")]
+		[Event(name="changePlaylistLayout", type="flash.events.Event")]
 	</mx:Metadata>
 	
 	<mx:Script>
@@ -163,9 +165,9 @@ application can take care of launching appropriate action.
 	<controls:BButton id="playButton" name="{_('Play/pause show')}" styleName="playVideoButtonStyle" color="#ffffff"
 		toggle="true" selected="{playList.playing}" click="playList.playing = playButton.selected"/>
 	<controls:BButton name="{_('Change layout')}" styleName="layoutVideoButtonStyle" color="#ffffff"
-		click="dispatchEvent(new Event(Constant.LAYOUT))"/>
+		click="dispatchEvent(new Event(Constant.CHANGE_PLAYLIST_LAYOUT))"/>
 	<controls:BButton name="{_('Save content or drag to another playlist')}" styleName="downloadVideoButtonStyle" color="#ffffff"
-		click="dispatchEvent(new Event(Constant.DOWNLOAD))"
+		click="dispatchEvent(new Event(Constant.DOWNLOAD_PLAYLIST_FILES))"
 		mouseMove="event.stopPropagation(); dragStartHandler(event)" mouseDown="event.stopPropagation()"/>
 	<!--
 	<controls:BButton name="{_('Upload to your home')}" styleName="uploadVideoButtonStyle" color="#ffffff"

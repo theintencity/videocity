@@ -88,15 +88,15 @@ package my.core
 			_user = value;
 			if (oldValue != value) {
 				if (oldValue != null) {
-					oldValue.removeEventListener(Constant.CONTROL, controlHandler);
-					oldValue.removeEventListener(Constant.MENU, menuHandler);
+					oldValue.removeEventListener(Constant.CONTROL_BAR, controlHandler);
+					oldValue.removeEventListener(Constant.MENU_CLICK, menuHandler);
 					oldValue.removeEventListener("cameraChange", deviceChangeHandler);
 					oldValue.removeEventListener("micChange", deviceChangeHandler);
 					oldValue.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler);
 				}
 				if (value != null) {
-					value.addEventListener(Constant.CONTROL, controlHandler, false, 0, true);
-					value.addEventListener(Constant.MENU, menuHandler, false, 0, true);
+					value.addEventListener(Constant.CONTROL_BAR, controlHandler, false, 0, true);
+					value.addEventListener(Constant.MENU_CLICK, menuHandler, false, 0, true);
 					value.addEventListener("cameraChange", deviceChangeHandler, false, 0, true);
 					value.addEventListener("micChange", deviceChangeHandler, false, 0, true);
 					value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler, false, 0, true);
@@ -115,10 +115,10 @@ package my.core
 		private function controlHandler(event:DataEvent):void
 		{
 			switch (event.data) {
-			case Constant.LAYOUT:
+			case Constant.GOTO_NEXT_ROOM:
 				changeLayoutHandler();
 				break;
-			case Constant.HOME:
+			case Constant.GOTO_HOME:
 				if (!user.isGuest && user.selected != null && user.selected.isOwner)
 					user.selected = user.getRoom(user.card.url);
 				else
@@ -283,26 +283,26 @@ package my.core
 		private function menuHandler(event:DataEvent):void
 		{
 			switch (event.data) {
-			case Constant.SMOOTH:     if (user) user.smoothing = !user.smoothing; break;
+			case Constant.SMOOTH_VIDEO:     if (user) user.smoothing = !user.smoothing; break;
 			case Constant.FULL_SCREEN:FullScreen.toggleFullScreen(); break;
-			case Constant.STRETCH:    FullScreen.toggleFullScreen(true); break;
-			case Constant.SELECT:     FullScreen.startSelectScreen(); break;
+			case Constant.STRETCH_FULL:    FullScreen.toggleFullScreen(true); break;
+			case Constant.STRETCH_SELECTED:     FullScreen.startSelectScreen(); break;
 			case Constant.DEVICE_SELECTION:   Security.showSettings(); break;
 			case Constant.DEVICE_SETTINGS:     DeviceSettings.show(user); break;
-			case Constant.PHONE_SETTINGS:  Prompt.show("This feature is currently not implemented.", "Not Implemented"); break; // PhoneSettings.show(); break;
-			case Constant.EMBED:      showEmbedSettings(); break;
-			case Constant.SEARCH:     Prompt.show("This feature is currently not implemented.", "Not Implemented"); break;
+			case Constant.VOIP_SETTINGS:  Prompt.show("This feature is currently not implemented.", "Not Implemented"); break; // PhoneSettings.show(); break;
+			case Constant.SHOW_EMBED:      showEmbedSettings(); break;
+			case Constant.SHOW_SEARCH:     Prompt.show("This feature is currently not implemented.", "Not Implemented"); break;
 				
-			case Constant.LOGIN:
+			case Constant.LOGIN_LOGOUT:
 				if (user != null) {
 					if (user.isGuest) 
-						user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD)); 
+						user.dispatchEvent(new DataEvent(Constant.CONTROL_BAR, false, false, Constant.UPLOAD_CARD)); 
 					else 
 						user.logout(); 
 				}
 				break;
 			
-			case Constant.SIGNUP:
+			case Constant.SIGNUP_ACCOUNT:
 				if (user != null) {
 					if (user.isGuest)
 						user.selectedIndex = Constant.INDEX_CREATE;

@@ -129,13 +129,11 @@ using the PlayList class.
 			
 			private function trashHandler(event:Event):void
 			{
-				if (playList != null && playList.user != null) {
-					var user:User = playList.user;
-					var e:DynamicEvent = new DynamicEvent(Constant.PLAY_LIST);
-					e.command = TrashButton.TRASH;
-					e.room = user.selected;
+				if (playList != null && playList.room != null) {
+					var e:DynamicEvent = new DynamicEvent(Constant.CONTROL_PLAYLIST);
+					e.command = Constant.TRASH_PLAYLIST;
 					e.playList = playList;
-					playList.user.dispatchEvent(e);
+					playList.room.dispatchEvent(e);
 				}
 			}
 			
@@ -213,6 +211,6 @@ using the PlayList class.
 
 	<play:ListControl id="controlBox" width="{this.width-2}" bottom="0"
 		playList="{playList}" visible="{hover || viewStack.selectedIndex != SELECTED_INDEX}" 
-		download="downloadHandler()" layout="layoutButtonHandler()"/>
+		downloadPlaylistFiles="downloadHandler()" changePlaylistLayout="layoutButtonHandler()"/>
 	
 </containers:BaseBox>

@@ -16,117 +16,169 @@ package my.core
 		public static const INDEX_INTRO:int   = 0;
 		public static const INDEX_CREATE:int  = 1;
 		
+		/*
+		 * Event dispatched on User object.
+		 */
+		 
 		/**
-		 * The event type used for DataEvent dispatched on Room object.
-		 * createRoom: when a new room is created in the view.
-		 * destroyRoom: when a room is removed from the view.
-		 * enterRoom: when the user joins a room and connection is complete.
-		 * exitRoom: when the user leaves a room.
+		 * The event type of DataEvent dispatched on User object, when user clicks on a menu item.
+		 * Dispatched on behalf by ControlBar and processed in Controller.
+		 */
+		public static const MENU_CLICK:String    = "menuClick";
+		
+		/**
+		 * The data property of the DataEvent when type is MENU_CLICK.
+		 */
+		public static const SMOOTH_VIDEO:String      = "smoothVideo";
+		public static const FULL_SCREEN:String       = "fullScreen";
+		public static const STRETCH_FULL:String      = "stretchFull";
+		public static const STRETCH_SELECTED:String  = "stretchSelect";
+		public static const DEVICE_SELECTION:String  = "deviceSelection";
+		public static const DEVICE_SETTINGS:String   = "deviceSettings";
+		public static const VOIP_SETTINGS:String     = "voipSettings";
+		public static const SHOW_EMBED:String        = "showEmbed";
+		public static const SHOW_SEARCH:String       = "showSearch";
+		public static const SIGNUP_ACCOUNT:String    = "signupAccount";
+		public static const LOGIN_LOGOUT:String      = "loginLogout";
+		
+		
+		/**
+		 * The event type of DataEvent dispatched on User object, when user clicks on a control button.
+		 * Dispatched on behalf by ControlBar and processed in Controller or FileController.
+		 */
+		public static const CONTROL_BAR:String = "controlBar";
+		
+		/**
+		 * The data property of DataEvent when type is CONTROL_BAR.
+		 */
+		public static const GOTO_HOME:String         = "gotoHome";
+		public static const GOTO_NEXT_ROOM:String    = "gotoNextRoom";
+		public static const UPLOAD_CARD:String       = "uploadCard";
+		public static const UPLOAD_FILES:String      = "uploadFiles"; // Dispatched by AddMediaPrompt
+		public static const DOWNLOAD_CARD:String     = "downloadCard";
+//		public static const CHANGE_SKIN:String       = "changeSkin";
+		
+		/**
+		 * The event type of DataEvent dispatched on User object, when a room is created or destroyed.
+		 * Dispatched by User and processed in RoomController.
 		 */
 		public static const CREATE_ROOM:String  = "createRoom";
 		public static const DESTROY_ROOM:String = "destroyRoom";
-		public static const ENTER_ROOM:String   = "enterRoom";
-		public static const EXIT_ROOM:String    = "exitRoom";
+		
+		/*
+		 * Event dispatched on Room object.
+		 */
+		 
+		/**
+		 * The event type of DataEvent dispatched on Room object, when user clicks on a control button.
+		 * Dispatched on behalf by ControlBar or RoomPage and processed in RoomController
+		 */
+		public static const CONTROL_ROOM:String = "controlRoom";
 		
 		/**
-		 * The event type used for received text message on a Room object.
+		 * The data property of DataEvent when type is CONTROL_ROOM.
 		 */
-		public static const MESSAGE:String = "message";
-		public static const TOGGLE_TEXT:String = "toggleText";
+		public static const TRY_ENTER_ROOM:String         = "tryEnterRoom";
+		public static const ENTER_ROOM:String             = "enterRoom";   // Dispatched also by Room
+		public static const EXIT_ROOM:String              = "exitRoom";
+		public static const KNOCK_ON_DOOR:String          = "knockOnDoor";
+		public static const SEND_EMAIL_TO_OWNER:String    = "sendEmailToOwner";
+		public static const LEAVE_MESSAGE_TO_OWNER:String = "leaveMessageToOwner";
+		public static const MAKE_ROOM_PUBLIC:String       = "makeRoomPublic";
+		public static const MAKE_ROOM_PRIVATE:String      = "makeRoomPrivate";
+		public static const SHOW_UPLOAD_PROMPT:String     = "showUploadPrompt";
+		public static const CREATE_NEW_PLAYLIST:String    = "createNewPlaylist";// Dispatched by AddMediaPrompt
+		public static const SHOW_CAPTURE_SNAPSHOT:String  = "showCaptureSnapshot";
+		public static const SHOW_VOIP_DIALER:String       = "showVoipDialer";
+		public static const TOGGLE_TEXT_CHAT:String       = "toggleTextChat";
 		
 		/**
-		 * The event type and commands used by Play List to dispatch on User object.
+		 * Event type of DynamicEvent dispatched by the Room object.
+		 * Dispatched by Room when data model changes and processed by RoomController.
 		 */
-		public static const PLAY_LIST:String   = "playList";
-		public static const SAVE:String        = "save";
-		public static const SHARE:String       = "share";
-		public static const SEND:String        = "send";
-		public static const UPLOAD:String      = "upload";
-		public static const CONVERT:String     = "convert";
-
-		public static const ACCESS:String  = "access";
+		public static const MEMBERS_CHANGE:String = "membersChange";
+		public static const STREAMS_CHANGE:String = "streamsChange";
+		public static const FILES_CHANGE:String   = "filesChange";
 		
+		/**
+		 * The event type of DynamicEvent used for received text message on a Room object.
+		 */
+		public static const RECEIVE_MESSAGE:String = "receiveMessage";
+		
+		/*
+		 * Event dispatched on PlayList object.
+		 */
+		 
+		/**
+		 * Event type of Event dispatched on ListControl object and captured by PlayListBox.
+		 */
+		public static const CHANGE_PLAYLIST_LAYOUT:String   = "changePlaylistLayout";
+		public static const DOWNLOAD_PLAYLIST_FILES:String  = "downloadPlaylistFiles";
+		
+		/**
+		 * Event type of Event dispatched on PlayItem views such as PhotoItem, StreamItem, etc.
+		 * It is captured by ListItem for a slide show.
+		 */
 		public static const PLAY_COMPLETE:String = "playComplete";
+		
+		/**
+		 * Event type of DynamicEvent dispatched on Room on behalf by SaveMediaPrompt or PlayListBox.
+		 */
+		public static const CONTROL_PLAYLIST:String  = "controlPlaylist";
+		
+		/**
+		 * The command property of DynamicEvent when type is "controlPlaylist".
+		 */
+		public static const TRASH_PLAYLIST:String              = "trashPlaylist";
+		public static const SAVE_PLAYLIST_FILE_LOCALLY:String  = "savePlaylistFileLocally";
+		public static const SHARE_PLAYLIST_WITH_OTHERS:String  = "sharePlaylistWithOthers";
+		public static const SEND_PLAYLIST_TO_OWNER:String      = "sendPlaylistToOwner";
+		public static const UPLOAD_PLAYLIST_TO_ROOM:String     = "uploadPlaylistToRoom";
+
+		/*
+		 * Additional constants for room, playlist, etc.
+		 */
+		
+		/**
+		 * Values of room access types.
+		 */
+		public static const ROOM_ACCESS_PUBLIC:String     = "public";
+		public static const ROOM_ACCESS_PRIVATE:String    = "private";
+		
+		/**
+		 * The send mode invoked on the server to send a message to others in a room.
+		 * If you change this, also change the name of the functions on server backend.
+		 */
+		public static const SEND_BROADCAST:String = "broadcast";
+		public static const SEND_UNICAST:String   = "unicast";
+
+		/**
+		 * The method name invoked on other clients via the server in a room.
+		 * If you change this, also change the name of the functions in Room.
+		 */
+		public static const ROOM_METHOD_PUBLISHED:String   = "published";
+		public static const ROOM_METHOD_UNPUBLISHED:String = "unpublished";
+		public static const ROOM_METHOD_MESSAGE:String     = "message";
+				
+		/**
+		 * HTTP commands sent to the backend. Any changes to this must be replicated in backend.
+		 */
+		public static const HTTP_FILE_CONVERT:String      = "convert";
+		public static const HTTP_PLAYLIST_TRASH:String    = "trash";
+		public static const HTTP_PLAYLIST_UPLOAD:String   = "upload";
+		public static const HTTP_ROOM_ACCESS:String       = "access";
+		public static const HTTP_ROOM_CREATE:String       = "create";
 		
 		/**
 		 * Target types for uploading play list.
 		 */
-		public static const ACTIVE:String  = "active.xml";
-		public static const PUBLIC:String  = "index.xml";
-		public static const PRIVATE:String = "inbox.xml";
+		public static const PLAYLIST_TARGET_ACTIVE:String  = "active.xml";
+		public static const PLAYLIST_TARGET_PUBLIC:String  = "index.xml";
+		public static const PLAYLIST_TARGET_PRIVATE:String = "inbox.xml";
 		
-		/**
-		 * Event types used from play list control.
+		/*
+		 * Additional misc constants.
 		 */
-		public static const DOWNLOAD:String    = "download";
-		// public static const LAYOUT:String = "layout" // defined elesewhere
-		public static const PLAY:String = "play";
-		
-		/**
-		 * Events dispatched by a room.
-		 */
-		public static const MEMBERS_CHANGE:String = "membersChange";
-		public static const STREAMS_CHANGE:String = "streamsChange";
-		public static const FILES_CHANGE:String  = "filesChange";
-		
-		/**
-		 * Methods name invoked on the server to send a message to others in a call.
-		 */
-		public static const BROADCAST:String = "broadcast";
-		public static const UNICAST:String = "unicast";
-
-		/**
-		 * The event type used for DataEvent dispatched on User object, when user clicks on a menu.
-		 */
-		public static const MENU:String    = "menu";
-		
-		/**
-		 * The event type used for DataEvent dispatched on User object, when user clicks on a control button.
-		 */
-		public static const CONTROL:String = "control";
-		
-		/**
-		 * The data property of the DataEvent when type is "menu".
-		 */
-		public static const SMOOTH:String      = "smooth";
-		public static const FULL_SCREEN:String = "fullScreen";
-		public static const STRETCH:String     = "stretch";
-		public static const SELECT:String      = "select";
-		public static const DEVICE_SELECTION:String   = "deviceSelection";
-		public static const DEVICE_SETTINGS:String    = "deviceSettings";
-		public static const PHONE_SETTINGS:String     = "phoneSettings";
-		public static const PHONE:String       = "phone"; 
-		public static const EMBED:String       = "embed";
-		public static const SEARCH:String      = "search";
-		public static const CAPTURE:String     = "capture";
-		public static const SIGNUP:String      = "signup";
-		public static const LOGIN:String       = "login";
-		
-		/**
-		 * The data property of the DataEvent when type "control".
-		 * Dispatch by User.
-		 */
-		public static const HOME:String        = "home";
-		public static const LAYOUT:String      = "layout";
-		public static const CREATE:String      = "create";
-		// following are already defined in this file.
-		// public static const UPLOAD:String      = "upload";
-		// public static const MESSAGE:String     = "messgae";
-		// public static const PHONE:String       = "phone"; 
-		public static const UPLOAD_CARD:String = "uploadCard";
-		
-		/**
-		 * The data property of the DataEvent when type is "control".
-		 * Dispatched by Room.
-		 */
-		public static const KNOCK:String       = "knock";
-		public static const SEND_EMAIL:String  = "sendEmail";
-		public static const JOIN_ROOM:String   = "joinRoom";
-		public static const LEAVE_MESSAGE:String = "leaveMessage";
-		// public static const PUBLIC
-		// public static const PRIVATE
-		public static const LOAD:String        = "load";
-		
 		
 		/**
 		 * The name of the company typically used in card editor to display the name of the issuer.
@@ -147,15 +199,5 @@ package my.core
 
 		// room page with valid login card
 		public static const HELP_ROOM_LOGIN:String = 'You own this room. You can upload a visiting card and make this room public, or make it private. You can enter the room to access your inbox for messages and to decorate your room with photos and videos.';
-
-		//--------------------------------------
-		// CONSTRUCTOR
-		//--------------------------------------
-		
-		// dummy constructor
-		public function Constant()
-		{
-		}
-
 	}
 }

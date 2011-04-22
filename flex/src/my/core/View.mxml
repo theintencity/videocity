@@ -51,7 +51,7 @@ A developer wanting to understand the design of this software, should start look
 	The main controller receives events from various user interface elements, and updates model or view
 	accordingly. For instance, it gets events from menu click on the ControlBar.
 	-->
-	<core:Controller id="control" user="{user}" view="{this}"/>
+	<core:Controller id="controller" user="{user}" view="{this}"/>
 	
 	<!--
 	The file controller controls the upload and download of files.

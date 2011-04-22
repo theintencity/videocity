@@ -38,23 +38,39 @@ package my.core.room
 	
 	/**
 	 * Dispatched when a control button is clicked. Possible values of data property:
-	 * 'enterRoom', 'selectRoom', 'exitRoom'. This is dispatched on behalf in RoomController or RoomPage
-	 * @eventType my.core.Constant.CONTROL
+	 * ENTER_ROOM, EXIT_ROOM, etc. This is dispatched on behalf in ControlBar, RoomController or RoomPage
+	 * @eventType my.core.Constant.CONTROL_ROOM
 	 */
-	[Event(name="control", type="flash.events.DataEvent")]
+	[Event(name="controlRoom", type="flash.events.DataEvent")]
+	
+	/**
+	 * Dispatched when a playlist related button is clicked. Possible values of data property:
+	 * TRASH_PLAYLIST, UPLOAD_PLAYLIST_TO_ROOM, etc.
+	 * @eventType my.core.Constant.CONTROL_PLAYLIST
+	 */
+	[Event(name="controlPlaylist", type="flash.events.DataEvent")]
+	
+	/**
+	 * Dispatched when an incoming message is received.
+	 * @eventType my.core.Constant.RECEIVE_MESSAGE
+	 */
+	[Event(name="receiveMessage", type="flash.events.DynamicEvent")]
 	
 	/**
 	 * Dispatched when the members property changes.
-	 */
+	 * @eventType my.core.Constant.MEMBERS_CHANGE
+ 	 */
 	[Event(name="membersChange", type="mx.collections.CollectionEvent")]
 	
 	/**
 	 * Dispatched when the streams property changes.
+	 * @eventType my.core.Constant.STREAMS_CHANGE
 	 */
 	[Event(name="streamsChange", type="mx.collections.CollectionEvent")]
 	
 	/**
 	 * Dispatched when the files property changes.
+	 * @eventType my.core.Constant.FILES_CHANGE
 	 */
 	[Event(name="filesChange", type="mx.collections.CollectionEvent")]
 	
@@ -88,7 +104,10 @@ package my.core.room
 		private var _ns:NetStream;  // local published stream for local video
 		private var _stream:String; // local stream name that is published. This is randomly generated.
 		private var _user:User;     // the local user for this room -- set only for RoomPage.room.
+		
 		private var _lock:Boolean = false;
+		private var _isPublic:Boolean = false;
+		private var _isController:Boolean = false;
 		
 		//--------------------------------------
 		// PUBLIC PROPERTIES
@@ -379,6 +398,42 @@ package my.core.room
 			_lock = value;
 		}
 		
+		[Bindable]
+		/**
+		 * Whether this is a public or private room?
+		 */
+		public function get isPublic():Boolean
+		{
+			return _isPublic;
+		}
+		public function set isPublic(value:Boolean):void
+		{
+			if (_isOwner) {
+				var oldValue:Boolean = _isPublic;
+				if (value != oldValue) {
+					var accessType:String = value ? Constant.MAKE_ROOM_PUBLIC : Constant.MAKE_ROOM_PRIVATE;
+					dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, accessType));
+				}
+			} else {
+				Prompt.show("You do not have permissions to change access type of this room", "Error");
+			}
+		}
+		
+		[Bindable]
+		/**
+		 * Whether this user is controller of this presentation room?
+		 * Setting this implies isOwner.
+		 */
+		public function get isController():Boolean
+		{
+			return _isController;
+		}
+		public function set isController(value:Boolean):void
+		{
+			var oldValue:Boolean = _isController;
+			_isController = value;
+		}
+		
 		//--------------------------------------
 		// PUBLIC METHODS
 		//--------------------------------------
@@ -432,9 +487,9 @@ package my.core.room
 		{
 			if (connected && _nc != null) {
 				if (user != null && user.card != null)
-					commandSend(Constant.BROADCAST, Constant.MESSAGE, text, user.name);
+					commandSend(Constant.SEND_BROADCAST, Constant.ROOM_METHOD_MESSAGE, text, user.name);
 				else
-					commandSend(Constant.BROADCAST, Constant.MESSAGE, text);
+					commandSend(Constant.SEND_BROADCAST, Constant.ROOM_METHOD_MESSAGE, text);
 			}
 			else {
 				message("Cannot send message without connection", null);
@@ -446,7 +501,7 @@ package my.core.room
 		 */
 		public function message(text:String, sender:String):void
 		{
-			var event:DynamicEvent = new DynamicEvent(Constant.MESSAGE);
+			var event:DynamicEvent = new DynamicEvent(Constant.RECEIVE_MESSAGE);
 			event.text = text;
 			event.sender = sender != null ? sender : 'null';
 			event.time = new Date();
@@ -520,7 +575,7 @@ package my.core.room
 			switch (event.info.code) {
 			case "NetConnection.Connect.Success":
 				connected = true;
-				dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.ENTER_ROOM));
+				dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.ENTER_ROOM));
 				publishLocal();
 				break;
 			case "NetConnection.Connect.Closed":
@@ -742,17 +797,17 @@ package my.core.room
 		{
 			if (args.length > 0) {
 				switch (args[1]) {
-				case Constant.MESSAGE: // senderId, message, text, [senderName]
+				case Constant.ROOM_METHOD_MESSAGE: // senderId, message, text, [senderName]
 					if (args.length >= 3)
 						message(args[2], args.length > 3 ? args[3] : "Guest " + args[0]);
 					break;
 					
-				case "published":
+				case Constant.ROOM_METHOD_PUBLISHED:
 					if (args.length >= 4)
 						published(args[0], args[2], new XML(args[3]));
 					break;
 					
-				case "unpublished":
+				case Constant.ROOM_METHOD_UNPUBLISHED:
 					if (args.length >= 3)
 						unpublished(args[0], args[2], new XML(args[3]));
 					break;
@@ -778,7 +833,7 @@ package my.core.room
 				files.push(file);
 			} 
 			
-			this.files.addItem(new PlayList(xml, files, user));
+			this.files.addItem(new PlayList(xml, files, this));
 		}
 		
 		/*
@@ -790,7 +845,7 @@ package my.core.room
 			var xml:XML = <show><file src="file://snapshot.jpg" smoothing="true" description="Captured Photo"/></show>;
 			var jpgEncoder:JPEGEncoder = new JPEGEncoder();
 			var data:ByteArray = jpgEncoder.encode(bm.bitmapData);
-			this.files.addItem(new PlayList(xml, [data], user));
+			this.files.addItem(new PlayList(xml, [data], this));
 		}
 		
 		/*
@@ -809,7 +864,7 @@ package my.core.room
 				}
 			}
 			if (found == null)
-				this.files.addItem(new PlayList(xml, [], user));
+				this.files.addItem(new PlayList(xml, [], this));
 			else
 				found.data = xml;
 		}
