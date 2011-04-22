@@ -56,11 +56,11 @@ Controller handles these events on the user object as if they are coming from th
 			{
 				if (type == 'create') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);
-					room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.CREATE));
+					room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.CREATE_NEW_PLAYLIST));
 				}
 				else if (type == 'upload') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);
-					room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD));
+					room.user.dispatchEvent(new DataEvent(Constant.CONTROL_BAR, false, false, Constant.UPLOAD_FILES));
 				}
 				else if (url.text != '') {
 					PopUpManager.removePopUp(this.parent.parent as Prompt);

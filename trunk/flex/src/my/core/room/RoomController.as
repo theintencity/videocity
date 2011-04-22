@@ -127,8 +127,8 @@ package my.core.room
 				roomView.user = user;
 				roomView.room = room;
 				room.view = roomView;
-				room.addEventListener(Constant.CONTROL, controlHandler, false, 0, true);
-				room.addEventListener(Constant.PLAY_LIST, playListHandler, false, 0, true);
+				room.addEventListener(Constant.CONTROL_ROOM, controlHandler, false, 0, true);
+				room.addEventListener(Constant.CONTROL_PLAYLIST, playListHandler, false, 0, true);
 				view.win.addChild(roomView);
 			}
 			user.selected = room;
@@ -140,8 +140,8 @@ package my.core.room
 			var roomView:RoomPage = room.view;
 			
 			user.selected = user.getPreviousRoom(room);
-			room.removeEventListener(Constant.CONTROL, controlHandler);
-			room.removeEventListener(Constant.PLAY_LIST, playListHandler);
+			room.removeEventListener(Constant.CONTROL_ROOM, controlHandler);
+			room.removeEventListener(Constant.CONTROL_PLAYLIST, playListHandler);
 			if (room.connected)
 				room.disconnect();
 			if (roomView != null) {
@@ -164,7 +164,7 @@ package my.core.room
 				if (user.card != null) {
 					var room:Room = user.getRoom(user.card.url);
 					if (room != null)
-						scriptStart(room, Constant.PRIVATE);
+						scriptStart(room, Constant.PLAYLIST_TARGET_PRIVATE);
 				}
 			}
 		}
@@ -173,40 +173,19 @@ package my.core.room
 		{
 			var room:Room = event.currentTarget as Room;
 			switch (event.data) {
-			case Constant.ENTER_ROOM:   enterRoom(room); break;
-			case Constant.EXIT_ROOM:    exitRoom(room); break;
-			case Constant.KNOCK:        knockRoomHandler(room); break;
-			case Constant.SEND_EMAIL:   sendEmailHandler(room); break;
-			case Constant.JOIN_ROOM:    joinRoomHandler(room);  break;
-			case Constant.LEAVE_MESSAGE: leaveMessageHandler(room); break;
-			case Constant.PUBLIC:
-			case Constant.PRIVATE:      setRoomAccess(room, event.data); break;
-			case Constant.LOAD:         AddMediaPrompt.show(user.selected); break;
-			case Constant.CREATE:
-				if (user.selected != null && user.selected.connected) {
-					user.selected.load(XML('<show description="Click to edit title"/>'));
-				}
-				break;
-			case Constant.CAPTURE:      captureHandler(event); break;
-			case Constant.PHONE:
-				Prompt.show("This feature is currently not implemented", "Not implemented yet");
-				break;
-				
-			case Constant.TOGGLE_TEXT:
-				if (user.selected != null) {
-					var roomPage:RoomPage = user.selected.view;
-					var box:ContainerBox = roomPage.callBox;
-					var text:TextBox = box.getChildByName("text") as TextBox;
-					if (text == null) {
-						text = new TextBox();
-						text.room = user.selected;
-						box.addChild(text);
-					}
-					else {
-						box.removeChild(text);
-					}
-				}
-				break;
+			case Constant.TRY_ENTER_ROOM: joinRoomHandler(room);  break;
+			case Constant.ENTER_ROOM:    enterRoom(room); break;
+			case Constant.EXIT_ROOM:     exitRoom(room); break;
+			case Constant.KNOCK_ON_DOOR: knockRoomHandler(room); break;
+			case Constant.SEND_EMAIL_TO_OWNER: sendEmailHandler(room); break;
+			case Constant.LEAVE_MESSAGE_TO_OWNER: leaveMessageHandler(room); break;
+			case Constant.MAKE_ROOM_PUBLIC: setRoomAccess(room, Constant.ROOM_ACCESS_PUBLIC); break;
+			case Constant.MAKE_ROOM_PRIVATE: setRoomAccess(room, Constant.ROOM_ACCESS_PRIVATE); break;
+			case Constant.SHOW_UPLOAD_PROMPT: AddMediaPrompt.show(user.selected); break;
+			case Constant.CREATE_NEW_PLAYLIST: createNewPlaylist(); break;
+			case Constant.SHOW_CAPTURE_SNAPSHOT: captureHandler(event); break;
+			case Constant.SHOW_VOIP_DIALER: Prompt.show("This feature is currently not implemented", "Not implemented yet"); break;
+			case Constant.TOGGLE_TEXT_CHAT: toggleTextChat(); break;
 			}			
 		}
 		
@@ -214,14 +193,14 @@ package my.core.room
 		{
 			// a new room is created, fetch a welcome page if needed
 			room.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
-			room.addEventListener(Constant.MESSAGE, messageHandler, false, 10, true);
+			room.addEventListener(Constant.RECEIVE_MESSAGE, messageHandler, false, 10, true);
 			room.addEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler, false, 0, true);
 			room.addEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler, false, 0, true);
 			room.addEventListener(Constant.FILES_CHANGE, filesChangeHandler, false, 0, true);
 			if (room.connected)
-				scriptStart(room, Constant.PUBLIC);
+				scriptStart(room, Constant.PLAYLIST_TARGET_PUBLIC);
 			if (user.selected != null)
-				user.selected.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM));
+				user.selected.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.TRY_ENTER_ROOM));
 		}
 		
 		private function exitRoom(room:Room):void
@@ -229,7 +208,7 @@ package my.core.room
 			room.files.removeAll();
 			room.streams.removeAll();
 			room.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
-			room.removeEventListener(Constant.MESSAGE, messageHandler);
+			room.removeEventListener(Constant.RECEIVE_MESSAGE, messageHandler);
 			room.removeEventListener(Constant.MEMBERS_CHANGE, membersChangeHandler);
 			room.removeEventListener(Constant.STREAMS_CHANGE, streamsChangeHandler);
 			room.removeEventListener(Constant.FILES_CHANGE, filesChangeHandler);
@@ -246,7 +225,7 @@ package my.core.room
 			var room:Room = event.currentTarget as Room;
 			if (event.property == "connected") {
 				if (event.newValue) {
-					scriptStart(room, Constant.PUBLIC);
+					scriptStart(room, Constant.PLAYLIST_TARGET_PUBLIC);
 				}
 				else {
 					scriptStop(room);
@@ -318,7 +297,7 @@ package my.core.room
 		private function setRoomAccess(room:Room, type:String):void
 		{
 			if (user.card != null && room.isOwner) {
-				if (room.card.isLoginCard && type == "public") {
+				if (room.card.isLoginCard && type == Constant.ROOM_ACCESS_PUBLIC) {
 					Prompt.show("You must first upload the visiting card for this room to make it public", "Error changing room access");
 				}
 				else {
@@ -328,9 +307,9 @@ package my.core.room
 						type: type
 					};
 					
-					if (type == "public")
+					if (type == Constant.ROOM_ACCESS_PUBLIC)
 						params.visitingcard = Util.base64encode(room.card.rawData);
-					user.httpSend(Constant.ACCESS, params, {room: room, type: type}, setRoomAccessHandler);
+					user.httpSend(Constant.HTTP_ROOM_ACCESS, params, {room: room, type: type}, setRoomAccessHandler);
 				}
 			}
 			else {
@@ -341,6 +320,13 @@ package my.core.room
 		private function setRoomAccessHandler(obj:Object, result:XML):void
 		{
 			Prompt.show('<br/>Your room is set to <font color="' + (obj.type == "public" ? '#00ff00' : '#ff0000') + '">"' + obj.type + '</font><br/><font color="#0000ff">' + obj.room.url + '</font>', "Room access changed");
+		}
+		
+		private function createNewPlaylist():void
+		{
+			if (user.selected != null && user.selected.connected) {
+				user.selected.load(XML('<show description="Click to edit title"/>'));
+			}
 		}
 		
 		private function postIt(msg:String):void
@@ -469,9 +455,9 @@ package my.core.room
 		private function scriptStop(room:Room, target:String=null):void 
 		{
 			if (target == null) {
-				scriptStop(room, Constant.ACTIVE);
-				scriptStop(room, Constant.PUBLIC);
-				scriptStop(room, Constant.PRIVATE);
+				scriptStop(room, Constant.PLAYLIST_TARGET_ACTIVE);
+				scriptStop(room, Constant.PLAYLIST_TARGET_PUBLIC);
+				scriptStop(room, Constant.PLAYLIST_TARGET_PRIVATE);
 			}
 			else if (room != null) {
 				var url:String = room.scriptUrl + '/' + target;
@@ -495,11 +481,11 @@ package my.core.room
 				var result:ResultEvent = event as ResultEvent;
 				var xml:XML = result.result as XML;
 				applyScript(p.room, xml);
-				if (p.target == Constant.PUBLIC)
-					scriptStart(p.room, Constant.ACTIVE);
-				else if (p.target == Constant.ACTIVE) {
+				if (p.target == Constant.PLAYLIST_TARGET_PUBLIC)
+					scriptStart(p.room, Constant.PLAYLIST_TARGET_ACTIVE);
+				else if (p.target == Constant.PLAYLIST_TARGET_ACTIVE) {
 					if (Room(p.room).isOwner && user.card.url == Room(p.room).card.url)
-						scriptStart(p.room, Constant.PRIVATE);
+						scriptStart(p.room, Constant.PLAYLIST_TARGET_PRIVATE);
 				}
 			}
 		}
@@ -526,24 +512,24 @@ package my.core.room
 		private function playListHandler(event:DynamicEvent):void
 		{
 			switch (event.command) {
-				case Constant.SAVE:
+				case Constant.SAVE_PLAYLIST_FILE_LOCALLY:
 					savePlayList(event.playItem);
 					break;
-				case Constant.SHARE:
-					uploadPlayList(event.room, event.playList, Constant.ACTIVE);
+				case Constant.SHARE_PLAYLIST_WITH_OTHERS:
+					uploadPlayList(event.playList, Constant.PLAYLIST_TARGET_ACTIVE);
 					break;
-				case Constant.UPLOAD:
+				case Constant.UPLOAD_PLAYLIST_TO_ROOM:
 					var room:Room = user.card != null ? user.getRoom(user.card.url) : null;
 					if (room != null)
-						uploadPlayList(room, event.playList, Constant.PUBLIC);
+						uploadPlayList(event.playList, Constant.PLAYLIST_TARGET_PUBLIC);
 					else
 						Prompt.show("You must be logged in to your room to send media to your room", "Error sending play-list");
 					break;
-				case Constant.SEND:
-					uploadPlayList(event.room, event.playList, Constant.PRIVATE);
+				case Constant.SEND_PLAYLIST_TO_OWNER:
+					uploadPlayList(event.playList, Constant.PLAYLIST_TARGET_PRIVATE);
 					break;
-				case TrashButton.TRASH:
-					trashPlayList(event.room, event.playList);
+				case Constant.TRASH_PLAYLIST:
+					trashPlayList(event.playList);
 					break;
 				default:
 					trace("invalid playList command " + event.command);
@@ -624,8 +610,10 @@ package my.core.room
 		 * uploaded using HTTP before the play-list gets uploaded. Also, the play-list is updated to refer
 		 * to the HTTP URL of the uploaded files, instead of the file content.
 		 */
-		private function uploadPlayList(room:Room, playList:PlayList, target:String):void
+		private function uploadPlayList(playList:PlayList, target:String):void
 		{
+			var room:Room = playList.room;
+			
 			var params:Object = {
 				target: target,
 				filedata: playList.data.toXMLString()
@@ -641,7 +629,7 @@ package my.core.room
 				}
 			}
 			
-			if (target == Constant.PUBLIC && user.card != null)
+			if (target == Constant.PLAYLIST_TARGET_PUBLIC && user.card != null)
 				params.logincard = Util.base64encode(user.card.rawData);
 			else if (room.card != null)
 				params.visitingcard = Util.base64encode(room.card.rawData);
@@ -652,12 +640,12 @@ package my.core.room
 				target: target
 			};
 				
-			user.httpSend(Constant.UPLOAD, params, context, uploadResultHandler);
+			user.httpSend(Constant.HTTP_PLAYLIST_UPLOAD, params, context, uploadResultHandler);
 		}
 
 		private function uploadResultHandler(context:Object, result:XML):void 
 		{
-			if (context.target == Constant.PUBLIC || context.target == Constant.PRIVATE) {
+			if (context.target == Constant.PLAYLIST_TARGET_PUBLIC || context.target == Constant.PLAYLIST_TARGET_PRIVATE) {
 				postIt("Upload success");
 			}
 			else {
@@ -666,7 +654,7 @@ package my.core.room
 				
 				var show:XML = result.filedata != undefined && result.filedata[0].show != undefined ? result.filedata[0].show[0] : null;
 				if (show != null) {
-					room.commandSend(Constant.BROADCAST, "published", playList.id, show.toXMLString());
+					room.commandSend(Constant.SEND_BROADCAST, Constant.ROOM_METHOD_PUBLISHED, playList.id, show.toXMLString());
 					postIt("Sharing completed");
 				}
 				else {
@@ -675,27 +663,23 @@ package my.core.room
 			}
 		}
 
-		private function trashPlayList(room:Room, playList:PlayList):void
+		private function trashPlayList(playList:PlayList):void
 		{
+			var room:Room = playList.room;
 			var desc:String = playList.data.toXMLString();
 			
-			room.commandSend(Constant.BROADCAST, "unpublished", playList.id, desc);
+			room.commandSend(Constant.SEND_BROADCAST, Constant.ROOM_METHOD_UNPUBLISHED, playList.id, desc);
 			
 			var params:Object = {
 				filedata: desc
 			};
 			
 			if (room.isOwner)
-				params.logincard = Util.base64encode(user.card.rawData);
+				params.logincard = Util.base64encode(room.user.card.rawData);
 			else if (room.card != null)
 				params.visitingcard = Util.base64encode(room.card.rawData);
 				
-			var context:Object = {
-				room: room,
-				playList: playList
-			};
-			
-			user.httpSend(TrashButton.TRASH, params, context);
+			user.httpSend(Constant.HTTP_PLAYLIST_TRASH, params, {});
 		}
 		
 		private function addTextBox(room:Room):void
@@ -732,6 +716,23 @@ package my.core.room
 					user.selected.load(capture.selectedPhoto.getChildAt(0));
 			}
 			capture = null;
+		}
+		
+		private function toggleTextChat():void
+		{
+			if (user.selected != null) {
+				var roomPage:RoomPage = user.selected.view;
+				var box:ContainerBox = roomPage.callBox;
+				var text:TextBox = box.getChildByName("text") as TextBox;
+				if (text == null) {
+					text = new TextBox();
+					text.room = user.selected;
+					box.addChild(text);
+				}
+				else {
+					box.removeChild(text);
+				}
+			}
 		}
 		
 	}

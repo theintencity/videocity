@@ -23,7 +23,7 @@ leave the room.
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:controls="my.controls.*"
-	xmlns:containers="my.containers.*" xmlns:card="my.core.card.*" xmlns:room="my.core.room.*"
+	xmlns:containers="my.containers.*" xmlns:room="my.core.room.*"
 	name="roomPage" styleName="roomPage" width="100%" height="100%" 
 	horizontalScrollPolicy="off" verticalScrollPolicy="off"
 	mouseDown="mouseDownHandler(event)">
@@ -97,36 +97,11 @@ leave the room.
 					if (old != null) {
 						if (old.user != null) 
 							old.user = null
-						old.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
 					}
 					if (value != null) {
 						value.user = user;
-						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
-						if (value.card != null && targetImage != null)
-							targetImage.data = value.card;
-					}
-					else {
-						if (targetImage != null)
-							targetImage.data = null;
 					}
 				}
-			}
-			
-			//--------------------------------------
-			// PRIVATE METHODS
-			//--------------------------------------
-			
-			private function roomChangeHandler(event:PropertyChangeEvent):void
-			{
-				if (event.property == "card") {
-					targetImage.data = room.card;
-				}
-			}
-			
-			private function targetImageHandler(event:Event):void
-			{
-				if (room != null && room.card != null)
-					targetImage.data = room.card;
 			}
 			
 			private function mouseDownHandler(event:MouseEvent):void
@@ -164,61 +139,9 @@ leave the room.
 	<room:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
 		itemRenderer="my.core.room.RoomMember" dataProvider="{room.members}"/>
 	
-	<containers:Door id="door2" y="35"
-		locked="{room != null &amp;&amp; room.card != null &amp;&amp; !room.connected &amp;&amp; numBoxes == 0}">
-		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
-			horizontalScrollPolicy="off" verticalScrollPolicy="off">
-			<card:CardBox id="targetImage" x="40" y="40"
-				download="user.downloadCard(targetImage.data)"
-				creationComplete="targetImageHandler(event)"/>
-			<mx:Button label="{_('Enter this room')}" styleName="blackButtonStyle" width="100%"
-				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.JOIN_ROOM))"/>
-			<mx:Button label="{_('Record a message')}" styleName="blackButtonStyle" width="100%"
-				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.LEAVE_MESSAGE))"/>
-		</mx:VBox>
-		
-		<mx:Canvas width="230" height="100%"
-			horizontalScrollPolicy="off" verticalScrollPolicy="off">
-			<mx:VBox styleName="vbuttonBox" width="230" height="100%"
-				horizontalScrollPolicy="off" verticalScrollPolicy="off" paddingLeft="0" paddingRight="0"
-				visible="{room != null &amp;&amp; room.isOwner}"
-				>
-				<mx:TextArea styleName="multiline" width="230" height="80"
-					selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-					text="{_(Constant.HELP_ROOM_LOGIN)}"/>
-				<mx:HBox width="100%">
-					<mx:Button label="{_('Public')}" styleName="blackButtonStyle" width="100%"
-						toolTip="{_('Make your room as public')}"
-						click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PUBLIC))"/>
-					<mx:Button label="{_('Private')}" styleName="blackButtonStyle" width="100%"
-						toolTip="{_('Make your room as private')}"
-						click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.PRIVATE))"/>
-				</mx:HBox>
-			</mx:VBox>
-			
-			<mx:TextArea styleName="multiline" width="230" height="100%"
-				selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-				visible="{room == null || !room.isOwner}"
-				text="{Constant.HELP_ROOM}"/>
-		</mx:Canvas>
-	</containers:Door>
+	<room:RoomDoorLocked id="door2" room="{room}" numBoxes="{numBoxes}" />
 	
-	<containers:Door id="door1" y="35"
-		locked="{room != null &amp;&amp; room.card == null}">
-		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
-			horizontalScrollPolicy="off" verticalScrollPolicy="off">
-			<mx:Button label="{_('Upload visiting card')}" styleName="blackButtonStyle" width="100%"
-				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))"/>
-			<mx:Button label="{_('Knock on the door')}" styleName="blackButtonStyle" width="100%"
-				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.KNOCK))"/>
-			<mx:Button label="{_('Send an email message')}" styleName="blackButtonStyle" width="100%"
-				click="room.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.SEND_EMAIL))"/>
-		</mx:VBox>
-		
-		<mx:TextArea styleName="multiline" width="230" height="100%"
-			selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-			text="{Constant.HELP_ROOM_TARGET}"/>
-	</containers:Door>
+	<room:RoomDoorUnlocked id="door1" room="{room}" user="{user}"/>
 
 	<!--		
 	<mx:Button styleName="noAccessStyle"

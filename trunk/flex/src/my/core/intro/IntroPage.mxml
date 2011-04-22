@@ -74,13 +74,13 @@ creating a new video room, joining an exiting room and logging in to your room.
 			</mx:VBox>
 	
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))">
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL_BAR, false, false, Constant.UPLOAD_CARD))">
 				<mx:Label text="{_('Join an existing room')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('upload Internet visiting card') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>
 				
 			<mx:VBox clipContent="true" buttonMode="true" mouseChildren="false" useHandCursor="true" verticalGap="0"
-				click="user.dispatchEvent(new DataEvent(Constant.CONTROL, false, false, Constant.UPLOAD_CARD))">
+				click="user.dispatchEvent(new DataEvent(Constant.CONTROL_BAR, false, false, Constant.UPLOAD_CARD))">
 				<mx:Label text="{user.isGuest ? _('Login to your room') : _('Login as another user')}" styleName="regular" paddingLeft="-20"/>
 				<mx:Label text="{_('upload private login card') + ' &gt;&gt;'}" styleName="small"/>
 			</mx:VBox>

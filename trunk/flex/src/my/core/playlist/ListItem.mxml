@@ -127,7 +127,7 @@ child depending on the current PlayItem.
 				}
 				else if (item.name == PlayItem.STREAM) {
 					var stream:StreamItem = new StreamItem();
-					stream.data = new Play(item.source, String(item.xml.@id), _playList.user);
+					stream.data = new Play(item.source, String(item.xml.@id));
 					return stream;
 				}
 				else if (item.name == PlayItem.IMAGE) {

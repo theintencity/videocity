@@ -373,6 +373,14 @@ introBox.roundedBox {
 	font-size: 9;
 }
 
+.checkbox {
+	color: #808080;
+	text-roll-over-color: #ffffff;
+	text-selection-color: #ffffff;
+	font-weight: normal;
+	font-size: 9;
+}
+
 TextArea.multiline {
 	border-style: solid;
 	border-thickness: 0;

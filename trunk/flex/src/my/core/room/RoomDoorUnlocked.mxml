@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<containers:Door xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" 
+	y="35" locked="{room != null &amp;&amp; room.card == null}">
+	<mx:Script>
+		<![CDATA[
+			import my.core.Constant;
+			import my.core.User;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The associated room property.
+			 */
+			public var room:Room;
+			
+			[Bindable]
+			/**
+			 * The associated user property.
+			 */
+			public var user:User;
+		]]>
+	</mx:Script>
+	
+	<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Button label="{_('Upload visiting card')}" styleName="blackButtonStyle" width="100%"
+			click="user.dispatchEvent(new DataEvent(Constant.CONTROL_BAR, false, false, Constant.UPLOAD_CARD))"/>
+		<mx:Button label="{_('Knock on the door')}" styleName="blackButtonStyle" width="100%"
+			click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.KNOCK_ON_DOOR))"/>
+		<mx:Button label="{_('Send an email message')}" styleName="blackButtonStyle" width="100%"
+			click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.SEND_EMAIL_TO_OWNER))"/>
+	</mx:VBox>
+	
+	<mx:TextArea styleName="multiline" width="230" height="100%"
+		selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		text="{Constant.HELP_ROOM_TARGET}"/>
+</containers:Door>

@@ -44,7 +44,6 @@ package my.core.video.play
 		private var ns:NetStream;
 		private var _url:String;
 		private var _id:String;
-		private var _user:User;
 		private var _video:Video;
 		private var _playing:Boolean = true;
 		
@@ -54,12 +53,11 @@ package my.core.video.play
 		 * @param id the stream name to play.
 		 * @param user the user object that is exposed as the user property from this object.
 		 */
-		public function Play(url:String, id:String, user:User)
+		public function Play(url:String, id:String)
 		{
 			_url = url;
 			if (_url != null && _url.indexOf("rtmp:") == 0)
 				_id = id;
-			_user = user;
 		}
 		
 		//--------------------------------------
@@ -72,14 +70,6 @@ package my.core.video.play
 		public function get url():String
 		{
 			return _url + '?id=' + _id;
-		}
-		
-		/**
-		 * The user object supplied in the constructor.
-		 */
-		public function get user():User
-		{
-			return _user;
 		}
 		
 		/**

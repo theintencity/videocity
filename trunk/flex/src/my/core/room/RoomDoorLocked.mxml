@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<containers:Door xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:containers="my.containers.*" xmlns:card="my.core.card.*" 
+	y="35" locked="{room != null &amp;&amp; room.card != null &amp;&amp; !room.connected &amp;&amp; numBoxes == 0}">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.PropertyChangeEvent;
+			import my.core.Constant;
+			import my.core.User;
+			
+			//--------------------------------------
+			// PRIVATE VARIABLES
+			//--------------------------------------
+			
+			private var _room:Room;
+			
+			//--------------------------------------
+			// PUBLIC PROPERTIES
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The associated user property.
+			 */
+			public var user:User;
+
+			[Bindable]
+			/*
+			 * Number of boxes in this room's callBox currently.
+			 */
+			public var numBoxes:Number = 0;
+			
+			//--------------------------------------
+			// GETTERS/SETTERS
+			//--------------------------------------
+			
+			[Bindable]
+			/**
+			 * The data model is a room object. 
+			 */
+			public function get room():Room
+			{
+				return _room;
+			}
+			public function set room(value:Room):void
+			{
+				var old:Room = _room;
+				_room = value;
+				if (old != value) {
+					if (old != null) {
+						old.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler);
+					}
+					if (value != null) {
+						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, roomChangeHandler, false, 0, true);
+						if (value.card != null && targetImage != null)
+							targetImage.data = value.card;
+					}
+					else {
+						if (targetImage != null)
+							targetImage.data = null;
+					}
+				}
+			}
+			
+			//--------------------------------------
+			// PRIVATE METHODS
+			//--------------------------------------
+			
+			private function roomChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (event.property == "card") {
+					targetImage.data = room.card;
+				}
+			}
+			
+			private function targetImageHandler(event:Event):void
+			{
+				if (room != null && room.card != null)
+					targetImage.data = room.card;
+			}
+			
+
+		]]>
+	</mx:Script>
+	
+	<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<card:CardBox id="targetImage" x="40" y="40"
+			download="user.downloadCard(targetImage.data)"
+			creationComplete="targetImageHandler(event)"/>
+		<mx:Button label="{_('Enter this room')}" styleName="blackButtonStyle" width="100%"
+			click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.TRY_ENTER_ROOM))"/>
+		<mx:Button label="{_('Record a message')}" styleName="blackButtonStyle" width="100%"
+			click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.LEAVE_MESSAGE_TO_OWNER))"/>
+	</mx:VBox>
+	
+	<mx:Canvas width="230" height="100%"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:VBox styleName="vbuttonBox" width="230" height="100%"
+			horizontalScrollPolicy="off" verticalScrollPolicy="off" paddingLeft="0" paddingRight="0"
+			visible="{room != null &amp;&amp; room.isOwner}"
+			>
+			<mx:TextArea styleName="multiline" width="230" height="80"
+				selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+				text="{_(Constant.HELP_ROOM_LOGIN)}"/>
+			<mx:CheckBox styleName="checkbox" width="100%" 
+				label="{_('allow view by anyone?')}" toolTip="{_('Make this room as public so that anyone can view content')}"
+				click="room.isPublic=event.currentTarget.selected"/>
+			<mx:CheckBox styleName="checkbox" width="100%" 
+				label="{_('control shared view for everyone?')}" toolTip="{_('Control the shared presentation view for everyone')}"
+				click="room.isController=event.currentTarget.selected"/>
+				
+		<!--
+			<mx:HBox width="100%">
+				<mx:Button label="{_('Public')}" styleName="blackButtonStyle" width="100%"
+					toolTip="{_('Make your room as public')}"
+					click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.MAKE_ROOM_PUBLIC))"/>
+				<mx:Button label="{_('Private')}" styleName="blackButtonStyle" width="100%"
+					toolTip="{_('Make your room as private')}"
+					click="room.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.MAKE_ROOM_PRIVATE))"/>
+			</mx:HBox>
+		-->
+		</mx:VBox>
+		
+		<mx:TextArea styleName="multiline" width="230" height="100%"
+			selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+			visible="{room == null || !room.isOwner}"
+			text="{Constant.HELP_ROOM}"/>
+	</mx:Canvas>
+</containers:Door>

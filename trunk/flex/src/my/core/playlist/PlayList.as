@@ -11,8 +11,9 @@ package my.core.playlist
 	
 	import my.controls.Prompt;
 	import my.core.Constant;
-	import my.core.User;
 	import my.core.Util;
+	import my.core.room.Room;
+	import my.core.User;
 	
 	/**
 	 * Represents a play-list that is used as the data model for PlayListBox. Each item in this list is
@@ -37,7 +38,7 @@ package my.core.playlist
 		private var _content:Array = [];
 		
 		// associated user object
-		private var _user:User;
+		private var _room:Room;
 		
 		// XML description of this play list
 		private var _data:XML;
@@ -62,10 +63,10 @@ package my.core.playlist
 		 * an optional array of content (ByteArray) if the play list is built using files uploaded from
 		 * the computer or snapshot captured from camera.
 		 */
-		public function PlayList(xml:XML=null, content:Array=null, user:User=null)
+		public function PlayList(xml:XML, content:Array, room:Room)
 		{
-			if (user != null)
-				this.user = user;
+			if (room != null)
+				this.room = room;
 			if (content != null)
 				this.content = content;
 			if (xml != null) // this must be set at the end.
@@ -100,6 +101,8 @@ package my.core.playlist
 					
 				var index:int = 0;
 				var context:Object;
+				var user:User = room.user;
+				
 				for each (var xml:XML in value.children()) {
 					if (xml.localName() == PlayItem.SHOW) {
 						context = {index: index};
@@ -109,10 +112,10 @@ package my.core.playlist
 						&& index < _content.length && _content[index] is FileReference) {
 						context = {index: index, xml: xml};
 						var params:Object = {filename: String(xml.@src), filedata: Util.base64encode(_content[index].data), visitingcard: Util.base64encode(user.selected.card.rawData)};
-						user.httpSend(Constant.CONVERT, params, context, videoHandler);
+						user.httpSend(Constant.HTTP_FILE_CONVERT, params, context, videoHandler);
 					}
 					else {
-						var item:PlayItem = new PlayItem(xml, _user, index < _content.length ? _content[index] : null);
+						var item:PlayItem = new PlayItem(xml, user, index < _content.length ? _content[index] : null);
 						this.addItem(item);
 					}
 					index = index + 1;
@@ -142,15 +145,15 @@ package my.core.playlist
 		}
 		
 		/**
-		 * The associated user object with this collection.
+		 * The associated room object with this collection.
 		 */
-		public function get user():User
+		public function get room():Room
 		{
-			return _user;
+			return _room;
 		}
-		public function set user(value:User):void
+		public function set room(value:Room):void
 		{
-			_user = value;
+			_room = value;
 		}
 		
 		[Bindable("selectedChange")]
@@ -270,7 +273,7 @@ package my.core.playlist
 			var index:int = context.index;
 			
 			for each (var child:XML in result.children())
-				this.addItemAt(new PlayItem(child, _user), index++);
+				this.addItemAt(new PlayItem(child, room.user), index++);
 				
 			if (selectedIndex == -1 && this.length > 0)
 				selectedIndex = 0;
@@ -286,7 +289,7 @@ package my.core.playlist
 			if (result.url != undefined) {
 				xml.setLocalName(PlayItem.VIDEO);
 				xml.@src = String(result.url);
-				this.addItemAt(new PlayItem(xml, _user), index < this.length ? index : this.length);
+				this.addItemAt(new PlayItem(xml, room.user), index < this.length ? index : this.length);
 				if (selectedIndex == -1 && this.length > 0)
 					selectedIndex = 0;
 			}
