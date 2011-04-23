@@ -408,7 +408,7 @@ package my.core
 				_rooms[url] = room;
 				dispatchEvent(new DataEvent(Constant.CREATE_ROOM, false, false, room.url));
 			}
-			// connect the room if we are the owner
+			// connect the room if we are the owner and login from Firefox.
 			if (!room.connected && (this.email != null && room.email == this.email)) {
 				room.connect();
 			}
@@ -574,6 +574,7 @@ package my.core
 					Prompt.show(error, "Cannot validate this room card");
 				else {
 					var room:Room = addRoom(card);
+					room.isPublic = true;
 				}
 			}
 			targetLoader = null;

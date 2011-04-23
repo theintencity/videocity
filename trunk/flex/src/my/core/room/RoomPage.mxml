@@ -115,7 +115,9 @@ leave the room.
 	
 	<mx:TextArea styleName="roomTitle"
 		width="100%" height="30" y="5" selectable="false" editable="false"
-		text="{_('You are on {0}', room == null || room.url == null ? _('empty room') : room.url)}"/>
+		text="{_('You are on {0}', room == null || room.url == null ? _('empty room') : room.url)}"
+		color="{room.isController ? 0x80ff80 : (room.controllerId != null ? 0x808080 : 0xffffff)}"
+		/>
 	
 	<!--
 	<mx:Box visible="{numBoxes == 0 &amp;&amp; (room.url == null || room.connected) &amp;&amp; !door1.locked &amp;&amp; !door2.locked}"
@@ -135,6 +137,8 @@ leave the room.
 			else if (callBox.mouseX &gt; 50) memberList.hide(); "/>
 	
 	<room:BoxController user="{user}" box="{callBox}"/>
+	
+	<room:RemoteController room="{room}" containerBox="{callBox}"/>
 	
 	<room:MemberList id="memberList" visible="{!door1.locked &amp;&amp; !door2.locked}" 
 		itemRenderer="my.core.room.RoomMember" dataProvider="{room.members}"/>

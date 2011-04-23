@@ -51,6 +51,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			
 			private static const INSIDE:String = "inside";
 			private static const OUTSIDE:String = "outside";
+			private static const CONTROLLED:String = "controlled";
 			
 			//--------------------------------------
 			// PRIVATE PROPERTIES
@@ -103,14 +104,21 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 			
 			private function roomChangeHandler(event:PropertyChangeEvent):void
 			{
-				if (event.property == "connected") {
+				if (event.property == "connected" || event.property == "controllerId") {
 					updateState();
 				}
 			}
 			
 			private function updateState():void
 			{
-				setCurrentState(_room == null ? null : (_room.connected ? INSIDE : OUTSIDE));
+				if (_room == null)
+					setCurrentState(null);
+				else if (!_room.connected)
+					setCurrentState(OUTSIDE);
+				else if (_room.controllerId != null)
+					setCurrentState(CONTROLLED);
+				else
+					setCurrentState(INSIDE);
 			}
 		]]>
 	</mx:Script>
@@ -150,8 +158,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 	
 	<mx:Button width="100%" height="20" name="" styleName="shinyButtonStyle"/>
 
-		
-<!-- no skinning for now	
+<!--
 	<mx:Spacer width="1"/>
 	
 	<controls:BButton styleName="colorButtonStyle" name="{_('Change skin')}"
@@ -274,6 +281,7 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.SHOW_UPLOAD_PROMPT))"/>
 			</mx:AddChild>
 			
+<!--
 			<mx:AddChild relativeTo="{seperator}" position="before">
 				<mx:Spacer width="1"/>
 			</mx:AddChild>
@@ -281,8 +289,34 @@ needed from inside a room, whereas "outside" state has buttons that are needed f
 				<controls:BButton styleName="lockButtonStyle" name="{_('Lock viewers to your screen')}"
 					toggle="true" click="user.selected.lock = BButton(event.currentTarget).selected"/>
 			</mx:AddChild>
-			
+-->	
 		</mx:State>
 		
+			
+		<mx:State name="controlled">
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="speakerButtonStyle" name="{_('On/off speaker')}"
+					toggle="true" selected="{user.speakerActive}" change="user.speakerActive = BButton(event.currentTarget).selected"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<skin:VolumeSlider width="40" height="20" styleName="volumeSliderStyle" name="{_('Adjust speaker volume')}"
+					level="{user.speakerVolume}" enabled="{user.speakerActive}" change="user.speakerVolume = VolumeSlider(event.currentTarget).level"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Button width="5" height="20" styleName="shinyButtonStyle"/>
+			</mx:AddChild>
+			
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<mx:Spacer width="1"/>
+			</mx:AddChild>
+			<mx:AddChild relativeTo="{seperator}" position="before">
+				<controls:BButton styleName="leftButtonStyle" name="{_('Exit from this room')}"
+					click="user.selected.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.EXIT_ROOM))"/>
+			</mx:AddChild>
+			
+		</mx:State>
 	</containers:states>
 </containers:HorizontalBar>

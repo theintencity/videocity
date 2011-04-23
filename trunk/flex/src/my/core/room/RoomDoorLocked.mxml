@@ -103,12 +103,12 @@
 			<mx:TextArea styleName="multiline" width="230" height="80"
 				selectable="false" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
 				text="{_(Constant.HELP_ROOM_LOGIN)}"/>
-			<mx:CheckBox styleName="checkbox" width="100%" 
+			<mx:CheckBox styleName="checkbox" width="100%" selected="{room.isPublic}"
 				label="{_('allow view by anyone?')}" toolTip="{_('Make this room as public so that anyone can view content')}"
-				click="room.isPublic=event.currentTarget.selected"/>
-			<mx:CheckBox styleName="checkbox" width="100%" 
+				click="room.setPublic(event.currentTarget.selected)"/>
+			<mx:CheckBox styleName="checkbox" width="100%" selected="{room.isController}" 
 				label="{_('control shared view for everyone?')}" toolTip="{_('Control the shared presentation view for everyone')}"
-				click="room.isController=event.currentTarget.selected"/>
+				click="room.setController(event.currentTarget.selected)"/>
 				
 		<!--
 			<mx:HBox width="100%">
