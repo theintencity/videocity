@@ -118,8 +118,8 @@ def _makeDir(path):
     if not os.path.exists(os.path.dirname(path)): os.makedirs(os.path.dirname(path), 0755)
     
 def upload(query):
-    if filter(lambda x: x not in query, ('target', 'filedata')): raise Exception((400, 'Must supply target and filedata to upload'))
-    target, filedata = map(lambda x: query.get(x)[0], ('target', 'filedata'))
+    if filter(lambda x: x not in query, ('target', 'filedata', 'room')): raise Exception((400, 'Must supply target, filedata and room to upload'))
+    target, room, filedata = map(lambda x: query.get(x)[0], ('target', 'room', 'filedata'))
     logincard, visitingcard = map(lambda x: vcard.Card(b64decode(query.get(x)[0])) if x in query else None, ('logincard', 'visitingcard'))
     if _debug: print 'target=', target, 'filedata=', len(filedata), filedata[:100]
     if 'encoding' in query and query.get('encoding')[0].lower() == 'base64': filedata = b64decode(filedata)
@@ -128,16 +128,17 @@ def upload(query):
     xml = XML(filedata)
     card = logincard if target == 'index.xml' else visitingcard
     if card is None: raise Exception((400, 'Must supply a valid card'))
+    if not room.startswith(card.url): raise Exception((400, 'Invalid card for this room'))
     subdir = 'private' if target == 'inbox.xml' else 'public' if target == 'index.xml' else 'active'
     for file in filter(lambda x: isinstance(x, XML) and x['src'] is not None and x['src'][:7] == 'file://' and x['src'] in files, xml.children): # for embedded file contents
         name, content = file['src'][7:], files[file['src']]
-        url, path = _makePath(url=card.url, filename=name, randomize=True, subdir=subdir)
+        url, path = _makePath(url=room, filename=name, randomize=True, subdir=subdir)
         file['src'] = url
         ext = os.path.splitext(name)[1].lower(); file.tag = 'video' if ext == '.flv' else 'image' if ext[1:] in ('jpg','png','jpeg','gif','swf') else file.tag
         if _debug: print 'file=', name, 'content=', len(content)
         _makeDir(path)
         fp = open(path, 'w'); fp.write(content); fp.close()
-    url, path = _makePath(url=card.url, filename=target)
+    url, path = _makePath(url=room, filename=target)
     try: fp = open(path); old = XML(fp.read()); fp.close()
     except: old = XML('<page/>')
     if target != 'inbox.xml' and xml['id'] is not None: del old.children[lambda x: x['id'] == xml['id']]
