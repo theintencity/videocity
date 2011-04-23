@@ -19,6 +19,7 @@ from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 _debug = True
+# rtmp._debug = True
 
 #----------------------------
 # WEB SERVER IMPLEMENTATION
@@ -184,6 +185,8 @@ class Call(rtmp.App):
         multitask.add(closeInternal(self, client, stream))
     def onCommand(self, client, cmd, *args):
         def commandInternal(self, client, cmd, *args):
+            if 'mouseMove' not in args:
+                if _debug: print 'cmd=', cmd, 'on client=', client.clientId, 'args=', args
             if cmd == 'broadcast': # broadcast the command to everyone else in the call
                 for other in filter(lambda x: x != client, self.clients):
                     yield other.call(cmd, str(client.clientId), *args)

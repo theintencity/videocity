@@ -100,6 +100,9 @@ An AIR-based application will have a different main file similar to this.
 				if (('enter' in this.parameters) && user.selected != null) {
 					user.selected.dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.TRY_ENTER_ROOM));
 				}
+				if (('control' in this.parameters) && user.selected != null) {
+					user.selected.isController = true;
+				}
 			}
 			
 			/*

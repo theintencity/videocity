@@ -616,6 +616,7 @@ package my.core.room
 			
 			var params:Object = {
 				target: target,
+				room: room.url,
 				filedata: playList.data.toXMLString()
 			};
 			
