@@ -95,7 +95,6 @@ package my.core.room
 		// PRIVATE VARIABLES
 		//--------------------------------------
 		
-		private var _photo:Object;  // the photo image
 		private var _url:String;    // URL string identifying the room
 		private var _flashUrl:String; // URL for Flash access
 		private var _card:VisitingCard; // visiting card of the room
@@ -105,13 +104,15 @@ package my.core.room
 		private var _stream:String; // local stream name that is published. This is randomly generated.
 		private var _user:User;     // the local user for this room -- set only for RoomPage.room.
 		
-		private var _lock:Boolean = false;
-		private var _isPublic:Boolean = false;
-		private var _isController:Boolean = false;
-		
 		//--------------------------------------
 		// PUBLIC PROPERTIES
 		//--------------------------------------
+		
+		[Bindable]
+		/**
+		 * The photo object associated with this room. This is typically a Image object.
+		 */
+		public var photo:Object;
 		
 		[Bindable]
 		/**
@@ -187,6 +188,25 @@ package my.core.room
 		 */
 		public var view:RoomPage;
 		
+		[Bindable]
+		/**
+		 * Whether this is a public or private room?
+		 */
+		public var isPublic:Boolean;
+		
+		[Bindable]
+		/**
+		 * Whether this user is controller of this presentation room?
+		 */
+		public var isController:Boolean;
+		 
+		[Bindable]
+		/**
+		 * The controller identifier of the shared room if any.
+		 * This property determines the number of buttons in bottom control bar.
+		 */
+		public var controllerId:String;
+		 
 		//--------------------------------------
 		// STATIC CONSTRUCTOR
 		//--------------------------------------
@@ -310,19 +330,6 @@ package my.core.room
 			return User.EMBED_TEXT.replace(/{url}/gi, 'http://' + user.server + '/embed').replace(/{flashVars}/gi, 'target=' + url.substr(('http://'+user.server).length+1));
 		}
 		
-		[Bindable]
-		/**
-		 * The photo object associated with this room. This is typically a Image object.
-		 */
-		public function get photo():Object
-		{
-			return _photo;
-		}
-		public function set photo(value:Object):void
-		{
-			_photo = value;
-		}
-		
 		/**
 		 * The application should use setPhoto method instead of setting the photo property, so that
 		 * the Image object gets copied correctly instead of reusing the same Image object. This is useful
@@ -383,55 +390,6 @@ package my.core.room
 					value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, userChangeHandler, false, 0, true);
 				setOwner();
 			}
-		}
-		
-		[Bindable]
-		/**
-		 * Whether this room is locked to do shared screen or not?
-		 */
-		public function get lock():Boolean
-		{
-			return _lock;
-		}
-		public function set lock(value:Boolean):void
-		{
-			_lock = value;
-		}
-		
-		[Bindable]
-		/**
-		 * Whether this is a public or private room?
-		 */
-		public function get isPublic():Boolean
-		{
-			return _isPublic;
-		}
-		public function set isPublic(value:Boolean):void
-		{
-			if (_isOwner) {
-				var oldValue:Boolean = _isPublic;
-				if (value != oldValue) {
-					var accessType:String = value ? Constant.MAKE_ROOM_PUBLIC : Constant.MAKE_ROOM_PRIVATE;
-					dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, accessType));
-				}
-			} else {
-				Prompt.show("You do not have permissions to change access type of this room", "Error");
-			}
-		}
-		
-		[Bindable]
-		/**
-		 * Whether this user is controller of this presentation room?
-		 * Setting this implies isOwner.
-		 */
-		public function get isController():Boolean
-		{
-			return _isController;
-		}
-		public function set isController(value:Boolean):void
-		{
-			var oldValue:Boolean = _isController;
-			_isController = value;
 		}
 		
 		//--------------------------------------
@@ -516,6 +474,41 @@ package my.core.room
 			isOwner = (user != null && user.card != null && card != null && card.url != null && card.url.indexOf(user.card.url) == 0);
 		}
 		
+		/**
+		 * Update the isPublic property based on the supplied parameter.
+		 * Must be called by owner of the room.
+		 */
+		public function setPublic(value:Boolean):void
+		{
+			if (isOwner) {
+				var oldValue:Boolean = isPublic;
+				isPublic = value;
+				if (value != oldValue) {
+					var accessType:String = value ? Constant.MAKE_ROOM_PUBLIC : Constant.MAKE_ROOM_PRIVATE;
+					dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, accessType));
+				}
+			} else {
+				Prompt.show("You do not have permissions to change access type of this room", "Error");
+			}
+		}
+		
+		/**
+		 * Update the isPublic property based on the supplied parameter.
+		 * Must be called by the owner of the room.
+		 */
+		public function setController(value:Boolean):void
+		{
+			if (isOwner) {
+				var oldValue:Boolean = isController;
+				isController = value;
+				if (value != oldValue) {
+
+				}
+			} else {
+				Prompt.show("You do not have permissions to control this shared room", "Error");
+			}
+		}
+		
 		//--------------------------------------
 		// PRIVATE METHODS
 		//--------------------------------------
@@ -535,10 +528,10 @@ package my.core.room
 			_nc.addEventListener(IOErrorEvent.IO_ERROR, errorHandler, false, 0, true);
 			_nc.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorHandler, false, 0, true);
 			
-			if (arg == null)
-				_nc.connect(flashUrl);
-			else
+			if (arg)
 				_nc.connect(flashUrl, arg);
+			else
+				_nc.connect(flashUrl);
 		}
 		
 		/*
@@ -576,6 +569,8 @@ package my.core.room
 			case "NetConnection.Connect.Success":
 				connected = true;
 				dispatchEvent(new DataEvent(Constant.CONTROL_ROOM, false, false, Constant.ENTER_ROOM));
+				if (isController)
+					commandSend(Constant.SEND_BROADCAST, Constant.ROOM_METHOD_CONTROLLED);
 				publishLocal();
 				break;
 			case "NetConnection.Connect.Closed":
@@ -636,6 +631,9 @@ package my.core.room
 				m = new Member(id);
 				members.addItem(m);
 			}
+			if (isController) {
+				commandSend(Constant.SEND_UNICAST, id, Constant.ROOM_METHOD_CONTROLLED);
+			}
 		}
 		
 		/*
@@ -653,6 +651,52 @@ package my.core.room
 				if (index >= 0)
 					members.removeItemAt(index);
 				m.close();
+			}
+			if (id == controllerId) {
+				controllerId = null;
+			}
+		}
+		
+		/*
+		 * Remote method invoked when another person wants to control the room.
+		 * The id represents the person who is controller.
+		 */
+		public function controlled(id:String):void
+		{
+			if (this.isController) {
+				Prompt.show("Ignoring control request of shared room by remote " + id, "Warning");
+			} 
+			else {
+				controllerId = id; 
+			}
+		}
+		
+		/*
+		 * Remote method invoked when controller changes something in the shared room.
+		 * It dispatches an event which is captured by RemoteController.
+		 */
+		public function controlledChange(id:String, ...args):void
+		{
+			if (id == controllerId) {
+				var event:DynamicEvent = new DynamicEvent(Constant.CONTROLLED_CHANGE);
+				for (var i:int=0; i<args.length-1; i += 2) {
+					event[args[i]] = args[i+1];
+				}
+				dispatchEvent(event);
+			} 
+			else {
+				trace("Ignoring controlled change by non-controller");
+			}
+		}
+		
+		/**
+		 * Function invoked by RemoteController to send a controlledChange method to remote.
+		 */
+		public function sendControlledChange(...args):void
+		{
+			if (isController) {
+				args.splice(0, 0, Constant.SEND_BROADCAST, Constant.ROOM_METHOD_CONTROLLED_CHANGE);
+				commandSend.apply(this, args);
 			}
 		}
 		
@@ -810,6 +854,15 @@ package my.core.room
 				case Constant.ROOM_METHOD_UNPUBLISHED:
 					if (args.length >= 3)
 						unpublished(args[0], args[2], new XML(args[3]));
+					break;
+					
+				case Constant.ROOM_METHOD_CONTROLLED:
+					controlled(args[0]);
+					break;
+					
+				case Constant.ROOM_METHOD_CONTROLLED_CHANGE:
+					args.splice(1, 1);
+					controlledChange.apply(this, args);
 					break;
 				}
 			}

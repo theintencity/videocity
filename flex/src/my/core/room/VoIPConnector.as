@@ -21,7 +21,7 @@ package model
 	 * active SIP registration, and can be in atmost one active SIP call. It also holds the
 	 * audio video streams to and from the remote party.
 	 */
-	public class RoomConnector extends EventDispatcher
+	public class VoIPConnector extends EventDispatcher
 	{
 		//--------------------------------------
 		// CLASS CONSTANTS
@@ -62,7 +62,7 @@ package model
 		/**
 		 * Constructing a new connector object
 		 */
-		public function RoomConnector()
+		public function VoIPConnector()
 		{
 		}
 		

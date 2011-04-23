@@ -457,6 +457,14 @@ targetBox.VBox {
 	overSkin: ClassReference("my.skins.CamButtonSkin");
 }
 
+/* Pointer button */
+.pointerButtonStyle {
+	border-thickness: 0;
+	color: #ffa0a0;
+	skin: ClassReference("my.skins.PointerButtonSkin");
+	overSkin: ClassReference("my.skins.PointerButtonSkin");
+}
+
 /* Lock button */
 .lockButtonStyle {
 	border-thickness: 0;

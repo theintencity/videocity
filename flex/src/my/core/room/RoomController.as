@@ -7,7 +7,6 @@ package my.core.room
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
-	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.events.TimerEvent;
@@ -319,7 +318,7 @@ package my.core.room
 		
 		private function setRoomAccessHandler(obj:Object, result:XML):void
 		{
-			Prompt.show('<br/>Your room is set to <font color="' + (obj.type == "public" ? '#00ff00' : '#ff0000') + '">"' + obj.type + '</font><br/><font color="#0000ff">' + obj.room.url + '</font>', "Room access changed");
+			Prompt.show('<br/>Your room is set to <font color="' + (obj.type == "public" ? '#00ff00' : '#ff0000') + '">' + obj.type + '</font><br/><font color="#0000ff">' + obj.room.url + '</font>', "Room access changed");
 		}
 		
 		private function createNewPlaylist():void
@@ -481,12 +480,13 @@ package my.core.room
 				var result:ResultEvent = event as ResultEvent;
 				var xml:XML = result.result as XML;
 				applyScript(p.room, xml);
-				if (p.target == Constant.PLAYLIST_TARGET_PUBLIC)
-					scriptStart(p.room, Constant.PLAYLIST_TARGET_ACTIVE);
-				else if (p.target == Constant.PLAYLIST_TARGET_ACTIVE) {
-					if (Room(p.room).isOwner && user.card.url == Room(p.room).card.url)
-						scriptStart(p.room, Constant.PLAYLIST_TARGET_PRIVATE);
-				}
+			}
+			if (p.target == Constant.PLAYLIST_TARGET_PUBLIC) {
+				scriptStart(p.room, Constant.PLAYLIST_TARGET_ACTIVE);
+			}
+			else if (p.target == Constant.PLAYLIST_TARGET_ACTIVE) {
+				if (Room(p.room).isOwner && user.card.url == Room(p.room).card.url)
+					scriptStart(p.room, Constant.PLAYLIST_TARGET_PRIVATE);
 			}
 		}
 		

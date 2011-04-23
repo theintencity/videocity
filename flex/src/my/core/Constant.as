@@ -56,7 +56,7 @@ package my.core
 		public static const UPLOAD_CARD:String       = "uploadCard";
 		public static const UPLOAD_FILES:String      = "uploadFiles"; // Dispatched by AddMediaPrompt
 		public static const DOWNLOAD_CARD:String     = "downloadCard";
-//		public static const CHANGE_SKIN:String       = "changeSkin";
+		public static const CHANGE_SKIN:String       = "changeSkin";
 		
 		/**
 		 * The event type of DataEvent dispatched on User object, when a room is created or destroyed.
@@ -105,6 +105,12 @@ package my.core
 		 */
 		public static const RECEIVE_MESSAGE:String = "receiveMessage";
 		
+		/**
+		 * The event type of DynamicEvent used for dispatching controlled change received
+		 * in a shared room, so that RemoteController can update the local room.
+		 */
+		public static const CONTROLLED_CHANGE:String = "controlledChange";
+		
 		/*
 		 * Event dispatched on PlayList object.
 		 */
@@ -146,6 +152,11 @@ package my.core
 		public static const ROOM_ACCESS_PRIVATE:String    = "private";
 		
 		/**
+		 * Optional parameters sent in connect to the server.
+		 */
+		public static const ROOM_CONNECT_CONTROLLED:String  = "controlled";
+		
+		/**
 		 * The send mode invoked on the server to send a message to others in a room.
 		 * If you change this, also change the name of the functions on server backend.
 		 */
@@ -159,6 +170,13 @@ package my.core
 		public static const ROOM_METHOD_PUBLISHED:String   = "published";
 		public static const ROOM_METHOD_UNPUBLISHED:String = "unpublished";
 		public static const ROOM_METHOD_MESSAGE:String     = "message";
+		
+		/**
+		 * The method name invoked on clients by the server in a room.
+		 * If you change this, also change the name of the function in Room and on the server backend.
+		 */
+		public static const ROOM_METHOD_CONTROLLED:String = "controlled";
+		public static const ROOM_METHOD_CONTROLLED_CHANGE:String = "controlledChange";
 				
 		/**
 		 * HTTP commands sent to the backend. Any changes to this must be replicated in backend.
