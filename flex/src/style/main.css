@@ -286,6 +286,13 @@ ToolTip {
 	vertical-center: 0;
 }
 
+.pauseWarning {
+	font-size: 12;
+	color: #ffffff;
+	horizontal-center: 0;
+	vertical-center: 30;
+}
+
 LinkButton {
 	color: #ffffff;
 	corner-radius: 0;

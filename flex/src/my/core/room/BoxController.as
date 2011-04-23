@@ -231,6 +231,7 @@ package my.core.room
 					if (Application.application.getChildByName("pause") == null) {
 						canvas = new PauseCanvas();
 						canvas.name = "pause";
+						PauseCanvas(canvas).warning = (user.camActive || user.micActive) ? _('your capture devices are on') : null;
 						canvas.addEventListener(MouseEvent.CLICK, pauseCanvasClickHandler, false, 0, true);
 						Application.application.addChild(canvas);
 					}
