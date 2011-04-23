@@ -7,5 +7,17 @@ The application is responsible for handling the "click" event on the PauseCanvas
 -->
 
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" styleName="pauseCanvas" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			/**
+			 * Any warning to show. For example if capture devices are active while you pause,
+			 * it shows a warning.
+			 */
+			public var warning:String = null;
+		]]>
+	</mx:Script>
+	
 	<mx:Label styleName="pauseLabel" text="{_('Click to Resume')}"/>
+	<mx:Label styleName="pauseWarning" text="{_('Warning: {0}', warning)}" visible="{warning != null}"/>
 </mx:Canvas>
