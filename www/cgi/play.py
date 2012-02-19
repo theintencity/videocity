@@ -2,7 +2,7 @@
 # A script to proxy a URL with pre-processing, such as extracting the FLV url from a youtube URL
 # or extracting a list of image files from a web page.
 
-import urllib, urllib2, urlparse, re
+import urllib, urllib2, urlparse, re, traceback
 
 # result variable is set when invoked as CGI
 if not globals().has_key('result') and __name__ == '__main__':
@@ -47,7 +47,7 @@ if videoid:
             if re.search(r'(?i)<form[^>]* name="loginForm"', result) is not None:
                 raise ValueError('bad username or password')
             result = urllib2.urlopen(urllib2.Request('http://www.youtube.com/verify_age?next_url=/&gl=US&hl=en', urllib.urlencode(dict(next_url='/', action_confirm='Confirm')))).read()
-        except: print 'unable to login: %s' % (str(sys.exc_info()[1]))
+        except: print 'unable to login'; traceback.print_exc()
     try:
         video_webpage = urllib2.urlopen(urllib2.Request('http://www.youtube.com/watch?v=%s&gl=US&hl=en&amp;has_verified=1' % videoid)).read()
         match = re.search(r'swfConfig.*?"(http:\\/\\/.*?watch.*?-.*?\.swf)"', video_webpage)
@@ -64,7 +64,8 @@ if videoid:
         format_map = [('38', 'video'), ('37', 'mp4'), ('22', 'mp4'), ('45', 'webm'), ('35', 'flv'), ('34', 'flv'), ('43', 'webm'), ('18', 'mp4'), ('6', 'flv'), ('5', 'flv'), ('17', 'mp4'), ('13', '3gp')]
         format_list = [x for x, y in format_map]
         if 'url_encoded_fmt_stream_map' in video_info and len(video_info['url_encoded_fmt_stream_map']) >= 1:
-            url_map = dict((ud['itag'], urllib.unquote(ud['url'])) for ud in [dict(pairStr.split('=') for pairStr in uds.split('&')) for uds in video_info['url_encoded_fmt_stream_map'][0].split(',')])
+            # following line didn't work (urllib is not defined) so expanded it
+            url_map = dict([(ud['itag'], urllib.unquote(ud['url'])) for ud in [dict(pairStr.split('=') for pairStr in uds.split('&')) for uds in video_info['url_encoded_fmt_stream_map'][0].split(',')]])
             existing_formats = [x for x in format_list[(format_list.find(u.headers['fmt']) if 'fmt' in u.headers and u.headers['fmt'] in format_list else 0):] if x in url_map]
             if not existing_formats: raise ValueError('no known formats available for video')
             video_url_list = [url_map[f] for f in existing_formats]
@@ -81,7 +82,7 @@ if videoid:
             print >>result, '302 Redirect'
             print >>result, 'Location:', video_url_list[0]
     except:
-        print 'unable to download from youtube: %s' %(str(sys.exc_info()[1]),)
+        print 'unable to download from youtube'; traceback.print_exc()
         print >>result, '500 Internal Server Error'
 elif videoplaylist:
     print 'getting for videoplaylist', videoplaylist
@@ -101,7 +102,8 @@ elif slideid:
     data = urllib.urlopen('http://www.slideshare.net/' + slideid).read()
     matches = re.search('"doc":\s*"([^"]+)"', data)
     if matches:
-        url = 'http://cdn.slideshare.net/' + matches.groups()[0] + '.xml'
+        #url = 'http://cdn.slideshare.net/' + matches.groups()[0] + '.xml' # this no longer works
+        url = 'http://s3.amazonaws.com/slideshare/' + matches.groups()[0] + '.xml'
         data = urllib.urlopen(url).read().lower().replace("<slide", "<image") # Converts <Show>,<Slide Src.../> to lower. TODO: what if Src URL has upper?
         print >>result, '200 OK\n'
         print >>result, data
