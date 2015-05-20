@@ -46,7 +46,7 @@ The client viewer application controls the main display, shows local and remote 
 
 ## Getting Started ##
 
-Windows or Mac OS X users may try to use the installer under the [download](/downloads) page. Please pick the appropriate file for your platform. Follow the instructions in the [README](/INSTALL) file available in the downloaded archive. Since this is "work in progress", the installer will be slightly outdated compared to the SVN source code.
+Windows or Mac OS X users may try to use the installer under the [download](/downloads) page. Please pick the appropriate file for your platform. Follow the instructions in the [INSTALL](/INSTALL) file available in the downloaded archive. Since this is "work in progress", the installer will be slightly outdated compared to the SVN source code.
 
 If you are a developer and wants to get started with this software, I recommend that you checkout the sources from SVN, run the server and point your browser to the local server.
 
